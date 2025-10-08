@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/andrelevesque/.config/**)",
+      "Read(//Users/andrelevesque/**)",
+      "Bash(echo $HOME)",
+      "Bash(ls:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
