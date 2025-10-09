@@ -7,6 +7,11 @@ interface Group {
   groupNumber: number;
   members: User[];
   costPerPerson: number;
+  stewardId?: string | null;
+}
+
+interface GroupFormationOptions {
+  existingStewards?: Map<string, string>; // Map of userId -> groupNumber where they're steward
 }
 
 const PASS_COSTS = {
@@ -21,53 +26,73 @@ function calculateCostPerPerson(groupSize: number): number {
   return PASS_COSTS[groupSize as keyof typeof PASS_COSTS] / groupSize;
 }
 
-export function formGroups(users: User[]): Group[] {
+export function formGroups(users: User[], options?: GroupFormationOptions): Group[] {
   const count = users.length;
+  const existingStewards = options?.existingStewards || new Map();
 
   if (count === 0) return [];
 
   if (count === 1) {
     // Solo rider - show individual ticket option
+    const stewardId = existingStewards.get(users[0].id) ? users[0].id : null;
     return [{
       groupNumber: 1,
       members: [users[0]],
       costPerPerson: 16.32, // Individual Presto fare KW→Union
+      stewardId,
     }];
   }
 
   if (count <= 5) {
+    // Find if any user was previously a steward
+    const stewardId = users.find(u => existingStewards.has(u.id))?.id || null;
     return [{
       groupNumber: 1,
       members: users,
       costPerPerson: calculateCostPerPerson(count),
+      stewardId,
     }];
   }
 
-  // For 6+ riders: distribute evenly
-  // Goal: avoid unbalanced groups like 5+5+2, prefer 4+4+4
+  // For 6+ riders: distribute evenly while preserving steward assignments
   const numGroups = Math.ceil(count / 5);
   const baseSize = Math.floor(count / numGroups);
   const remainder = count % numGroups;
 
+  // Separate stewards from non-stewards to ensure they're distributed across groups
+  const stewards = users.filter(u => existingStewards.has(u.id));
+  const nonStewards = users.filter(u => !existingStewards.has(u.id));
+
   const groups: Group[] = [];
-  let userIndex = 0;
+  let nonStewardIndex = 0;
 
   for (let i = 0; i < numGroups; i++) {
-    // Distribute remainder across first N groups
     const size = baseSize + (i < remainder ? 1 : 0);
-    const groupMembers = users.slice(userIndex, userIndex + size);
+    const groupMembers: User[] = [];
+    let stewardId: string | null = null;
+
+    // Assign one steward per group if available
+    if (i < stewards.length) {
+      groupMembers.push(stewards[i]);
+      stewardId = stewards[i].id;
+    }
+
+    // Fill remaining slots with non-stewards
+    const slotsNeeded = size - groupMembers.length;
+    const availableNonStewards = nonStewards.slice(nonStewardIndex, nonStewardIndex + slotsNeeded);
+    groupMembers.push(...availableNonStewards);
+    nonStewardIndex += availableNonStewards.length;
 
     groups.push({
       groupNumber: i + 1,
       members: groupMembers,
       costPerPerson: calculateCostPerPerson(size),
+      stewardId,
     });
-
-    userIndex += size;
   }
 
   return groups;
 }
 
 // Export types for use in other modules
-export type { User, Group };
+export type { User, Group, GroupFormationOptions };

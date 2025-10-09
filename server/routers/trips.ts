@@ -77,15 +77,23 @@ export const tripsRouter = router({
         });
       }
 
-      // Get all current members
+      // Get all current members and existing stewards
       const { data: existingGroups } = await ctx.supabase
         .from('groups')
-        .select('*, memberships:group_memberships(user_id, user:profiles(id, display_name))')
+        .select('*, steward_id, memberships:group_memberships(user_id, user:profiles(id, display_name))')
         .eq('trip_id', input.tripId);
 
       const allMembers = existingGroups?.flatMap(g =>
         g.memberships.map((m: any) => ({ id: m.user_id, displayName: m.user?.display_name || '' }))
       ) || [];
+
+      // Build steward map for preservation
+      const existingStewards = new Map<string, string>();
+      existingGroups?.forEach(g => {
+        if (g.steward_id) {
+          existingStewards.set(g.steward_id, String(g.group_number));
+        }
+      });
 
       // Get current user profile
       const { data: profile } = await ctx.supabase
@@ -97,45 +105,20 @@ export const tripsRouter = router({
       // Add new user
       allMembers.push({ id: userId, displayName: profile?.display_name || '' });
 
-      // Rebalance groups
-      const newGroups = formGroups(allMembers);
+      // Rebalance groups with steward preservation
+      const newGroups = formGroups(allMembers, { existingStewards });
 
-      // Transaction: delete old groups, insert new
-      await ctx.supabase.from('groups').delete().eq('trip_id', input.tripId);
+      // Use atomic transaction function
+      const { error: rebalanceError } = await ctx.supabase.rpc('rebalance_trip_groups', {
+        p_trip_id: input.tripId,
+        p_new_groups: newGroups,
+      });
 
-      for (const group of newGroups) {
-        const { data: newGroup, error: groupError } = await ctx.supabase
-          .from('groups')
-          .insert({
-            trip_id: input.tripId,
-            group_number: group.groupNumber,
-            cost_per_person: group.costPerPerson,
-          })
-          .select()
-          .single();
-
-        if (groupError || !newGroup) {
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'Failed to create group'
-          });
-        }
-
-        const { error: membershipsError } = await ctx.supabase
-          .from('group_memberships')
-          .insert(
-            group.members.map(m => ({
-              group_id: newGroup.id,
-              user_id: m.id,
-            }))
-          );
-
-        if (membershipsError) {
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'Failed to add group members'
-          });
-        }
+      if (rebalanceError) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: `Failed to rebalance groups: ${rebalanceError.message}`,
+        });
       }
 
       return { success: true };
@@ -183,51 +166,55 @@ export const tripsRouter = router({
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Not in this trip' });
       }
 
-      // Remove user
-      await ctx.supabase
-        .from('group_memberships')
-        .delete()
-        .eq('user_id', userId)
-        .eq('group_id', membership.group_id);
-
-      // Rebalance remaining groups
-      const { data: remainingGroups } = await ctx.supabase
+      // Get all groups to check stewards and remove user
+      const { data: currentGroups } = await ctx.supabase
         .from('groups')
-        .select('*, memberships:group_memberships(user_id, user:profiles(id, display_name))')
+        .select('*, steward_id, memberships:group_memberships(user_id, user:profiles(id, display_name))')
         .eq('trip_id', input.tripId);
 
-      const remainingMembers = remainingGroups?.flatMap(g =>
-        g.memberships.map((m: any) => ({ id: m.user_id, displayName: m.user?.display_name || '' }))
+      // Build steward map (excluding user who's leaving if they're steward)
+      const existingStewards = new Map<string, string>();
+      currentGroups?.forEach(g => {
+        if (g.steward_id && g.steward_id !== userId) {
+          existingStewards.set(g.steward_id, String(g.group_number));
+        }
+      });
+
+      const remainingMembers = currentGroups?.flatMap(g =>
+        g.memberships
+          .filter((m: any) => m.user_id !== userId) // Exclude leaving user
+          .map((m: any) => ({ id: m.user_id, displayName: m.user?.display_name || '' }))
       ) || [];
 
       if (remainingMembers.length > 0) {
-        const newGroups = formGroups(remainingMembers);
+        // Rebalance with steward preservation
+        const newGroups = formGroups(remainingMembers, { existingStewards });
 
-        await ctx.supabase.from('groups').delete().eq('trip_id', input.tripId);
+        // Use atomic transaction function
+        const { error: rebalanceError } = await ctx.supabase.rpc('rebalance_trip_groups', {
+          p_trip_id: input.tripId,
+          p_new_groups: newGroups,
+        });
 
-        for (const group of newGroups) {
-          const { data: newGroup } = await ctx.supabase
-            .from('groups')
-            .insert({
-              trip_id: input.tripId,
-              group_number: group.groupNumber,
-              cost_per_person: group.costPerPerson,
-            })
-            .select()
-            .single();
-
-          if (newGroup) {
-            await ctx.supabase.from('group_memberships').insert(
-              group.members.map(m => ({
-                group_id: newGroup.id,
-                user_id: m.id,
-              }))
-            );
-          }
+        if (rebalanceError) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: `Failed to rebalance groups: ${rebalanceError.message}`,
+          });
         }
       } else {
-        // No members left, just delete all groups
-        await ctx.supabase.from('groups').delete().eq('trip_id', input.tripId);
+        // No members left, delete all groups using transaction
+        const { error } = await ctx.supabase.rpc('rebalance_trip_groups', {
+          p_trip_id: input.tripId,
+          p_new_groups: [],
+        });
+
+        if (error) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: `Failed to remove groups: ${error.message}`,
+          });
+        }
       }
 
       return { success: true };
