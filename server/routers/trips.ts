@@ -27,7 +27,8 @@ export const tripsRouter = router({
         `)
         .gte('date', input.startDate)
         .lte('date', input.endDate)
-        .order('date');
+        .order('date')
+        .order('train(departure_time)');
 
       if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message });
       
@@ -40,6 +41,13 @@ export const tripsRouter = router({
         
         return departureTime > now;
       }) || [];
+
+      // Sort by departure time within each date
+      availableTrips.sort((a, b) => {
+        const timeA = new Date(`${a.date}T${a.train.departure_time}`);
+        const timeB = new Date(`${b.date}T${b.train.departure_time}`);
+        return timeA.getTime() - timeB.getTime();
+      });
 
       return availableTrips;
     }),
@@ -68,7 +76,8 @@ export const tripsRouter = router({
         `)
         .gte('date', input.startDate)
         .lte('date', input.endDate)
-        .order('date');
+        .order('date')
+        .order('train(departure_time)');
 
       if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message });
       
@@ -78,6 +87,13 @@ export const tripsRouter = router({
           group.memberships.some((membership: any) => membership.user_id === userId)
         )
       ) || [];
+
+      // Sort by departure time within each date
+      myTrips.sort((a, b) => {
+        const timeA = new Date(`${a.date}T${a.train.departure_time}`);
+        const timeB = new Date(`${b.date}T${b.train.departure_time}`);
+        return timeA.getTime() - timeB.getTime();
+      });
 
       return myTrips;
     }),
