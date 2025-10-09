@@ -60,7 +60,7 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Save up to 26% on your GO Train fare by sharing group passes with other commuters.
+                Save up to 38% on your GO Train fare by sharing group passes with other commuters.
               </p>
             </CardContent>
           </Card>

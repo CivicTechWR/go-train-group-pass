@@ -22,8 +22,8 @@ export function FareComparison({ className }: FareComparisonProps) {
           <div className="space-y-2">
             <h3 className="font-semibold text-red-600">Individual Ticket</h3>
             <div className="bg-white border border-red-200 rounded-lg p-3">
-              <div className="text-2xl font-bold text-red-600">$16.32</div>
-              <p className="text-sm text-muted-foreground">Kitchener → Union</p>
+              <div className="text-2xl font-bold text-red-600">$19.35</div>
+              <p className="text-sm text-muted-foreground">Kitchener → Union (cash)</p>
               <p className="text-xs text-muted-foreground">One-way only</p>
             </div>
           </div>
@@ -40,13 +40,23 @@ export function FareComparison({ className }: FareComparisonProps) {
         <div className="bg-green-100 border border-green-300 rounded-lg p-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-semibold text-green-800">You save $4.32 per trip!</p>
-              <p className="text-sm text-green-700">That's 26% savings</p>
+              <p className="font-semibold text-green-800">You save $7.35 per trip!</p>
+              <p className="text-sm text-green-700">That's 38% savings</p>
             </div>
             <Badge variant="secondary" className="bg-green-200 text-green-800">
-              26% OFF
+              38% OFF
             </Badge>
           </div>
+        </div>
+
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+          <h3 className="font-semibold text-yellow-800 mb-2">Who Benefits from Group Passes?</h3>
+          <ul className="text-sm text-yellow-700 space-y-1">
+            <li>• <strong>Infrequent travelers</strong> - Don't travel enough for PRESTO discounts</li>
+            <li>• <strong>Visitors & tourists</strong> - Don't have PRESTO cards</li>
+            <li>• <strong>Cash payers</strong> - Prefer not to use PRESTO system</li>
+            <li>• <strong>Occasional commuters</strong> - Travel less than 35 times per month</li>
+          </ul>
         </div>
 
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">

@@ -30,10 +30,10 @@ export default function FAQPage() {
                 <h3 className="font-bold text-green-800 mb-3">💰 Individual vs Group Pass Costs</h3>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <h4 className="font-semibold text-red-600">Individual Ticket</h4>
+                    <h4 className="font-semibold text-red-600">Individual Ticket (Cash)</h4>
                     <ul className="text-sm space-y-1">
-                      <li>• <strong>Kitchener → Union:</strong> $16.32</li>
-                      <li>• <strong>No discounts</strong> (unless you have PRESTO fare type)</li>
+                      <li>• <strong>Kitchener → Union:</strong> $19.35</li>
+                      <li>• <strong>No discounts</strong> (unless you have PRESTO)</li>
                       <li>• <strong>One-way only</strong></li>
                     </ul>
                   </div>
@@ -48,8 +48,32 @@ export default function FAQPage() {
                 </div>
                 <div className="mt-4 p-3 bg-green-100 rounded-lg">
                   <p className="text-sm font-semibold text-green-800">
-                    💡 You save $4.32 per trip (26% savings!)
+                    💡 You save $7.35 per trip (38% savings!)
                   </p>
+                </div>
+              </div>
+
+              <div className="bg-white border border-yellow-200 rounded-lg p-4">
+                <h3 className="font-bold text-yellow-800 mb-3">🎯 Who Benefits from Group Passes?</h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-green-600">Perfect For:</h4>
+                    <ul className="text-sm space-y-1">
+                      <li>• <strong>Infrequent travelers</strong> - Don&apos;t travel enough for PRESTO discounts</li>
+                      <li>• <strong>Visitors & tourists</strong> - Don&apos;t have PRESTO cards</li>
+                      <li>• <strong>Cash payers</strong> - Prefer not to use PRESTO system</li>
+                      <li>• <strong>Occasional commuters</strong> - Travel less than 35 times per month</li>
+                    </ul>
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-red-600">Not Ideal For:</h4>
+                    <ul className="text-sm space-y-1">
+                      <li>• <strong>Daily commuters</strong> - PRESTO discounts are better</li>
+                      <li>• <strong>Frequent travelers</strong> - 35+ trips per month get 88-100% off</li>
+                      <li>• <strong>PRESTO users</strong> - Already get 15.7% discount</li>
+                      <li>• <strong>Students with discounts</strong> - May have better rates</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
 
@@ -60,13 +84,12 @@ export default function FAQPage() {
                 </p>
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="space-y-2">
-                    <h4 className="font-semibold">Available Fare Types</h4>
+                    <h4 className="font-semibold">PRESTO Discounts</h4>
                     <ul className="text-sm space-y-1">
-                      <li>• <strong>Adult:</strong> Full fare (ages 20-64)</li>
-                      <li>• <strong>Youth:</strong> Discounted (ages 13-19)</li>
-                      <li>• <strong>Senior:</strong> Discounted (ages 65+)</li>
-                      <li>• <strong>Child:</strong> Discounted (ages 6-12)</li>
-                      <li>• <strong>Student:</strong> Post-secondary discounts</li>
+                      <li>• <strong>Trips 1-35:</strong> 15.7% off ($16.32)</li>
+                      <li>• <strong>Trips 36-40:</strong> 88.3% off</li>
+                      <li>• <strong>Trips 41+:</strong> 100% off (free!)</li>
+                      <li>• <strong>Must use same payment method</strong></li>
                     </ul>
                   </div>
                   <div className="space-y-2">
@@ -75,7 +98,7 @@ export default function FAQPage() {
                       <li>• <strong>Works for everyone</strong> - no age restrictions</li>
                       <li>• <strong>Round trip included</strong> - better than one-way</li>
                       <li>• <strong>Consistent pricing</strong> - no fare type needed</li>
-                      <li>• <strong>Always saves money</strong> - guaranteed 26% savings</li>
+                      <li>• <strong>Always saves money</strong> - guaranteed 38% savings</li>
                     </ul>
                   </div>
                 </div>
