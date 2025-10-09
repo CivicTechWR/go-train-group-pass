@@ -13,8 +13,6 @@ import { AlertCircle, Wifi, WifiOff } from 'lucide-react';
 export const dynamic = 'force-dynamic';
 
 export default function TodayPage() {
-  console.log('TodayPage rendering');
-  
   const today = new Date();
   const tomorrow = addDays(today, 1);
 
