@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createServiceClient } from '@supabase/supabase-js';
 
 export async function POST() {
   try {
-    const supabase = await createClient();
+    // Use service role client to bypass RLS for setup
+    const supabase = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
 
     // Step 1: Check if schema exists
     const { error: tableError } = await supabase
