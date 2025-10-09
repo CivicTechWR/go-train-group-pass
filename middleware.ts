@@ -60,7 +60,12 @@ export async function middleware(request: NextRequest) {
   const isAuthPage = request.nextUrl.pathname.startsWith('/login');
   const isProtectedRoute = !isAuthPage && !request.nextUrl.pathname.startsWith('/auth/callback');
 
+  // TEMPORARY: Allow access in development mode for testing
   if (!session && isProtectedRoute) {
+    if (process.env.NODE_ENV === 'development') {
+      // Allow access to the app in development
+      return response;
+    }
     return NextResponse.redirect(new URL('/login', request.url));
   }
 

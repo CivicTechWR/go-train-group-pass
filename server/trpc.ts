@@ -50,7 +50,20 @@ export const publicProcedure = t.procedure;
 
 // Protected procedure (requires authentication)
 export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
+  // TEMPORARY: Allow test user for development
+  const testUserId = 'a702251f-4686-4a79-aa8a-3fc936194860';
+  
   if (!ctx.session) {
+    // In development, use test user ID
+    if (process.env.NODE_ENV === 'development') {
+      return next({
+        ctx: {
+          ...ctx,
+          session: null,
+          userId: testUserId,
+        },
+      });
+    }
     throw new TRPCError({ code: 'UNAUTHORIZED' });
   }
 

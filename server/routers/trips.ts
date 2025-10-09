@@ -30,7 +30,56 @@ export const tripsRouter = router({
         .order('date');
 
       if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message });
-      return data;
+      
+      // Filter out departed trips - only show trips that haven't departed yet
+      const now = new Date();
+      
+      const availableTrips = data?.filter(trip => {
+        // Create departure time in local timezone by using the date string with time
+        const departureTime = new Date(`${trip.date}T${trip.train.departure_time}`);
+        
+        return departureTime > now;
+      }) || [];
+
+      return availableTrips;
+    }),
+
+  // Get user's joined trips (including departed ones) for a date range
+  myTrips: protectedProcedure
+    .input(z.object({
+      startDate: z.string(),
+      endDate: z.string(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.userId;
+      
+      const { data, error } = await ctx.supabase
+        .from('trips')
+        .select(`
+          *,
+          train:trains(*),
+          groups(
+            *,
+            memberships:group_memberships(
+              *,
+              user:profiles(id, display_name, profile_photo_url)
+            )
+          )
+        `)
+        .gte('date', input.startDate)
+        .lte('date', input.endDate)
+        .order('date');
+
+      if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message });
+      
+      // Filter to only trips where user is a member
+      const myTrips = data?.filter(trip => 
+        trip.groups.some((group: any) => 
+          group.memberships.some((membership: any) => membership.user_id === userId)
+        )
+      ) || [];
+
+      return myTrips;
     }),
 
   // Join a trip

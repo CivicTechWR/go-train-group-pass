@@ -13,26 +13,53 @@ import { AlertCircle, Wifi, WifiOff } from 'lucide-react';
 export const dynamic = 'force-dynamic';
 
 export default function TodayPage() {
+  console.log('TodayPage rendering');
+  
   const today = new Date();
   const tomorrow = addDays(today, 1);
 
   const todayStr = format(today, 'yyyy-MM-dd');
   const tomorrowStr = format(tomorrow, 'yyyy-MM-dd');
+  
+  console.log('Date strings:', { todayStr, tomorrowStr });
 
-  // Fetch today's trips
-  const todayQuery = trpc.trips.list.useQuery(
+  // Fetch available trips (not departed)
+  const todayAvailableQuery = trpc.trips.list.useQuery(
     { startDate: todayStr, endDate: todayStr },
     { refetchInterval: 30000 } // Refetch every 30 seconds as backup
   );
 
-  // Fetch tomorrow's trips
+  // Fetch user's joined trips (including departed ones)
+  const todayMyTripsQuery = trpc.trips.myTrips.useQuery(
+    { startDate: todayStr, endDate: todayStr },
+    { refetchInterval: 30000 }
+  );
+
+  // Debug logging
+  console.log('Today available query state:', {
+    isLoading: todayAvailableQuery.isLoading,
+    isError: todayAvailableQuery.isError,
+    error: todayAvailableQuery.error,
+    data: todayAvailableQuery.data,
+    dataLength: todayAvailableQuery.data?.length
+  });
+
+  console.log('Today my trips query state:', {
+    isLoading: todayMyTripsQuery.isLoading,
+    isError: todayMyTripsQuery.isError,
+    error: todayMyTripsQuery.error,
+    data: todayMyTripsQuery.data,
+    dataLength: todayMyTripsQuery.data?.length
+  });
+
+  // Fetch tomorrow's available trips
   const tomorrowQuery = trpc.trips.list.useQuery(
     { startDate: tomorrowStr, endDate: tomorrowStr },
     { refetchInterval: 30000 }
   );
 
   // Get user session
-  const todayTripIds = todayQuery.data?.map((t) => t.id) || [];
+  const todayTripIds = todayMyTripsQuery.data?.map((t) => t.id) || [];
   const tomorrowTripIds = tomorrowQuery.data?.map((t) => t.id) || [];
 
   // Subscribe to real-time updates for today's trips
@@ -67,12 +94,12 @@ export default function TodayPage() {
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="today" className="relative">
               Today
-              {todayQuery.data && todayQuery.data.length > 0 && (
+              {todayMyTripsQuery.data && todayMyTripsQuery.data.length > 0 && (
                 <Badge
                   variant="secondary"
                   className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center"
                 >
-                  {todayQuery.data.length}
+                  {todayMyTripsQuery.data.length}
                 </Badge>
               )}
             </TabsTrigger>
@@ -108,28 +135,52 @@ export default function TodayPage() {
               </div>
             )}
 
-            {todayQuery.isLoading ? (
+            {todayAvailableQuery.isLoading || todayMyTripsQuery.isLoading ? (
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
                   <TripCardSkeleton key={i} />
                 ))}
               </div>
-            ) : todayQuery.error ? (
+            ) : todayAvailableQuery.error || todayMyTripsQuery.error ? (
               <div className="flex items-center gap-2 p-4 border border-destructive/50 rounded-lg bg-destructive/10">
                 <AlertCircle className="h-5 w-5 text-destructive" />
                 <p className="text-sm text-destructive">
-                  Failed to load trips: {todayQuery.error.message}
+                  Failed to load trips: {todayAvailableQuery.error?.message || todayMyTripsQuery.error?.message}
                 </p>
               </div>
-            ) : todayQuery.data && todayQuery.data.length > 0 ? (
-              <div className="space-y-4">
-                {todayQuery.data.map((trip) => (
-                  <TripCard key={trip.id} trip={trip} currentUserId={currentUserId} />
-                ))}
-              </div>
             ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                <p>No trains scheduled for today</p>
+              <div className="space-y-6">
+                {/* User's joined trips (including departed ones) */}
+                {todayMyTripsQuery.data && todayMyTripsQuery.data.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Your Trips</h3>
+                    <div className="space-y-4">
+                      {todayMyTripsQuery.data.map((trip) => (
+                        <TripCard key={trip.id} trip={trip} currentUserId={currentUserId} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Available trips to join */}
+                {todayAvailableQuery.data && todayAvailableQuery.data.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Available to Join</h3>
+                    <div className="space-y-4">
+                      {todayAvailableQuery.data.map((trip) => (
+                        <TripCard key={trip.id} trip={trip} currentUserId={currentUserId} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* No trips message */}
+                {(!todayMyTripsQuery.data || todayMyTripsQuery.data.length === 0) && 
+                 (!todayAvailableQuery.data || todayAvailableQuery.data.length === 0) && (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <p>No trains scheduled for today</p>
+                  </div>
+                )}
               </div>
             )}
           </TabsContent>
