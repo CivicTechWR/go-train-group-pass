@@ -190,16 +190,16 @@ export default function FAQPage() {
               <div>
                 <h3 className="font-semibold mb-2">How do I pay for my share?</h3>
                 <p className="text-sm text-muted-foreground">
-                  Usually by Interac e-Transfer to the steward. The app will show you the steward's email 
-                  and the amount you owe. You send the money directly to them - we don't handle payments.
+                  Usually by Interac e-Transfer to the steward. The app will show you the steward&apos;s email 
+                  and the amount you owe. You send the money directly to them - we don&apos;t handle payments.
                 </p>
               </div>
 
               <div>
-                <h3 className="font-semibold mb-2">What if someone doesn't pay me back?</h3>
+                <h3 className="font-semibold mb-2">What if someone doesn&apos;t pay me back?</h3>
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3">
                   <p className="text-sm text-red-800">
-                    <strong>We can't help you get your money back.</strong> We don't handle payments or provide 
+                    <strong>We can&apos;t help you get your money back.</strong> We don&apos;t handle payments or provide 
                     payment protection. Only use the app with people you trust, or at least people who seem trustworthy.
                   </p>
                 </div>
@@ -219,10 +219,10 @@ export default function FAQPage() {
               </div>
 
               <div>
-                <h3 className="font-semibold mb-2">What if I can't make the trip?</h3>
+                <h3 className="font-semibold mb-2">What if I can&apos;t make the trip?</h3>
                 <p className="text-sm text-muted-foreground">
-                  You can leave a trip up to 30 minutes before departure. If you've already paid, you'll need to 
-                  work out a refund with the steward directly. We can't help with refunds.
+                  You can leave a trip up to 30 minutes before departure. If you&apos;ve already paid, you&apos;ll need to 
+                  work out a refund with the steward directly. We can&apos;t help with refunds.
                 </p>
               </div>
             </div>
@@ -250,7 +250,7 @@ export default function FAQPage() {
               <div>
                 <h3 className="font-semibold mb-2">What if not enough people join?</h3>
                 <p className="text-sm text-muted-foreground">
-                  If there aren't enough people for a group pass, you'll need to buy an individual ticket. 
+                  If there aren&apos;t enough people for a group pass, you&apos;ll need to buy an individual ticket. 
                   The app will show you how many people have joined and whether a group pass is possible.
                 </p>
               </div>
@@ -258,7 +258,7 @@ export default function FAQPage() {
               <div>
                 <h3 className="font-semibold mb-2">How do I find my group on the train?</h3>
                 <p className="text-sm text-muted-foreground">
-                  Group members can report which coach and level they're sitting in. The app will show you 
+                  Group members can report which coach and level they&apos;re sitting in. The app will show you 
                   where everyone is so you can find each other. You can also exchange phone numbers if needed.
                 </p>
               </div>
@@ -287,17 +287,17 @@ export default function FAQPage() {
               <div>
                 <h3 className="font-semibold mb-2">Is it safe to meet strangers?</h3>
                 <p className="text-sm text-muted-foreground">
-                  You're meeting at a public GO Train station, which is generally safe. You can also exchange 
+                  You&apos;re meeting at a public GO Train station, which is generally safe. You can also exchange 
                   phone numbers with group members if you want to coordinate beforehand. Trust your instincts 
-                  and don't meet anyone if something feels wrong.
+                  and don&apos;t meet anyone if something feels wrong.
                 </p>
               </div>
 
               <div>
-                <h3 className="font-semibold mb-2">What if there's a fare inspection?</h3>
+                <h3 className="font-semibold mb-2">What if there&apos;s a fare inspection?</h3>
                 <p className="text-sm text-muted-foreground">
                   The app has a fare inspection alert system. If someone sees an inspector, they can send an 
-                  alert to everyone in the group. You'll get a push notification and can quickly find your 
+                  alert to everyone in the group. You&apos;ll get a push notification and can quickly find your 
                   group members to show the pass together.
                 </p>
               </div>
@@ -306,7 +306,7 @@ export default function FAQPage() {
                 <h3 className="font-semibold mb-2">What if the train is delayed or cancelled?</h3>
                 <p className="text-sm text-muted-foreground">
                   Group passes are valid for the day, so you can take a later train if needed. If the train 
-                  is cancelled, you'll need to work out refunds with your group members directly.
+                  is cancelled, you&apos;ll need to work out refunds with your group members directly.
                 </p>
               </div>
             </div>
@@ -323,7 +323,7 @@ export default function FAQPage() {
               <div>
                 <h3 className="font-semibold mb-2">Do I need to download an app?</h3>
                 <p className="text-sm text-muted-foreground">
-                  Yes, this is a web app that works on your phone's browser. You can also install it as a 
+                  Yes, this is a web app that works on your phone&apos;s browser. You can also install it as a 
                   PWA (Progressive Web App) for a more app-like experience.
                 </p>
               </div>
@@ -332,7 +332,7 @@ export default function FAQPage() {
                 <h3 className="font-semibold mb-2">What if the app stops working?</h3>
                 <p className="text-sm text-muted-foreground">
                   We try to keep the app running 24/7, but sometimes things break. If the app is down, 
-                  you'll need to buy individual tickets. We're not responsible for missed trains or extra costs.
+                  you&apos;ll need to buy individual tickets. We&apos;re not responsible for missed trains or extra costs.
                 </p>
               </div>
 
@@ -354,13 +354,13 @@ export default function FAQPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2 text-sm">
-              <p>If you have questions that aren't answered here:</p>
+              <p>If you have questions that aren&apos;t answered here:</p>
               <div className="flex items-center gap-2">
                 <HelpCircle className="h-4 w-4" />
                 <span>support@gotraingroup.ca</span>
               </div>
               <p className="text-muted-foreground">
-                We're real people who will read your email and help you out.
+                We&apos;re real people who will read your email and help you out.
               </p>
             </div>
           </CardContent>
