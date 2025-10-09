@@ -134,12 +134,54 @@ See `AGENTS_GUIDE.md` for detailed usage examples and workflows.
 
 ## Development Practices
 
+### Tactical Agent & MCP Usage
+
+**CRITICAL: Use agents and MCP servers proactively for ALL development tasks.**
+
+**Agent Usage Rules:**
+1. **ALWAYS use agents for specialized tasks** - Don't do it yourself if an agent can
+2. **Use multiple agents in parallel** - Delegate different aspects of a feature simultaneously
+3. **Agent-first mindset** - Before writing code, determine which agent(s) should handle it
+
+**When to Use Which Agent:**
+- **@fullstack-developer** - Any feature touching UI + API + Database
+- **@go-train-fullstack** - Project-specific features (group formation, payment, trips)
+- **@go-train-realtime** - Real-time subscriptions, WebSocket, notifications
+- **@go-train-algorithm-specialist** - Group formation logic, cost optimization
+- **@go-train-payment-tracker** - Payment workflows, e-Transfer tracking
+- **@api-designer** - New tRPC endpoints, API contract design
+- **@database-administrator** - Schema changes, migrations, query optimization
+- **@code-reviewer** - Pre-commit code review (MANDATORY before every commit)
+- **@test-automator** - Writing unit/integration/E2E tests
+- **@qa-expert** - Test strategy, quality planning
+- **@debugger** - Troubleshooting bugs, diagnosis
+- **@devops-engineer** - CI/CD, deployment, infrastructure
+- **@platform-engineer** - Infrastructure code, scaling, monitoring
+
+**MCP Usage Rules:**
+1. **Use Supabase MCP** for all database queries instead of raw SQL
+2. **Use PostgreSQL MCP** for complex queries, performance analysis
+3. **Use Memory MCP** to store architectural decisions, patterns learned
+4. **Use Fetch MCP** to test API endpoints, fetch external data
+5. **Use Sequential Thinking MCP** for complex algorithm design
+
+**Example Tactical Workflow:**
+```
+Task: Implement user authentication
+
+Step 1: Use @sequential-thinking MCP to plan approach
+Step 2: Use @database-administrator to design auth schema
+Step 3: Use @fullstack-developer to implement auth flow
+Step 4: Use @test-automator to write test suite
+Step 5: Use @code-reviewer before commit
+```
+
 ### Code Quality Standards
 
 **IMPORTANT: Perform regular and extensive code reviews before every commit.**
 
 **Pre-commit Requirements:**
-- Run `@code-reviewer` agent for automated review
+- **MANDATORY:** Run `@code-reviewer` agent for automated review
 - Execute `npm run build` (must pass)
 - Test functionality in browser (`npm run dev`)
 - Verify no console errors/warnings
