@@ -79,11 +79,22 @@ export function TripCard({ trip, currentUserId }: TripCardProps) {
               </CardTitle>
               <Badge variant="outline" className="text-xs">
                 <Calendar className="h-3 w-3 mr-1" />
-                {isToday(new Date(trip.date))
-                  ? 'Today'
-                  : isTomorrow(new Date(trip.date))
-                  ? 'Tomorrow'
-                  : format(new Date(trip.date), 'MMM d')}
+                {(() => {
+                  // Create a proper date object for comparison
+                  const tripDate = new Date(trip.date + 'T00:00:00');
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  const tomorrow = new Date(today);
+                  tomorrow.setDate(tomorrow.getDate() + 1);
+                  
+                  if (tripDate.getTime() === today.getTime()) {
+                    return 'Today';
+                  } else if (tripDate.getTime() === tomorrow.getTime()) {
+                    return 'Tomorrow';
+                  } else {
+                    return format(tripDate, 'MMM d');
+                  }
+                })()}
               </Badge>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
