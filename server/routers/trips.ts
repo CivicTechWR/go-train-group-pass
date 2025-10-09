@@ -32,14 +32,20 @@ export const tripsRouter = router({
 
       if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message });
       
-      // Filter out departed trips - only show trips that haven't departed yet
+      // Filter out departed trips and non-direct routes - only show direct train trips that haven't departed yet
       const now = new Date();
       
       const availableTrips = data?.filter(trip => {
+        // Only direct train routes (no bus transfers required)
+        const isDirectTrain = trip.train.direction === 'outbound' && 
+                             trip.train.destination === 'Union Station' &&
+                             !trip.train.origin.includes('Bus') &&
+                             !trip.train.destination.includes('Bus');
+        
         // Create departure time in local timezone by using the date string with time
         const departureTime = new Date(`${trip.date}T${trip.train.departure_time}`);
         
-        return departureTime > now;
+        return isDirectTrain && departureTime > now;
       }) || [];
 
       // Sort by departure time within each date
@@ -81,12 +87,21 @@ export const tripsRouter = router({
 
       if (error) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message });
       
-      // Filter to only trips where user is a member
-      const myTrips = data?.filter(trip => 
-        trip.groups.some((group: any) => 
+      // Filter to only direct train trips where user is a member
+      const myTrips = data?.filter(trip => {
+        // Only direct train routes (no bus transfers required)
+        const isDirectTrain = trip.train.direction === 'outbound' && 
+                             trip.train.destination === 'Union Station' &&
+                             !trip.train.origin.includes('Bus') &&
+                             !trip.train.destination.includes('Bus');
+        
+        // User must be a member of this trip
+        const isUserMember = trip.groups.some((group: any) => 
           group.memberships.some((membership: any) => membership.user_id === userId)
-        )
-      ) || [];
+        );
+        
+        return isDirectTrain && isUserMember;
+      }) || [];
 
       // Sort by departure time within each date
       myTrips.sort((a, b) => {
@@ -115,6 +130,19 @@ export const tripsRouter = router({
 
       if (tripError || !trip) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Trip not found' });
+      }
+
+      // Validate this is a direct train route (no bus transfers required)
+      const isDirectTrain = trip.train.direction === 'outbound' && 
+                           trip.train.destination === 'Union Station' &&
+                           !trip.train.origin.includes('Bus') &&
+                           !trip.train.destination.includes('Bus');
+
+      if (!isDirectTrain) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Only direct train routes are supported for group passes'
+        });
       }
 
       const departureTime = new Date(`${trip.date}T${trip.train.departure_time}`);
@@ -252,6 +280,19 @@ export const tripsRouter = router({
 
       if (tripError || !trip) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Trip not found' });
+      }
+
+      // Validate this is a direct train route (no bus transfers required)
+      const isDirectTrain = trip.train.direction === 'outbound' && 
+                           trip.train.destination === 'Union Station' &&
+                           !trip.train.origin.includes('Bus') &&
+                           !trip.train.destination.includes('Bus');
+
+      if (!isDirectTrain) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Only direct train routes are supported for group passes'
+        });
       }
 
       const departureTime = new Date(`${trip.date}T${trip.train.departure_time}`);
