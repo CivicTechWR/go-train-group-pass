@@ -72,7 +72,7 @@ export default function TodayPage() {
         <Tabs defaultValue="today" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="today" className="relative">
-              Today
+              Today ({format(today, 'MMM d')})
               {todayMyTripsQuery.data && todayMyTripsQuery.data.length > 0 && (
                 <Badge
                   variant="secondary"
@@ -83,7 +83,7 @@ export default function TodayPage() {
               )}
             </TabsTrigger>
             <TabsTrigger value="tomorrow" className="relative">
-              Tomorrow
+              Tomorrow ({format(tomorrow, 'MMM d')})
               {tomorrowQuery.data && tomorrowQuery.data.length > 0 && (
                 <Badge
                   variant="secondary"

@@ -87,12 +87,14 @@ export function TripCard({ trip, currentUserId }: TripCardProps) {
                   const tomorrow = new Date(today);
                   tomorrow.setDate(tomorrow.getDate() + 1);
                   
+                  const dateStr = format(tripDate, 'MMM d');
+                  
                   if (tripDate.getTime() === today.getTime()) {
-                    return 'Today';
+                    return `Today (${dateStr})`;
                   } else if (tripDate.getTime() === tomorrow.getTime()) {
-                    return 'Tomorrow';
+                    return `Tomorrow (${dateStr})`;
                   } else {
-                    return format(tripDate, 'MMM d');
+                    return dateStr;
                   }
                 })()}
               </Badge>
