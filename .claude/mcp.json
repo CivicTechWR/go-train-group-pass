@@ -2,47 +2,66 @@
   "mcpServers": {
     "supabase": {
       "command": "npx",
-      "args": ["-y", "@designcomputer/supabase_mcp_server@1.1.0"],
+      "args": ["-y", "@supabase/mcp-server-supabase@latest"],
       "env": {
         "NEXT_PUBLIC_SUPABASE_URL": "${NEXT_PUBLIC_SUPABASE_URL}",
         "SUPABASE_URL": "${NEXT_PUBLIC_SUPABASE_URL}",
         "NEXT_PUBLIC_SUPABASE_ANON_KEY": "${NEXT_PUBLIC_SUPABASE_ANON_KEY}",
-        "SUPABASE_SERVICE_ROLE_KEY": "${SUPABASE_SERVICE_ROLE_KEY}"
+        "SUPABASE_SERVICE_ROLE_KEY": "${SUPABASE_SERVICE_ROLE_KEY}",
+        "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}"
       },
       "description": "Direct access to Supabase database, auth, and storage operations"
     },
-    "postgres": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-postgres@1.0.1", "${POSTGRES_CONNECTION_STRING}"],
-      "description": "Advanced PostgreSQL queries and database optimization"
-    },
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem@1.0.0", "/Users/andrelevesque/Projects/go-transit-group"],
-      "description": "Fast file operations and directory management"
-    },
-    "sequential-thinking": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking@1.0.0"],
-      "description": "Complex problem solving for group formation algorithm design"
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem@latest",
+        "/Users/andrelevesque/Projects/go-transit-group"
+      ],
+      "description": "Filesystem MCP (scoped package, restricted to project path)"
     },
     "memory": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-memory@1.0.0"],
-      "description": "Maintain context across sessions, store architectural decisions"
+      "args": ["-y", "@modelcontextprotocol/server-memory@latest"],
+      "description": "Memory MCP (scoped package)"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking@latest"],
+      "description": "Sequential thinking MCP (published package)"
     },
     "fetch": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-fetch@1.0.0"],
-      "description": "Test API endpoints and fetch GO Transit GTFS feeds"
+      "command": ".venv/bin/python",
+      "args": ["-m", "mcp_server_fetch"],
+      "description": "Fetch MCP (python -m mcp_server_fetch) to extract web pages as markdown"
     },
     "brave-search": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-brave-search@1.0.0"],
+      "args": ["-y", "@brave/brave-search-mcp-server@latest"],
       "env": {
         "BRAVE_API_KEY": "${BRAVE_API_KEY}"
       },
-      "description": "Research Next.js 15, Supabase, and tRPC best practices"
+      "description": "Brave Search MCP (official Brave package; requires BRAVE_API_KEY)"
+    },
+    "git": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-git",
+        "--repository",
+        "/Users/andrelevesque/Projects/go-transit-group"
+      ],
+      "description": "Git MCP server for local git operations (works with Gitea)"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"],
+      "description": "Playwright MCP server for E2E testing and browser automation"
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest"],
+      "description": "Chrome DevTools MCP server for debugging and performance monitoring"
     }
   }
 }

@@ -8,5 +8,18 @@
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "supabase",
+    "filesystem",
+    "memory",
+    "sequential-thinking",
+    "fetch",
+    "brave-search",
+    "git",
+    "playwright",
+    "chrome-devtools",
+    "toolbox"
+  ]
 }

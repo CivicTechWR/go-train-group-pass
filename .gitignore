@@ -35,3 +35,25 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# MCP servers
+.claude/mcp.json
+.cursor/mcp.json
+tools.yaml
+test-mcp-servers.sh
+
+# Python virtual environment
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# MCP server logs
+mcp-*.log

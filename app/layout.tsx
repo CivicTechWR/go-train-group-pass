@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { TRPCProvider } from "@/lib/trpc/Provider";
 import { Toaster } from "sonner";
+import { BottomNav } from "@/components/navigation/BottomNav";
 
 export const metadata: Metadata = {
   title: "GO Train Group Pass",
@@ -17,7 +18,10 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         <TRPCProvider>
-          {children}
+          <div className="md:pl-64">
+            {children}
+          </div>
+          <BottomNav />
           <Toaster />
         </TRPCProvider>
       </body>
