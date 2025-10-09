@@ -2,41 +2,43 @@
   "mcpServers": {
     "supabase": {
       "command": "npx",
-      "args": ["-y", "@designcomputer/supabase_mcp_server"],
+      "args": ["-y", "@designcomputer/supabase_mcp_server@1.1.0"],
       "env": {
-        "SUPABASE_URL": "${SUPABASE_URL}",
+        "NEXT_PUBLIC_SUPABASE_URL": "${NEXT_PUBLIC_SUPABASE_URL}",
+        "SUPABASE_URL": "${NEXT_PUBLIC_SUPABASE_URL}",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY": "${NEXT_PUBLIC_SUPABASE_ANON_KEY}",
         "SUPABASE_SERVICE_ROLE_KEY": "${SUPABASE_SERVICE_ROLE_KEY}"
       },
       "description": "Direct access to Supabase database, auth, and storage operations"
     },
     "postgres": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"],
+      "args": ["-y", "@modelcontextprotocol/server-postgres@1.0.1", "${POSTGRES_CONNECTION_STRING}"],
       "description": "Advanced PostgreSQL queries and database optimization"
     },
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/andrelevesque/Projects/go-transit-group"],
+      "args": ["-y", "@modelcontextprotocol/server-filesystem@1.0.0", "/Users/andrelevesque/Projects/go-transit-group"],
       "description": "Fast file operations and directory management"
     },
     "sequential-thinking": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking@1.0.0"],
       "description": "Complex problem solving for group formation algorithm design"
     },
     "memory": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "args": ["-y", "@modelcontextprotocol/server-memory@1.0.0"],
       "description": "Maintain context across sessions, store architectural decisions"
     },
     "fetch": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-fetch"],
+      "args": ["-y", "@modelcontextprotocol/server-fetch@1.0.0"],
       "description": "Test API endpoints and fetch GO Transit GTFS feeds"
     },
     "brave-search": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "args": ["-y", "@modelcontextprotocol/server-brave-search@1.0.0"],
       "env": {
         "BRAVE_API_KEY": "${BRAVE_API_KEY}"
       },
