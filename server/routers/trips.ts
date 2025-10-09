@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { router, protectedProcedure } from '../trpc';
 import { formGroups } from '@/lib/group-formation';
 import { TRPCError } from '@trpc/server';
+import type { GroupWithMemberships, Profile } from '@/types/database';
 
 export const tripsRouter = router({
   // Get trips for date range
@@ -83,13 +84,18 @@ export const tripsRouter = router({
         .select('*, steward_id, memberships:group_memberships(user_id, user:profiles(id, display_name))')
         .eq('trip_id', input.tripId);
 
-      const allMembers = existingGroups?.flatMap(g =>
-        g.memberships.map((m: any) => ({ id: m.user_id, displayName: m.user?.display_name || '' }))
-      ) || [];
+      const typedGroups = (existingGroups || []) as GroupWithMemberships[];
+
+      const allMembers = typedGroups.flatMap(g =>
+        g.memberships.map(m => ({
+          id: m.user_id,
+          displayName: m.user?.display_name || ''
+        }))
+      );
 
       // Build steward map for preservation
       const existingStewards = new Map<string, string>();
-      existingGroups?.forEach(g => {
+      typedGroups.forEach(g => {
         if (g.steward_id) {
           existingStewards.set(g.steward_id, String(g.group_number));
         }
@@ -172,19 +178,24 @@ export const tripsRouter = router({
         .select('*, steward_id, memberships:group_memberships(user_id, user:profiles(id, display_name))')
         .eq('trip_id', input.tripId);
 
+      const typedCurrentGroups = (currentGroups || []) as GroupWithMemberships[];
+
       // Build steward map (excluding user who's leaving if they're steward)
       const existingStewards = new Map<string, string>();
-      currentGroups?.forEach(g => {
+      typedCurrentGroups.forEach(g => {
         if (g.steward_id && g.steward_id !== userId) {
           existingStewards.set(g.steward_id, String(g.group_number));
         }
       });
 
-      const remainingMembers = currentGroups?.flatMap(g =>
+      const remainingMembers = typedCurrentGroups.flatMap(g =>
         g.memberships
-          .filter((m: any) => m.user_id !== userId) // Exclude leaving user
-          .map((m: any) => ({ id: m.user_id, displayName: m.user?.display_name || '' }))
-      ) || [];
+          .filter(m => m.user_id !== userId) // Exclude leaving user
+          .map(m => ({
+            id: m.user_id,
+            displayName: m.user?.display_name || ''
+          }))
+      );
 
       if (remainingMembers.length > 0) {
         // Rebalance with steward preservation
