@@ -21,8 +21,6 @@ export default function TodayPage() {
   const todayStr = format(today, 'yyyy-MM-dd');
   const tomorrowStr = format(tomorrow, 'yyyy-MM-dd');
   
-  console.log('Date strings:', { todayStr, tomorrowStr });
-
   // Fetch available trips (not departed)
   const todayAvailableQuery = trpc.trips.list.useQuery(
     { startDate: todayStr, endDate: todayStr },
@@ -34,23 +32,6 @@ export default function TodayPage() {
     { startDate: todayStr, endDate: todayStr },
     { refetchInterval: 30000 }
   );
-
-  // Debug logging
-  console.log('Today available query state:', {
-    isLoading: todayAvailableQuery.isLoading,
-    isError: todayAvailableQuery.isError,
-    error: todayAvailableQuery.error,
-    data: todayAvailableQuery.data,
-    dataLength: todayAvailableQuery.data?.length
-  });
-
-  console.log('Today my trips query state:', {
-    isLoading: todayMyTripsQuery.isLoading,
-    isError: todayMyTripsQuery.isError,
-    error: todayMyTripsQuery.error,
-    data: todayMyTripsQuery.data,
-    dataLength: todayMyTripsQuery.data?.length
-  });
 
   // Fetch tomorrow's available trips
   const tomorrowQuery = trpc.trips.list.useQuery(

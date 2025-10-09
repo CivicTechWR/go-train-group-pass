@@ -12,9 +12,6 @@ function getBaseUrl() {
   return `http://localhost:${process.env.PORT ?? 3000}`;
 }
 
-// Debug logging
-console.log('tRPC Base URL:', getBaseUrl());
-
 export function TRPCProvider({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
@@ -26,20 +23,17 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
     },
   }));
 
-  const [trpcClient] = useState(() => {
-    console.log('Creating tRPC client with URL:', `${getBaseUrl()}/api/trpc`);
-    return trpc.createClient({
+  const [trpcClient] = useState(() =>
+    trpc.createClient({
       links: [
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
           transformer: superjson,
         }),
       ],
-    });
-  });
+    })
+  );
 
-  console.log('TRPCProvider rendering with client:', trpcClient);
-  
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
