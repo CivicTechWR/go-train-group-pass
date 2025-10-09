@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { CalendarDays, User, Shield } from 'lucide-react';
+import { CalendarDays, User, Shield, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -20,6 +20,11 @@ const navItems = [
     label: 'Steward',
     href: '/steward',
     icon: Shield,
+  },
+  {
+    label: 'FAQ',
+    href: '/faq',
+    icon: HelpCircle,
   },
 ];
 
