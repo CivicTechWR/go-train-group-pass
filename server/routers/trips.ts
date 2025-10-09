@@ -101,15 +101,29 @@ export const tripsRouter = router({
         }
       });
 
-      // Get current user profile
-      const { data: profile } = await ctx.supabase
+      // Get current user profile and validate it exists
+      const { data: profile, error: profileError } = await ctx.supabase
         .from('profiles')
         .select('id, display_name')
         .eq('id', userId)
-        .single();
+        .maybeSingle(); // Use maybeSingle to avoid errors when no rows
+
+      if (profileError) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: `Database error: ${profileError.message}`,
+        });
+      }
+
+      if (!profile) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: `User profile not found for ID: ${userId}. Please check your user configuration.`,
+        });
+      }
 
       // Add new user
-      allMembers.push({ id: userId, displayName: profile?.display_name || '' });
+      allMembers.push({ id: userId, displayName: profile.display_name || 'Unknown User' });
 
       // Rebalance groups with steward preservation
       const newGroups = formGroups(allMembers, { existingStewards });
@@ -121,9 +135,35 @@ export const tripsRouter = router({
       });
 
       if (rebalanceError) {
+        // Parse specific error types for better user messages
+        const errorMessage = rebalanceError.message.toLowerCase();
+
+        if (errorMessage.includes('foreign key') && errorMessage.includes('profiles')) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Your user profile is not properly set up. Please contact support.',
+          });
+        }
+
+        if (errorMessage.includes('foreign key') && errorMessage.includes('trips')) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'This trip no longer exists.',
+          });
+        }
+
+        if (errorMessage.includes('permission denied') || errorMessage.includes('rls')) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'You do not have permission to join this trip.',
+          });
+        }
+
+        // Generic error for unknown cases
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: `Failed to rebalance groups: ${rebalanceError.message}`,
+          message: 'Failed to join trip. Please try again or contact support.',
+          cause: rebalanceError,
         });
       }
 

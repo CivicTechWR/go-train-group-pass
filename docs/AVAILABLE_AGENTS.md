@@ -8,6 +8,10 @@ Located in `agents/` (project-local):
 
 - **go-train-algorithm-specialist** - Group formation optimization and cost distribution
 - **go-train-payment-tracker** - Payment tracking and e-Transfer workflow
+- **go-train-ocr-specialist** - OCR and pass verification for steward workflow
+- **go-train-notifications-engineer** - Push plus SMS notifications and rate limiting
+- **go-train-gtfs-integrator** - GTFS static and realtime ingestion
+- **go-train-security-reviewer** - Security and privacy review on changes
 
 Located in `~/.claude/agents/` (global, project-specific):
 
@@ -45,7 +49,7 @@ Located in `~/.claude/agents/` (global, project-specific):
 - **home-assistant-expert** - Home Assistant configuration and automation
 - **opnsense-security-expert** - OPNsense firewall and network security
 - **junos-network-admin** - Juniper JunOS and network administration
-- **media-server-expert** - Plex, Jellyfin, *arr suite management
+- **media-server-expert** - Plex, Jellyfin, \*arr suite management
 
 ## How Agents Work
 
@@ -57,18 +61,22 @@ Agents are automatically available to Claude Code. You can:
 
 ## Agent Selection Guidelines
 
-| Task Type | Recommended Agent |
-|-----------|------------------|
+| Task Type                   | Recommended Agent                               |
+| --------------------------- | ----------------------------------------------- |
 | New feature (UI + API + DB) | `@go-train-fullstack` or `@fullstack-developer` |
-| Real-time updates | `@go-train-realtime` |
-| Group algorithm changes | `@go-train-algorithm-specialist` |
-| Payment workflow | `@go-train-payment-tracker` |
-| API design | `@api-designer` |
-| Code review | `@code-reviewer` |
-| Testing | `@qa-expert` or `@test-automator` |
-| Database schema | `@database-administrator` |
-| Deployment/CI/CD | `@devops-engineer` or `@platform-engineer` |
-| Debugging issues | `@debugger` |
+| Real-time updates           | `@go-train-realtime`                            |
+| Group algorithm changes     | `@go-train-algorithm-specialist`                |
+| Payment workflow            | `@go-train-payment-tracker`                     |
+| API design                  | `@api-designer`                                 |
+| Code review                 | `@code-reviewer`                                |
+| Testing                     | `@qa-expert` or `@test-automator`               |
+| Database schema             | `@database-administrator`                       |
+| Deployment/CI/CD            | `@devops-engineer` or `@platform-engineer`      |
+| Debugging issues            | `@debugger`                                     |
+| OCR and pass validation     | `@go-train-ocr-specialist`                      |
+| Alerts and reminders        | `@go-train-notifications-engineer`              |
+| Schedules and delays        | `@go-train-gtfs-integrator`                     |
+| Security and privacy review | `@go-train-security-reviewer`                   |
 
 ## Adding More Agents
 

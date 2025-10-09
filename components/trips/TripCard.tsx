@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ChevronDown, ChevronUp, Users, ArrowRight } from 'lucide-react';
-import { format, parse } from 'date-fns';
+import { ChevronDown, ChevronUp, Users, ArrowRight, Calendar } from 'lucide-react';
+import { format, parse, isToday, isTomorrow } from 'date-fns';
 import { CountdownTimer } from './CountdownTimer';
 import { GroupCard } from '@/components/groups/GroupCard';
 import type { TripWithDetails } from '@/types/database';
@@ -52,9 +52,10 @@ export function TripCard({ trip, currentUserId }: TripCardProps) {
     0
   );
 
-  // Parse departure time
+  // Parse departure time (handle both HH:mm:ss and HH:mm:ss.SSSSSS formats)
+  const cleanTime = trip.train.departure_time.split('.')[0]; // Remove microseconds if present
   const departureDate = parse(
-    `${trip.date} ${trip.train.departure_time}`,
+    `${trip.date} ${cleanTime}`,
     'yyyy-MM-dd HH:mm:ss',
     new Date()
   );
@@ -72,9 +73,19 @@ export function TripCard({ trip, currentUserId }: TripCardProps) {
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between">
           <div className="space-y-1">
-            <CardTitle className="text-2xl font-bold">
-              {format(parse(trip.train.departure_time, 'HH:mm:ss', new Date()), 'h:mm a')}
-            </CardTitle>
+            <div className="flex items-baseline gap-2">
+              <CardTitle className="text-2xl font-bold">
+                {format(parse(cleanTime, 'HH:mm:ss', new Date()), 'h:mm a')}
+              </CardTitle>
+              <Badge variant="outline" className="text-xs">
+                <Calendar className="h-3 w-3 mr-1" />
+                {isToday(new Date(trip.date))
+                  ? 'Today'
+                  : isTomorrow(new Date(trip.date))
+                  ? 'Tomorrow'
+                  : format(new Date(trip.date), 'MMM d')}
+              </Badge>
+            </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>{trip.train.origin.replace(' GO', '')}</span>
               <ArrowRight className="h-4 w-4" />

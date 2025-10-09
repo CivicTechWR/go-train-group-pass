@@ -3,11 +3,23 @@
 > **Note**: Full implementation examples available in `docs/IMPLEMENTATION_EXAMPLES.md`
 > Database schema in `supabase/migrations/001_initial_schema.sql`
 
+## Maintenance Practices
+
+For cleanup, issue tracking, and commit routines, see [docs/MAINTENANCE_PRACTICES.md](docs/MAINTENANCE_PRACTICES.md).
+
+# Remember: Keep the repository clean and well-structured.
+
+# Remember: Track TODOs and issues in Gitea, commit frequently, and run @code-reviewer before merges.
+
+# Remember: Prefer agents and MCP servers when available; use Supabase MCP for all database work.
+
+# Remember: Log TODOs as issues, avoid leaving TODO comments in code.
+
 ## Project Overview
 
 A modern web application that replaces WhatsApp-based coordination for GO Train weekday group passes between Kitchener and Union Station. The app automates group formation, payment tracking, and real-time alerts for fare inspections.
 
------
+---
 
 ## Recommended MCP Servers
 
@@ -16,15 +28,18 @@ When working on this project, configure these MCP servers in `.claude/mcp.json`:
 ### Essential MCP Servers
 
 1. **Git MCP** (`@gitmcp/server`)
+
    - **Use for:** Version control operations, commit history, branch management
    - **Why:** Essential for tracking changes and collaborating on the codebase
 
 2. **Supabase MCP** (`@designcomputer/supabase_mcp_server`)
+
    - **Use for:** Database queries, auth management, storage operations
    - **Why:** Direct access to Supabase without writing SQL, manages migrations
    - **Requires:** `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` environment variables
 
 3. **PostgreSQL MCP** (`@modelcontextprotocol/server-postgres`)
+
    - **Use for:** Advanced database queries, performance optimization, direct SQL access
    - **Why:** Fine-grained control over database operations
    - **Requires:** `POSTGRES_CONNECTION_STRING` environment variable
@@ -37,14 +52,17 @@ When working on this project, configure these MCP servers in `.claude/mcp.json`:
 ### Optional but Recommended
 
 5. **Sequential Thinking MCP** (`@modelcontextprotocol/server-sequential-thinking`)
+
    - **Use for:** Complex problem solving, algorithm design (especially group formation logic)
    - **Why:** Helps break down complex tasks into manageable steps
 
 6. **Memory MCP** (`@modelcontextprotocol/server-memory`)
+
    - **Use for:** Maintaining context across sessions, storing decisions and patterns
    - **Why:** Remembers architectural decisions and coding patterns
 
 7. **Fetch MCP** (`@modelcontextprotocol/server-fetch`)
+
    - **Use for:** Testing API endpoints, fetching GO Transit GTFS feeds
    - **Why:** Essential for external API integration
 
@@ -57,7 +75,25 @@ When working on this project, configure these MCP servers in `.claude/mcp.json`:
 
 See `.claude/mcp.json` for the complete configuration. All required environment variables are documented in `.env.example` and `MCP_SETUP.md`.
 
------
+## Connected MCP Servers
+
+The following servers are actively connected in this workspace:
+
+| Server                | Description                                                                 | Used By                                                         |
+| --------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `supabase`            | Database and RLS policy checks                                              | `@go-train-security-reviewer`, `@go-train-payment-tracker`      |
+| `filesystem`          | File system read/write at `/Users/andrelevesque/Projects/go-transit-group`  | All agents                                                      |
+| `memory`              | Persistent session state                                                    | `@go-train-security-reviewer`, `@go-train-gtfs-integrator`      |
+| `sequential-thinking` | Structured reasoning engine                                                 | `@go-train-ocr-specialist`, `@go-train-security-reviewer`       |
+| `fetch`               | External HTTP requests (Python fetch server)                                | `@go-train-gtfs-integrator`, `@go-train-notifications-engineer` |
+| `brave-search`        | Public web and doc search                                                   | `@go-train-gtfs-integrator`, `@go-train-security-reviewer`      |
+| `git`                 | Repo diffs and commits for `/Users/andrelevesque/Projects/go-transit-group` | All agents                                                      |
+| `playwright`          | Browser automation and UI testing                                           | `@go-train-ocr-specialist`                                      |
+| `chrome-devtools`     | Frontend runtime introspection                                              | `@go-train-notifications-engineer`                              |
+
+_Tip:_ Prefer `supabase` MCP for DB work; use `postgres` MCP only for advanced SQL/perf analysis.
+
+---
 
 ## Recommended Claude Code Agents
 
@@ -66,23 +102,27 @@ This project has two custom agents configured for specialized tasks:
 ### 1. GO Train Fullstack Agent (`@go-train-fullstack`)
 
 **Use for:**
+
 - Building new features end-to-end (UI → API → Database)
 - Implementing tRPC routers and endpoints
 - Creating Next.js pages and components
 - Integrating Supabase auth and storage
 
 **Invoke with:**
+
 ```
 @go-train-fullstack implement the steward volunteer system with database integration
 ```
 
 **Capabilities:**
+
 - Deep knowledge of project architecture (Next.js 15, tRPC, Supabase, Zustand)
 - Understands group formation algorithm and business logic
 - Follows project patterns (tRPC router structure, component organization)
 - Can write both frontend and backend code
 
 **Best for:**
+
 - Week 2-4 MVP features (core functionality)
 - Payment tracking system
 - User profile management
@@ -91,23 +131,27 @@ This project has two custom agents configured for specialized tasks:
 ### 2. GO Train Realtime Agent (`@go-train-realtime`)
 
 **Use for:**
+
 - Implementing Supabase Realtime subscriptions
 - Building fare inspection alert system
 - Creating live group update hooks
 - WebSocket connection management
 
 **Invoke with:**
+
 ```
 @go-train-realtime implement real-time group updates when members join/leave
 ```
 
 **Capabilities:**
+
 - Specialist in Supabase Realtime and WebSocket patterns
 - Optimistic UI updates
 - Connection recovery and offline handling
 - Push notification integration with FCM
 
 **Best for:**
+
 - Week 4 real-time features
 - Fare inspection alerts
 - Live payment tracking
@@ -116,10 +160,29 @@ This project has two custom agents configured for specialized tasks:
 ### General-Purpose Agents
 
 Also available from `@VoltAgent/awesome-claude-code-subagents` (see `AGENTS_GUIDE.md`):
+
 - `@debug-doctor` - Troubleshooting build errors, runtime issues
 - `@test-writer` - Creating unit/integration tests
 - `@code-reviewer` - Pre-commit code review
 - `@docs-writer` - Generating documentation
+
+#### Additional Project Agents
+
+- **GO Train OCR Specialist (`@go-train-ocr-specialist`)**
+  Use for: pass extraction and validation.
+  Invoke: `@go-train-ocr-specialist improve low confidence OCR handling in PassUploadModal`
+
+- **GO Train Notifications Engineer (`@go-train-notifications-engineer`)**
+  Use for: FCM push with Twilio SMS fallback and rate limiting.
+  Invoke: `@go-train-notifications-engineer add delivery metrics and SMS fallback`
+
+- **GO Train GTFS Integrator (`@go-train-gtfs-integrator`)**
+  Use for: static schedule seeding and realtime delay updates.
+  Invoke: `@go-train-gtfs-integrator implement delay propagation to trips`
+
+- **GO Train Security Reviewer (`@go-train-security-reviewer`)**
+  Use for: privacy and security checks on routes, database, and notifications.
+  Invoke: `@go-train-security-reviewer audit new alerts API for PII and auth gaps`
 
 ### Usage Pattern
 
@@ -130,7 +193,7 @@ Also available from `@VoltAgent/awesome-claude-code-subagents` (see `AGENTS_GUID
 
 See `AGENTS_GUIDE.md` for detailed usage examples and workflows.
 
------
+---
 
 ## Development Practices
 
@@ -139,11 +202,13 @@ See `AGENTS_GUIDE.md` for detailed usage examples and workflows.
 **CRITICAL: Use agents and MCP servers proactively for ALL development tasks.**
 
 **Agent Usage Rules:**
+
 1. **ALWAYS use agents for specialized tasks** - Don't do it yourself if an agent can
 2. **Use multiple agents in parallel** - Delegate different aspects of a feature simultaneously
 3. **Agent-first mindset** - Before writing code, determine which agent(s) should handle it
 
 **When to Use Which Agent:**
+
 - **@fullstack-developer** - Any feature touching UI + API + Database
 - **@go-train-fullstack** - Project-specific features (group formation, payment, trips)
 - **@go-train-realtime** - Real-time subscriptions, WebSocket, notifications
@@ -159,6 +224,7 @@ See `AGENTS_GUIDE.md` for detailed usage examples and workflows.
 - **@platform-engineer** - Infrastructure code, scaling, monitoring
 
 **MCP Usage Rules:**
+
 1. **Use Supabase MCP** for all database queries instead of raw SQL
 2. **Use PostgreSQL MCP** for complex queries, performance analysis
 3. **Use Memory MCP** to store architectural decisions, patterns learned
@@ -166,6 +232,7 @@ See `AGENTS_GUIDE.md` for detailed usage examples and workflows.
 5. **Use Sequential Thinking MCP** for complex algorithm design
 
 **Example Tactical Workflow:**
+
 ```
 Task: Implement user authentication
 
@@ -181,6 +248,7 @@ Step 5: Use @code-reviewer before commit
 **IMPORTANT: Perform regular and extensive code reviews before every commit.**
 
 **Pre-commit Requirements:**
+
 - **MANDATORY:** Run `@code-reviewer` agent for automated review
 - Execute `npm run build` (must pass)
 - Test functionality in browser (`npm run dev`)
@@ -197,11 +265,13 @@ Step 5: Use @code-reviewer before commit
 **CRITICAL: Commit code changes regularly to Gitea repository**
 
 **Commit Frequency:**
+
 - After completing each feature or bug fix
 - Minimum: end of each work session
 - Create atomic commits (one logical change per commit)
 
 **Commit Message Format:**
+
 ```
 <type>: <short summary> (50 chars or less)
 
@@ -217,24 +287,27 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 **Commit Types:** `feat:`, `fix:`, `refactor:`, `docs:`, `style:`, `test:`, `chore:`
 
 **Issue Tracking:**
+
 - Create Gitea issues for all bugs, features, tasks
 - Link commits: `Fixes #123` or `Relates to #123`
 - Update status: In Progress → Review → Closed
 - Use labels: `bug`, `feature`, `enhancement`, `documentation`, `urgent`
 
 **Branching:**
+
 - `main` - production-ready
 - `develop` - integration branch
 - `feature/*`, `fix/*`, `hotfix/*`
 
 **Before Pushing:**
+
 - Run full pre-commit checklist
 - Verify no sensitive data in code
 - Review `git diff`
 - Pull latest: `git pull origin main`
 - Resolve conflicts
 
------
+---
 
 ## Tech Stack
 
@@ -274,7 +347,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - **GO Transit:** GTFS Static + GTFS Realtime feeds
 - **Payments:** Manual (copy-paste Interac e-Transfer)
 
------
+---
 
 ## Core User Flows
 
@@ -297,7 +370,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - Steward clearly identified (or "Volunteer to steward" button)
 - One-tap unjoin (with 30-min cutoff before departure)
 
------
+---
 
 ### Flow 2: Steward Workflow
 
@@ -311,6 +384,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 1. Steward confirms details (or edits if OCR wrong)
 1. App generates payment requests with copy-paste fields
 1. Steward either:
+
 - Taps "Copy All" → bulk paste into bank app
 - OR taps each person's [Copy] to send individual e-Transfers
 
@@ -326,7 +400,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - If OCR shows x4 but group has 5 people → warning: "Pass mismatch. Verify you bought correct pass."
 - Store ticket number hash → prevent screenshot reuse across groups
 
------
+---
 
 ### Flow 3: Coach Number Reporting
 
@@ -350,7 +424,7 @@ Shows all members with status:
 
 If split across coaches: "⚠ Group split: 3 in coach 2429, 1 in coach 2430"
 
------
+---
 
 ### Flow 4: Fare Inspection Alert
 
@@ -361,9 +435,11 @@ If split across coaches: "⚠ Group split: 3 in coach 2429, 1 in coach 2430"
 1. Any group member sees inspector → taps floating red "ALERT" button
 1. Confirmation modal: "Send alert to 4 people?"
 1. On confirm:
+
 - **Push notification:** "🚨 FARE INSPECTION - Meet at 2429 Upper NOW"
 - **SMS fallback** (if push fails within 10 sec)
 - **In-app takeover:** full-screen red banner with alarm sound
+
 1. Members tap "I'm Ready" (steward sees who acknowledged)
 1. 2-min timeout → assume unresponsive members will meet at steward's location
 
@@ -372,7 +448,7 @@ If split across coaches: "⚠ Group split: 3 in coach 2429, 1 in coach 2430"
 - Rate limit: 1 alert per person per trip
 - Logged for admin review (if pattern of false alarms)
 
------
+---
 
 ### Flow 5: Daily Commitment Reminder
 
@@ -384,7 +460,7 @@ If split across coaches: "⚠ Group split: 3 in coach 2429, 1 in coach 2430"
 - Users open app → commit to tomorrow's trains
 - No manual intervention needed
 
------
+---
 
 ## Data Model
 
@@ -393,6 +469,7 @@ If split across coaches: "⚠ Group split: 3 in coach 2429, 1 in coach 2430"
 **Tables:** `profiles`, `trains`, `trips`, `groups`, `group_memberships`, `fare_inspection_alerts`, `alert_acknowledgments`
 
 **Key Relationships:**
+
 - `trains` → `trips` (1:many, by date)
 - `trips` → `groups` (1:many)
 - `groups` → `group_memberships` (1:many)
@@ -404,7 +481,7 @@ If split across coaches: "⚠ Group split: 3 in coach 2429, 1 in coach 2430"
 
 See `supabase/migrations/001_initial_schema.sql` for full schema with indexes and RLS policies.
 
------
+---
 
 ## Group Formation Algorithm
 
@@ -432,6 +509,7 @@ export function formGroups(users: User[]): Group[] {
 ```
 
 **Edge Cases:**
+
 - 0 users: return empty array
 - 1 user: solo rider (individual ticket $16.32)
 - 2-5 users: single group
@@ -439,24 +517,27 @@ export function formGroups(users: User[]): Group[] {
 
 Full implementation in `lib/group-formation.ts`
 
------
+---
 
 ## API Layer (tRPC)
 
 ### Router Structure
 
 **Base Setup** (`server/trpc.ts`):
+
 - `publicProcedure` - unauthenticated access
 - `protectedProcedure` - requires Supabase session, provides `ctx.session` and `ctx.supabase`
 
 ### Trips Router
 
 **Endpoints** (`server/routers/trips.ts`):
+
 - `list` - Get trips with nested groups/memberships for date range
 - `join` - Add user to trip, rebalance groups (30-min cutoff validation)
 - `leave` - Remove user from trip, rebalance remaining groups
 
 **Key Patterns:**
+
 - Timeframe validation: 30-min cutoff before departure
 - Group rebalancing: delete old groups, recalculate with `formGroups()`, insert new
 - Transaction-like operations: delete then insert in sequence
@@ -464,12 +545,14 @@ Full implementation in `lib/group-formation.ts`
 ### Groups Router
 
 **Endpoints** (`server/routers/groups.ts`):
+
 - `volunteerSteward` - Set steward_id (only if null)
 - `uploadPass` - Verify steward, validate passenger count, hash ticket number, upload to storage
 - `updateLocation` - Update coach number/level with check-in timestamp
 - `markPaymentSent` - Update payment timestamp
 
 **Key Patterns:**
+
 - SHA-256 hash ticket numbers to prevent reuse
 - Steward-only mutations (verify `ctx.session.user.id === steward_id`)
 - Storage operations: base64 → Buffer → Supabase Storage
@@ -477,16 +560,18 @@ Full implementation in `lib/group-formation.ts`
 ### Alerts Router
 
 **Endpoints** (`server/routers/alerts.ts`):
+
 - `trigger` - Create alert, fetch members, call notification API route
 - `acknowledge` - Insert acknowledgment record
 
 **Key Patterns:**
+
 - Rate limiting: check existing alerts count before insert
 - Call separate API route for notifications (avoid tRPC timeout on slow SMS)
 
 Full implementation examples in `docs/IMPLEMENTATION_EXAMPLES.md`
 
------
+---
 
 ## Real-time Subscriptions
 
@@ -497,6 +582,7 @@ Supabase Realtime channels → React Query invalidation
 **Hooks:**
 
 1. **useGroupUpdates** (`hooks/useGroupUpdates.ts`):
+
    - Subscribe to `groups` + `group_memberships` table changes
    - Filter by `trip_id`
    - On change → invalidate trips query
@@ -508,7 +594,7 @@ Supabase Realtime channels → React Query invalidation
 
 **Implementation:** See `docs/IMPLEMENTATION_EXAMPLES.md`
 
------
+---
 
 ## Notification System
 
@@ -518,17 +604,19 @@ Supabase Realtime channels → React Query invalidation
 **Fallback:** Twilio SMS (if push fails after 10s)
 
 **Setup:**
+
 - `lib/firebase-admin.ts` - Admin SDK initialization
 - `app/api/notifications/fare-inspection/route.ts` - Try FCM → fallback SMS
 - `app/api/notifications/payment-reminder/route.ts` - FCM only (non-critical)
 
 **Config:**
+
 - Android: `priority: 'max'`, `channelId: 'fare_inspection'`
 - iOS: `interruption-level: 'critical'` (for fare inspection alerts)
 
 **Implementation:** See `docs/IMPLEMENTATION_EXAMPLES.md`
 
------
+---
 
 ## Background Jobs (Inngest)
 
@@ -537,16 +625,19 @@ Supabase Realtime channels → React Query invalidation
 **Jobs:**
 
 1. **syncSchedules** (daily 3 AM):
+
    - Download GTFS feed
    - Seed train schedules
    - Create trip instances for next 7 days
 
 2. **checkDelays** (every 5 min, 6AM-7PM weekdays):
+
    - Fetch GTFS Realtime
    - Update trip status
    - Notify affected users of delays/cancellations
 
 3. **dailyReminder** (6 PM weekdays):
+
    - Push "tomorrow's trains open" to all users with FCM tokens
 
 4. **cleanupScreenshots** (daily 4 AM):
@@ -555,18 +646,20 @@ Supabase Realtime channels → React Query invalidation
 
 **Implementation:** See `inngest/functions/` and `docs/IMPLEMENTATION_EXAMPLES.md`
 
------
+---
 
 ## OCR Implementation
 
 **Library:** Tesseract.js (client-side, privacy-first)
 
 **Extraction Patterns** (`lib/ocr.ts`):
+
 - Ticket number: `/[A-Z]{2}\d{8,10}/`
 - Passenger count: `/x\s*(\d)/i`
 - Activation time: `/\d{1,2}:\d{2}(:\d{2})?\s*[AP]M/i`
 
 **Component Flow** (`components/PassUploadModal.tsx`):
+
 1. File select → OCR extraction
 2. Show confidence score + extracted details
 3. Validate passenger count vs group size
@@ -574,39 +667,44 @@ Supabase Realtime channels → React Query invalidation
 5. Submit: base64 encode → tRPC mutation
 
 **Key UX:**
+
 - Manual fallback always available
 - Show warning if passenger count mismatch
 - SHA-256 hash ticket number server-side to prevent reuse
 
 **Implementation:** See `docs/IMPLEMENTATION_EXAMPLES.md`
 
------
+---
 
 ## PWA Configuration
 
 **next-pwa Setup:**
+
 - `dest: 'public'`
 - NetworkFirst for Supabase API calls
 - CacheFirst for images
 - Disabled in development
 
 **Manifest** (`public/manifest.json`):
+
 - App name, icons (192x192, 512x512)
 - Shortcuts to `/today`
 - Categories: travel, utilities
 
 **Service Worker** (`app/sw.ts`):
+
 - Workbox precaching
 - Push event handlers → `showNotification()`
 - Notification click → `openWindow()`
 
 **Critical Config:**
+
 - iOS: `interruption-level: 'critical'` for fare inspection
 - Android: `priority: 'max'`, custom channel
 
 **Implementation:** See `docs/IMPLEMENTATION_EXAMPLES.md`
 
------
+---
 
 ## Environment Variables
 
@@ -615,7 +713,7 @@ Optional: Sentry (monitoring)
 
 See `.env.example` for complete list with descriptions.
 
------
+---
 
 ## MVP Feature Checklist
 
@@ -682,7 +780,7 @@ See `.env.example` for complete list with descriptions.
 - [ ] Error tracking (Sentry)
 - [ ] Monitoring dashboards
 
------
+---
 
 ## Key Technical Decisions
 
@@ -735,7 +833,7 @@ See `.env.example` for complete list with descriptions.
 - Install-to-homescreen for app-like feel
 - Can migrate to native later if needed
 
------
+---
 
 ## Deployment
 
@@ -781,7 +879,7 @@ vercel
 # Add to environment variables
 ```
 
------
+---
 
 ## Testing Strategy
 
@@ -812,7 +910,7 @@ vercel
 - Real-time update performance
 - Database query performance under load
 
------
+---
 
 ## Security Considerations
 
@@ -842,7 +940,7 @@ vercel
 - Duplicate ticket number detection (SHA-256 hash)
 - Admin moderation tools
 
------
+---
 
 ## Success Metrics
 
@@ -870,7 +968,7 @@ vercel
 - User survey: "Easier than WhatsApp?" >90% yes
 - Retention: >70% weekly active users
 
------
+---
 
 ## Risk Mitigation
 
@@ -907,7 +1005,7 @@ vercel
 **Risk:** Privacy regulations (PIPEDA)
 **Mitigation:** Minimal data collection, clear privacy policy, data deletion after 48hr
 
------
+---
 
 ## Future Enhancements (Phase 3+)
 
@@ -925,7 +1023,7 @@ vercel
 - Transaction fee: $0.25 per pass purchased
 - Partnership with GO Transit (official endorsement)
 
------
+---
 
 ## Questions for Clarification
 
@@ -937,6 +1035,6 @@ vercel
 1. **Historical Data:** Import past WhatsApp poll data to seed reputation scores?
 1. **Coach Number Accuracy:** What if someone reports wrong coach? Allow corrections?
 
------
+---
 
 This CLAUDE.md provides everything needed to start building the MVP. The tech stack is modern, the architecture is scalable, and the implementation is practical for a 4-week sprint to launch.

@@ -47,9 +47,9 @@ export default function TodayPage() {
     enabled: tomorrowTripIds.length > 0,
   });
 
-  // Mock current user ID (in production, get from auth context)
+  // Test user ID from database (in production, get from auth context)
   // TODO: Replace with actual user ID from auth context
-  const currentUserId = 'mock-user-id';
+  const currentUserId = 'a702251f-4686-4a79-aa8a-3fc936194860';
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 pb-20 md:pb-6">
