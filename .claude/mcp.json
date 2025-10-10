@@ -17,7 +17,7 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem@latest",
-        "/Users/andrelevesque/Projects/go-transit-group"
+        "."
       ],
       "description": "Filesystem MCP (scoped package, restricted to project path)"
     },
@@ -32,9 +32,9 @@
       "description": "Sequential thinking MCP (published package)"
     },
     "fetch": {
-      "command": ".venv/bin/python",
-      "args": ["-m", "mcp_server_fetch"],
-      "description": "Fetch MCP (python -m mcp_server_fetch) to extract web pages as markdown"
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "description": "Fetch MCP (uvx auto-manages isolated environment)"
     },
     "brave-search": {
       "command": "npx",
@@ -49,7 +49,7 @@
       "args": [
         "mcp-server-git",
         "--repository",
-        "/Users/andrelevesque/Projects/go-transit-group"
+        "."
       ],
       "description": "Git MCP server for local git operations (works with Gitea)"
     },
