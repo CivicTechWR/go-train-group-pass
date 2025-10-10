@@ -6,6 +6,7 @@ import { TripCard } from '@/components/trips/TripCard';
 import { TripCardSkeleton } from '@/components/trips/TripCardSkeleton';
 import { useGroupUpdates } from '@/hooks/useGroupUpdates';
 import { trpc } from '@/lib/trpc/client';
+import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { AlertCircle, Wifi, WifiOff } from 'lucide-react';
 
@@ -19,23 +20,44 @@ export default function TodayPage() {
   const todayStr = format(today, 'yyyy-MM-dd');
   const tomorrowStr = format(tomorrow, 'yyyy-MM-dd');
   
-  // Fetch available trips (not departed)
-  const todayAvailableQuery = trpc.trips.list.useQuery(
-    { startDate: todayStr, endDate: todayStr },
-    { refetchInterval: 30000 } // Refetch every 30 seconds as backup
-  );
+  // Fetch available trips (not departed) - using direct API for now
+  const todayAvailableQuery = useQuery({
+    queryKey: ['trips', 'available', todayStr],
+    queryFn: async () => {
+      const response = await fetch(`/api/trips?startDate=${todayStr}&endDate=${todayStr}`);
+      if (!response.ok) throw new Error('Failed to fetch trips');
+      return response.json();
+    },
+    refetchInterval: 30000
+  });
 
-  // Fetch user's joined trips (including departed ones)
-  const todayMyTripsQuery = trpc.trips.myTrips.useQuery(
-    { startDate: todayStr, endDate: todayStr },
-    { refetchInterval: 30000 }
-  );
+  // Fetch user's joined trips (including departed ones) - using direct API for now
+  const todayMyTripsQuery = useQuery({
+    queryKey: ['trips', 'my', todayStr],
+    queryFn: async () => {
+      const response = await fetch(`/api/trips?startDate=${todayStr}&endDate=${todayStr}`);
+      if (!response.ok) throw new Error('Failed to fetch trips');
+      const trips = await response.json();
+      // Filter to only trips where user is a member
+      return trips.filter((trip: any) => 
+        trip.groups.some((group: any) => 
+          group.memberships.some((membership: any) => membership.user_id === 'a702251f-4686-4a79-aa8a-3fc936194860')
+        )
+      );
+    },
+    refetchInterval: 30000
+  });
 
-  // Fetch tomorrow's available trips
-  const tomorrowQuery = trpc.trips.list.useQuery(
-    { startDate: tomorrowStr, endDate: tomorrowStr },
-    { refetchInterval: 30000 }
-  );
+  // Fetch tomorrow's available trips - using direct API for now
+  const tomorrowQuery = useQuery({
+    queryKey: ['trips', 'available', tomorrowStr],
+    queryFn: async () => {
+      const response = await fetch(`/api/trips?startDate=${tomorrowStr}&endDate=${tomorrowStr}`);
+      if (!response.ok) throw new Error('Failed to fetch trips');
+      return response.json();
+    },
+    refetchInterval: 30000
+  });
 
   // Get user session
   const todayTripIds = todayMyTripsQuery.data?.map((t) => t.id) || [];
