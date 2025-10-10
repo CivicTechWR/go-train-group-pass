@@ -55,7 +55,7 @@ export default function SimplePrivacyPolicyPage() {
                 <ul className="text-sm space-y-1 ml-4">
                   <li>• <strong>Your phone number</strong> - to send you text messages for login</li>
                   <li>• <strong>Your email</strong> - to send you important updates</li>
-                  <li>• <strong>Your name</strong> - so other people in your group know who you are (like "~John")</li>
+                  <li>• <strong>Your name</strong> - so other people in your group know who you are (like &ldquo;~John&rdquo;)</li>
                   <li>• <strong>Your photo</strong> - optional, so people can recognize you at the train</li>
                 </ul>
               </div>

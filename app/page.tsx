@@ -19,7 +19,7 @@ export default function Home() {
               href="/today" 
               className="bg-go-green text-white px-6 py-3 rounded-lg font-semibold hover:bg-go-green/90 transition-colors"
             >
-              View Today's Trains
+              View Today&apos;s Trains
             </a>
             <a 
               href="/faq" 

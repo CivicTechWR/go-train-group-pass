@@ -40,7 +40,7 @@ export default function PrivacyPolicyPage() {
                 </ul>
               </div>
               <div className="space-y-2">
-                <h3 className="font-semibold text-green-600">What We Don't Collect</h3>
+                <h3 className="font-semibold text-green-600">What We Don&apos;t Collect</h3>
                 <ul className="text-sm space-y-1 text-muted-foreground">
                   <li>• Banking information</li>
                   <li>• Payment card details</li>
@@ -70,7 +70,7 @@ export default function PrivacyPolicyPage() {
                 <ul className="text-sm space-y-1 ml-4">
                   <li>• <strong>Phone Number:</strong> Used for authentication via SMS verification</li>
                   <li>• <strong>Email Address:</strong> For account recovery and important notifications</li>
-                  <li>• <strong>Display Name:</strong> Shown to other group members (e.g., "~John")</li>
+                  <li>• <strong>Display Name:</strong> Shown to other group members (e.g., &ldquo;~John&rdquo;)</li>
                   <li>• <strong>Profile Photo:</strong> Optional avatar for group identification</li>
                 </ul>
               </div>
@@ -194,7 +194,7 @@ export default function PrivacyPolicyPage() {
               <div>
                 <h3 className="font-semibold mb-2">Payment Security</h3>
                 <p className="text-sm text-muted-foreground">
-                  We do not process payments directly. All payments are handled through your bank's 
+                  We do not process payments directly. All payments are handled through your bank&apos;s 
                   Interac e-Transfer system. We only track payment status, not payment details.
                 </p>
               </div>
