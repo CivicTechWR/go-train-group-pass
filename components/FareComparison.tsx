@@ -22,9 +22,9 @@ export function FareComparison({ className }: FareComparisonProps) {
           <div className="space-y-2">
             <h3 className="font-semibold text-red-600">Individual Ticket</h3>
             <div className="bg-white border border-red-200 rounded-lg p-3">
-              <div className="text-2xl font-bold text-red-600">$19.35</div>
-              <p className="text-sm text-muted-foreground">Kitchener → Union (cash)</p>
-              <p className="text-xs text-muted-foreground">One-way only</p>
+              <div className="text-2xl font-bold text-red-600">$38.70</div>
+              <p className="text-sm text-muted-foreground">Kitchener ↔ Union (cash)</p>
+              <p className="text-xs text-muted-foreground">Round trip ($19.35 × 2)</p>
             </div>
           </div>
           <div className="space-y-2">
@@ -40,11 +40,11 @@ export function FareComparison({ className }: FareComparisonProps) {
         <div className="bg-green-100 border border-green-300 rounded-lg p-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-semibold text-green-800">You save $7.35 per trip!</p>
-              <p className="text-sm text-green-700">That&apos;s 38% savings</p>
+              <p className="font-semibold text-green-800">You save $26.70 per round trip!</p>
+              <p className="text-sm text-green-700">That&apos;s 69% savings</p>
             </div>
             <Badge variant="secondary" className="bg-green-200 text-green-800">
-              38% OFF
+              69% OFF
             </Badge>
           </div>
         </div>

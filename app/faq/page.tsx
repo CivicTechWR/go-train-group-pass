@@ -32,9 +32,9 @@ export default function FAQPage() {
                   <div className="space-y-2">
                     <h4 className="font-semibold text-red-600">Individual Ticket (Cash)</h4>
                     <ul className="text-sm space-y-1">
-                      <li>• <strong>Kitchener → Union:</strong> $19.35</li>
+                      <li>• <strong>Kitchener ↔ Union:</strong> $38.70</li>
+                      <li>• <strong>Round trip</strong> ($19.35 × 2)</li>
                       <li>• <strong>No discounts</strong> (unless you have PRESTO)</li>
-                      <li>• <strong>One-way only</strong></li>
                     </ul>
                   </div>
                   <div className="space-y-2">
@@ -48,7 +48,7 @@ export default function FAQPage() {
                 </div>
                 <div className="mt-4 p-3 bg-green-100 rounded-lg">
                   <p className="text-sm font-semibold text-green-800">
-                    💡 You save $7.35 per trip (38% savings!)
+                    💡 You save $26.70 per round trip (69% savings!)
                   </p>
                 </div>
               </div>
@@ -98,7 +98,7 @@ export default function FAQPage() {
                       <li>• <strong>Works for everyone</strong> - no age restrictions</li>
                       <li>• <strong>Round trip included</strong> - better than one-way</li>
                       <li>• <strong>Consistent pricing</strong> - no fare type needed</li>
-                      <li>• <strong>Always saves money</strong> - guaranteed 38% savings</li>
+                      <li>• <strong>Potential savings</strong> - up to 69% off cash fares</li>
                     </ul>
                   </div>
                 </div>
@@ -140,8 +140,8 @@ export default function FAQPage() {
               <div>
                 <h3 className="font-semibold mb-2">What is this app?</h3>
                 <p className="text-sm text-muted-foreground">
-                  This app helps GO Train commuters coordinate group passes to save money. Instead of paying $16.32 
-                  for an individual ticket, you can pay around $12.00 by sharing a group pass with 4-5 other people.
+                  This app helps GO Train commuters coordinate group passes to save money. Instead of paying $38.70
+                  for a round trip ticket, you can pay just $12.00 by sharing a group pass with 4-5 other people.
                 </p>
               </div>
 
