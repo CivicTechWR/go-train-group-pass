@@ -32,9 +32,23 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
 
   const { data: { session } } = await supabase.auth.getSession();
 
+  // Development bypass - if no session, try to get a test user profile
+  let userId: string | undefined;
+  if (!session && process.env.NODE_ENV === 'development') {
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id')
+      .limit(1);
+    
+    if (profiles && profiles.length > 0) {
+      userId = profiles[0].id;
+    }
+  }
+
   return {
     supabase,
     session,
+    userId,
     headers: opts.headers,
   };
 };
@@ -50,28 +64,59 @@ export const publicProcedure = t.procedure;
 
 // Protected procedure (requires authentication)
 export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
-  // TEMPORARY: Allow test user for development
-  const testUserId = 'a702251f-4686-4a79-aa8a-3fc936194860';
-  
-  if (!ctx.session) {
-    // In development, use test user ID
-    if (process.env.NODE_ENV === 'development') {
-      return next({
-        ctx: {
-          ...ctx,
-          session: null,
-          userId: testUserId,
-        },
+  // Use userId from context (either from session or development bypass)
+  const userId = ctx.userId;
+
+  if (!userId) {
+    throw new TRPCError({ code: 'UNAUTHORIZED' });
+  }
+
+  // Ensure user profile exists (create if missing for authenticated users)
+  if (ctx.session) {
+    const { data: profile, error: profileError } = await ctx.supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (profileError) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: `Database error: ${profileError.message}`,
       });
     }
-    throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+    if (!profile) {
+      // Create profile for authenticated user
+      const { error: createError } = await ctx.supabase
+        .from('profiles')
+        .insert({
+          id: userId,
+          display_name: ctx.session.user.user_metadata?.display_name || 
+                       ctx.session.user.email?.split('@')[0] || 
+                       'User',
+          email: ctx.session.user.email,
+          phone: ctx.session.user.phone || '',
+          reputation_score: 100,
+          trips_completed: 0,
+          on_time_payment_rate: 1,
+          is_community_admin: false,
+        });
+
+      if (createError) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: `Failed to create user profile: ${createError.message}`,
+        });
+      }
+    }
   }
 
   return next({
     ctx: {
       ...ctx,
       session: ctx.session,
-      userId: ctx.session.user.id,
+      userId: userId,
     },
   });
 });
