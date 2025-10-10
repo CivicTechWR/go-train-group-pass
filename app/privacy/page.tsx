@@ -12,10 +12,10 @@ export default function PrivacyPolicyPage() {
         <div className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight">Privacy Policy</h1>
           <p className="text-muted-foreground">
-            Last updated: {new Date().toLocaleDateString('en-CA', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
+            Last updated: {new Date().toLocaleDateString('en-CA', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
             })}
           </p>
         </div>
@@ -81,9 +81,9 @@ export default function PrivacyPolicyPage() {
                   When you join trips, we track:
                 </p>
                 <ul className="text-sm space-y-1 ml-4">
-                  <li>• <strong>Trip Details:</strong> Which trains you've joined and when</li>
-                  <li>• <strong>Group Assignments:</strong> Which group you're assigned to</li>
-                  <li>• <strong>Payment Status:</strong> Whether you've marked payment as sent (not payment details)</li>
+                  <li>• <strong>Trip Details:</strong> Which trains you&apos;ve joined and when</li>
+                  <li>• <strong>Group Assignments:</strong> Which group you&apos;re assigned to</li>
+                  <li>• <strong>Payment Status:</strong> Whether you&apos;ve marked payment as sent (not payment details)</li>
                   <li>• <strong>Coach Information:</strong> Coach number and level you report boarding</li>
                 </ul>
               </div>
@@ -194,7 +194,7 @@ export default function PrivacyPolicyPage() {
               <div>
                 <h3 className="font-semibold mb-2">Payment Security</h3>
                 <p className="text-sm text-muted-foreground">
-                  We do not process payments directly. All payments are handled through your bank&apos;s 
+                  We do not process payments directly. All payments are handled through your bank&apos;s
                   Interac e-Transfer system. We only track payment status, not payment details.
                 </p>
               </div>
@@ -262,7 +262,7 @@ export default function PrivacyPolicyPage() {
               <div>
                 <h3 className="font-semibold mb-2">Automatic Cleanup</h3>
                 <p className="text-sm text-muted-foreground">
-                  We automatically delete certain data after specific periods to minimize 
+                  We automatically delete certain data after specific periods to minimize
                   data retention and protect your privacy.
                 </p>
               </div>
@@ -277,8 +277,8 @@ export default function PrivacyPolicyPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              We may update this privacy policy from time to time. We will notify you of any 
-              significant changes via email or through the app. Your continued use of the 
+              We may update this privacy policy from time to time. We will notify you of any
+              significant changes via email or through the app. Your continued use of the
               app after changes are posted constitutes acceptance of the updated policy.
             </p>
           </CardContent>
@@ -293,10 +293,10 @@ export default function PrivacyPolicyPage() {
             <div className="space-y-2 text-sm">
               <p><strong>GO Train Group Pass Coordination App</strong></p>
               <p>Email: privacy@gotraingroup.ca</p>
-              <p>Last updated: {new Date().toLocaleDateString('en-CA', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
+              <p>Last updated: {new Date().toLocaleDateString('en-CA', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
               })}</p>
             </div>
           </CardContent>

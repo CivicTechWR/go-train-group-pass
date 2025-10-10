@@ -12,14 +12,14 @@ export default function SimplePrivacyPolicyPage() {
         <div className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight">Privacy Policy (Simple Version)</h1>
           <p className="text-muted-foreground">
-            Last updated: {new Date().toLocaleDateString('en-CA', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
+            Last updated: {new Date().toLocaleDateString('en-CA', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
             })}
           </p>
           <p className="text-sm text-blue-600">
-            This is the simple version. For the full legal version, see our 
+            This is the simple version. For the full legal version, see our
             <a href="/privacy" className="underline ml-1">complete Privacy Policy</a>.
           </p>
         </div>
@@ -34,7 +34,7 @@ export default function SimplePrivacyPolicyPage() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              This app helps people share GO Train group passes to save money. Instead of paying $16.32 
+              This app helps people share GO Train group passes to save money. Instead of paying $16.32
               for an individual ticket, you can pay around $12-13 by sharing a group pass with 4-5 other people.
             </p>
           </CardContent>
@@ -64,14 +64,14 @@ export default function SimplePrivacyPolicyPage() {
                 <h3 className="font-semibold mb-2">What We Track</h3>
                 <ul className="text-sm space-y-1 ml-4">
                   <li>• <strong>Which trains you join</strong> - so we can put you in the right group</li>
-                  <li>• <strong>Whether you've paid</strong> - so the person who bought the pass knows who still owes money</li>
-                  <li>• <strong>Which coach you're in</strong> - so your group can find each other</li>
+                  <li>• <strong>Whether you&apos;ve paid</strong> - so the person who bought the pass knows who still owes money</li>
+                  <li>• <strong>Which coach you&apos;re in</strong> - so your group can find each other</li>
                   <li>• <strong>When you use the app</strong> - to fix bugs and make it work better</li>
                 </ul>
               </div>
 
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <h4 className="font-semibold text-green-800 mb-2">What We DON'T Know</h4>
+                <h4 className="font-semibold text-green-800 mb-2">What We DON&apos;T Know</h4>
                 <ul className="text-sm text-green-700 space-y-1">
                   <li>• Your bank account details</li>
                   <li>• Your credit card information</li>
@@ -97,8 +97,8 @@ export default function SimplePrivacyPolicyPage() {
                 <h3 className="font-semibold mb-2">To Make the App Work</h3>
                 <ul className="text-sm space-y-1 ml-4">
                   <li>• <strong>Put you in groups</strong> - so you can share passes and save money</li>
-                  <li>• <strong>Tell you when people join/leave</strong> - so you know who's in your group</li>
-                  <li>• <strong>Send you alerts</strong> - like when there's a fare inspection on your train</li>
+                  <li>• <strong>Tell you when people join/leave</strong> - so you know who&apos;s in your group</li>
+                  <li>• <strong>Send you alerts</strong> - like when there&apos;s a fare inspection on your train</li>
                   <li>• <strong>Help you find your group</strong> - by showing which coach everyone is in</li>
                 </ul>
               </div>
@@ -106,8 +106,8 @@ export default function SimplePrivacyPolicyPage() {
               <div>
                 <h3 className="font-semibold mb-2">To Keep You Safe</h3>
                 <ul className="text-sm space-y-1 ml-4">
-                  <li>• <strong>Make sure you're a real person</strong> - by sending you a text message to verify your phone</li>
-                  <li>• <strong>Stop fake accounts</strong> - so people can't pretend to be someone else</li>
+                  <li>• <strong>Make sure you&apos;re a real person</strong> - by sending you a text message to verify your phone</li>
+                  <li>• <strong>Stop fake accounts</strong> - so people can&apos;t pretend to be someone else</li>
                   <li>• <strong>Fix problems quickly</strong> - by tracking when things go wrong</li>
                 </ul>
               </div>
@@ -130,10 +130,10 @@ export default function SimplePrivacyPolicyPage() {
               </div>
 
               <div>
-                <h3 className="font-semibold mb-2 text-red-600">We DON'T Share With</h3>
+                <h3 className="font-semibold mb-2 text-red-600">We DON&apos;T Share With</h3>
                 <ul className="text-sm space-y-1 ml-4">
-                  <li>• <strong>GO Transit or Metrolinx</strong> - we're not connected to them</li>
-                  <li>• <strong>Advertisers</strong> - we don't sell your info to anyone</li>
+                  <li>• <strong>GO Transit or Metrolinx</strong> - we&apos;re not connected to them</li>
+                  <li>• <strong>Advertisers</strong> - we don&apos;t sell your info to anyone</li>
                   <li>• <strong>Other apps</strong> - your info stays in our app</li>
                   <li>• <strong>Random people</strong> - only people in your group see your info</li>
                 </ul>
@@ -145,8 +145,8 @@ export default function SimplePrivacyPolicyPage() {
                   <div>
                     <h4 className="font-semibold text-yellow-800">Important</h4>
                     <p className="text-sm text-yellow-700 mt-1">
-                      We might have to share your info if the police ask us to, or if we need to protect 
-                      someone's safety. This almost never happens, but we want you to know.
+                      We might have to share your info if the police ask us to, or if we need to protect
+                      someone&apos;s safety. This almost never happens, but we want you to know.
                     </p>
                   </div>
                 </div>
@@ -170,7 +170,7 @@ export default function SimplePrivacyPolicyPage() {
                 <ul className="text-sm space-y-1 ml-4">
                   <li>• <strong>See what we know about you</strong> - just ask us</li>
                   <li>• <strong>Change your info</strong> - update your name, photo, or email anytime</li>
-                  <li>• <strong>Delete your account</strong> - we'll remove all your info if you want</li>
+                  <li>• <strong>Delete your account</strong> - we&apos;ll remove all your info if you want</li>
                   <li>• <strong>Stop getting messages</strong> - you can turn off notifications</li>
                 </ul>
               </div>
@@ -182,8 +182,8 @@ export default function SimplePrivacyPolicyPage() {
                   <span>privacy@gotraingroup.ca</span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Send us an email if you want to see your data, change something, or delete your account. 
-                  We'll get back to you within a few days.
+                  Send us an email if you want to see your data, change something, or delete your account.
+                  We&apos;ll get back to you within a few days.
                 </p>
               </div>
             </div>
@@ -209,8 +209,8 @@ export default function SimplePrivacyPolicyPage() {
               <div>
                 <h3 className="font-semibold mb-2">Why We Keep It</h3>
                 <p className="text-sm text-muted-foreground">
-                  We keep some info for a while to help you if you have problems, and to make the app work better. 
-                  But we don't keep it forever, and we don't use it for anything weird.
+                  We keep some info for a while to help you if you have problems, and to make the app work better.
+                  But we don&apos;t keep it forever, and we don&apos;t use it for anything weird.
                 </p>
               </div>
             </div>
@@ -224,9 +224,9 @@ export default function SimplePrivacyPolicyPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              If we need to change this privacy policy, we'll tell you about it. We might send you an email 
-              or show you a message in the app. If you keep using the app after we tell you about changes, 
-              that means you're okay with the new policy.
+              If we need to change this privacy policy, we&apos;ll tell you about it. We might send you an email
+              or show you a message in the app. If you keep using the app after we tell you about changes,
+              that means you&apos;re okay with the new policy.
             </p>
           </CardContent>
         </Card>
@@ -244,7 +244,7 @@ export default function SimplePrivacyPolicyPage() {
                 <span>privacy@gotraingroup.ca</span>
               </div>
               <p className="text-muted-foreground">
-                We're real people who will read your email and help you out.
+                We&apos;re real people who will read your email and help you out.
               </p>
             </div>
           </CardContent>

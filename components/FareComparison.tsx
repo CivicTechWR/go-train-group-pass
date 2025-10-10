@@ -36,12 +36,12 @@ export function FareComparison({ className }: FareComparisonProps) {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-green-100 border border-green-300 rounded-lg p-3">
           <div className="flex items-center justify-between">
             <div>
               <p className="font-semibold text-green-800">You save $7.35 per trip!</p>
-              <p className="text-sm text-green-700">That's 38% savings</p>
+              <p className="text-sm text-green-700">That&apos;s 38% savings</p>
             </div>
             <Badge variant="secondary" className="bg-green-200 text-green-800">
               38% OFF
@@ -52,8 +52,8 @@ export function FareComparison({ className }: FareComparisonProps) {
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
           <h3 className="font-semibold text-yellow-800 mb-2">Who Benefits from Group Passes?</h3>
           <ul className="text-sm text-yellow-700 space-y-1">
-            <li>• <strong>Infrequent travelers</strong> - Don't travel enough for PRESTO discounts</li>
-            <li>• <strong>Visitors & tourists</strong> - Don't have PRESTO cards</li>
+            <li>• <strong>Infrequent travelers</strong> - Don&apos;t travel enough for PRESTO discounts</li>
+            <li>• <strong>Visitors &amp; tourists</strong> - Don&apos;t have PRESTO cards</li>
             <li>• <strong>Cash payers</strong> - Prefer not to use PRESTO system</li>
             <li>• <strong>Occasional commuters</strong> - Travel less than 35 times per month</li>
           </ul>
@@ -67,8 +67,8 @@ export function FareComparison({ className }: FareComparisonProps) {
           <p className="text-sm text-blue-700 mb-2">
             Use the official GO Transit calculator to see your individual fare:
           </p>
-          <a 
-            href="https://www.gotransit.com/en/plan-your-trip" 
+          <a
+            href="https://www.gotransit.com/en/plan-your-trip"
             target="_blank"
             rel="noopener"
             className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-semibold text-sm"

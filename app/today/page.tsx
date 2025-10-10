@@ -19,7 +19,7 @@ export default function TodayPage() {
 
   const todayStr = format(today, 'yyyy-MM-dd');
   const tomorrowStr = format(tomorrow, 'yyyy-MM-dd');
-  
+
   // Fetch available trips (not departed) - using direct API for now
   const todayAvailableQuery = useQuery({
     queryKey: ['trips', 'available', todayStr],
@@ -39,8 +39,8 @@ export default function TodayPage() {
       if (!response.ok) throw new Error('Failed to fetch trips');
       const trips = await response.json();
       // Filter to only trips where user is a member
-      return trips.filter((trip: any) => 
-        trip.groups.some((group: any) => 
+      return trips.filter((trip: any) =>
+        trip.groups.some((group: any) =>
           group.memberships.some((membership: any) => membership.user_id === 'a702251f-4686-4a79-aa8a-3fc936194860')
         )
       );
@@ -60,8 +60,8 @@ export default function TodayPage() {
   });
 
   // Get user session
-  const todayTripIds = todayMyTripsQuery.data?.map((t) => t.id) || [];
-  const tomorrowTripIds = tomorrowQuery.data?.map((t) => t.id) || [];
+  const todayTripIds = todayMyTripsQuery.data?.map((t: any) => t.id) || [];
+  const tomorrowTripIds = tomorrowQuery.data?.map((t: any) => t.id) || [];
 
   // Subscribe to real-time updates for today's trips
   const todayRealtime = useGroupUpdates({
@@ -156,7 +156,7 @@ export default function TodayPage() {
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold">Your Trips</h3>
                     <div className="space-y-4">
-                      {todayMyTripsQuery.data.map((trip) => (
+                      {todayMyTripsQuery.data.map((trip: any) => (
                         <TripCard key={trip.id} trip={trip} currentUserId={currentUserId} />
                       ))}
                     </div>
@@ -168,7 +168,7 @@ export default function TodayPage() {
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold">Available to Join</h3>
                     <div className="space-y-4">
-                      {todayAvailableQuery.data.map((trip) => (
+                      {todayAvailableQuery.data.map((trip: any) => (
                         <TripCard key={trip.id} trip={trip} currentUserId={currentUserId} />
                       ))}
                     </div>
@@ -176,7 +176,7 @@ export default function TodayPage() {
                 )}
 
                 {/* No trips message */}
-                {(!todayMyTripsQuery.data || todayMyTripsQuery.data.length === 0) && 
+                {(!todayMyTripsQuery.data || todayMyTripsQuery.data.length === 0) &&
                  (!todayAvailableQuery.data || todayAvailableQuery.data.length === 0) && (
                   <div className="text-center py-12 text-muted-foreground">
                     <p>No trains scheduled for today</p>
@@ -220,7 +220,7 @@ export default function TodayPage() {
               </div>
             ) : tomorrowQuery.data && tomorrowQuery.data.length > 0 ? (
               <div className="space-y-4">
-                {tomorrowQuery.data.map((trip) => (
+                {tomorrowQuery.data.map((trip: any) => (
                   <TripCard key={trip.id} trip={trip} currentUserId={currentUserId} />
                 ))}
               </div>

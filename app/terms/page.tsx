@@ -12,10 +12,10 @@ export default function TermsOfServicePage() {
         <div className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight">Terms of Service</h1>
           <p className="text-muted-foreground">
-            Last updated: {new Date().toLocaleDateString('en-CA', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
+            Last updated: {new Date().toLocaleDateString('en-CA', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
             })}
           </p>
         </div>
@@ -59,8 +59,8 @@ export default function TermsOfServicePage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              By using the GO Train Group Pass Coordination App ("the App"), you agree to be bound by these 
-              Terms of Service ("Terms"). If you do not agree to these Terms, please do not use the App.
+              By using the GO Train Group Pass Coordination App (&quot;the App&quot;), you agree to be bound by these
+              Terms of Service (&quot;Terms&quot;). If you do not agree to these Terms, please do not use the App.
             </p>
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <div className="flex items-start gap-2">
@@ -68,8 +68,8 @@ export default function TermsOfServicePage() {
                 <div>
                   <h4 className="font-semibold text-yellow-800">Important Notice</h4>
                   <p className="text-sm text-yellow-700 mt-1">
-                    This app is not affiliated with GO Transit or Metrolinx. It is a community tool 
-                    to help coordinate group passes. You are responsible for following all GO Transit 
+                    This app is not affiliated with GO Transit or Metrolinx. It is a community tool
+                    to help coordinate group passes. You are responsible for following all GO Transit
                     policies and regulations.
                   </p>
                 </div>
@@ -91,9 +91,9 @@ export default function TermsOfServicePage() {
               <div>
                 <h3 className="font-semibold mb-2">Purpose</h3>
                 <p className="text-sm text-muted-foreground">
-                  The GO Train Group Pass Coordination App is a community tool designed to help 
-                  commuters coordinate group passes for GO Transit trains between Kitchener and 
-                  Union Station. The app facilitates group formation, payment tracking, and 
+                  The GO Train Group Pass Coordination App is a community tool designed to help
+                  commuters coordinate group passes for GO Transit trains between Kitchener and
+                  Union Station. The app facilitates group formation, payment tracking, and
                   real-time communication for fare inspection alerts.
                 </p>
               </div>
@@ -179,8 +179,8 @@ export default function TermsOfServicePage() {
               <div>
                 <h3 className="font-semibold mb-2">GO Transit Compliance</h3>
                 <p className="text-sm text-muted-foreground">
-                  You must comply with all GO Transit terms of service, fare policies, and 
-                  regulations. The app does not provide any special privileges or exemptions 
+                  You must comply with all GO Transit terms of service, fare policies, and
+                  regulations. The app does not provide any special privileges or exemptions
                   from GO Transit rules.
                 </p>
               </div>
@@ -201,8 +201,8 @@ export default function TermsOfServicePage() {
               <div>
                 <h3 className="font-semibold mb-2">Payment Processing</h3>
                 <p className="text-sm text-muted-foreground mb-2">
-                  The app does not process payments directly. All payments are handled through 
-                  your bank's Interac e-Transfer system. We only track payment status, not 
+                  The app does not process payments directly. All payments are handled through
+                  your bank&apos;s Interac e-Transfer system. We only track payment status, not
                   payment details.
                 </p>
               </div>
@@ -223,7 +223,7 @@ export default function TermsOfServicePage() {
                   <div>
                     <h4 className="font-semibold text-red-800">No Payment Protection</h4>
                     <p className="text-sm text-red-700 mt-1">
-                      We do not provide payment protection or guarantee refunds. Use the app 
+                      We do not provide payment protection or guarantee refunds. Use the app
                       at your own risk and only with people you trust.
                     </p>
                   </div>
@@ -246,8 +246,8 @@ export default function TermsOfServicePage() {
               <div>
                 <h3 className="font-semibold mb-2">Data Collection</h3>
                 <p className="text-sm text-muted-foreground">
-                  We collect minimal data necessary to operate the app. See our 
-                  <a href="/privacy" className="text-blue-600 hover:underline ml-1">Privacy Policy</a> 
+                  We collect minimal data necessary to operate the app. See our
+                  <a href="/privacy" className="text-blue-600 hover:underline ml-1">Privacy Policy</a>
                   for detailed information about data collection and usage.
                 </p>
               </div>
@@ -275,7 +275,7 @@ export default function TermsOfServicePage() {
               <div>
                 <h3 className="font-semibold mb-2">No Affiliation</h3>
                 <p className="text-sm text-muted-foreground">
-                  This app is not affiliated with, endorsed by, or sponsored by GO Transit, 
+                  This app is not affiliated with, endorsed by, or sponsored by GO Transit,
                   Metrolinx, or any government agency. We are an independent community tool.
                 </p>
               </div>
@@ -293,8 +293,8 @@ export default function TermsOfServicePage() {
               <div>
                 <h3 className="font-semibold mb-2">Use at Your Own Risk</h3>
                 <p className="text-sm text-muted-foreground">
-                  You use the app at your own risk. We are not responsible for any losses, 
-                  damages, or issues arising from your use of the app or interactions with 
+                  You use the app at your own risk. We are not responsible for any losses,
+                  damages, or issues arising from your use of the app or interactions with
                   other users.
                 </p>
               </div>
@@ -309,8 +309,8 @@ export default function TermsOfServicePage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              To the maximum extent permitted by law, we shall not be liable for any indirect, 
-              incidental, special, consequential, or punitive damages, including but not limited 
+              To the maximum extent permitted by law, we shall not be liable for any indirect,
+              incidental, special, consequential, or punitive damages, including but not limited
               to loss of profits, data, or use, arising out of or relating to your use of the app.
             </p>
           </CardContent>
@@ -326,7 +326,7 @@ export default function TermsOfServicePage() {
               <div>
                 <h3 className="font-semibold mb-2">Account Termination</h3>
                 <p className="text-sm text-muted-foreground">
-                  We may terminate or suspend your account at any time for violation of these 
+                  We may terminate or suspend your account at any time for violation of these
                   Terms or for any other reason at our discretion.
                 </p>
               </div>
@@ -350,8 +350,8 @@ export default function TermsOfServicePage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              We may update these Terms from time to time. We will notify you of any 
-              significant changes via email or through the app. Your continued use of the 
+              We may update these Terms from time to time. We will notify you of any
+              significant changes via email or through the app. Your continued use of the
               app after changes are posted constitutes acceptance of the updated Terms.
             </p>
           </CardContent>
@@ -369,10 +369,10 @@ export default function TermsOfServicePage() {
             <div className="space-y-2 text-sm">
               <p><strong>GO Train Group Pass Coordination App</strong></p>
               <p>Email: support@gotraingroup.ca</p>
-              <p>Last updated: {new Date().toLocaleDateString('en-CA', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
+              <p>Last updated: {new Date().toLocaleDateString('en-CA', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
               })}</p>
             </div>
           </CardContent>

@@ -19,10 +19,13 @@ interface TripCardProps {
 
 export function TripCard({ trip, currentUserId }: TripCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const utils = trpc.useUtils();
 
   const joinMutation = trpc.trips.join.useMutation({
     onSuccess: () => {
       toast.success('Successfully joined trip!');
+      utils.trips.list.invalidate();
+      utils.trips.myTrips.invalidate();
     },
     onError: (error) => {
       toast.error(error.message);
@@ -32,6 +35,8 @@ export function TripCard({ trip, currentUserId }: TripCardProps) {
   const leaveMutation = trpc.trips.leave.useMutation({
     onSuccess: () => {
       toast.success('Successfully left trip');
+      utils.trips.list.invalidate();
+      utils.trips.myTrips.invalidate();
     },
     onError: (error) => {
       toast.error(error.message);
