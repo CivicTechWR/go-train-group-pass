@@ -14,6 +14,7 @@ on:
 env:
   REGISTRY: gitea.dredre.net:5005
   IMAGE_NAME: go-transit-group
+  GITEA_URL: https://gitea.dredre.net
 
 jobs:
   lint-and-typecheck:
@@ -37,6 +38,15 @@ jobs:
 
       - name: Run TypeScript check
         run: npx tsc --noEmit
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Lint and type check failed!"
+          echo "Workflow: ${{ gitea.workflow }}"
+          echo "Repository: ${{ gitea.repository }}"
+          echo "Branch: ${{ gitea.ref_name }}"
+          echo "Commit: ${{ gitea.sha }}"
 
   build:
     name: Build Application
@@ -68,6 +78,15 @@ jobs:
           name: build-output
           path: .next
           retention-days: 7
+
+      - name: Notify on build failure
+        if: failure()
+        run: |
+          echo "❌ Build failed!"
+          echo "Workflow: ${{ gitea.workflow }}"
+          echo "Repository: ${{ gitea.repository }}"
+          echo "Branch: ${{ gitea.ref_name }}"
+          echo "Commit: ${{ gitea.sha }}"
 
   test:
     name: Run Tests
@@ -161,3 +180,32 @@ jobs:
           echo "Deploying to production environment..."
           echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
           # Add actual deployment commands here
+
+  notify-completion:
+    name: Notify Workflow Completion
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck, build, test, docker-build]
+    if: always()
+    steps:
+      - name: Workflow completion notification
+        run: |
+          if [ "${{ needs.lint-and-typecheck.result }}" == "success" ] && 
+             [ "${{ needs.build.result }}" == "success" ] && 
+             [ "${{ needs.test.result }}" == "success" ] && 
+             [ "${{ needs.docker-build.result }}" == "success" ]; then
+            echo "✅ Workflow completed successfully!"
+            echo "Repository: ${{ gitea.repository }}"
+            echo "Branch: ${{ gitea.ref_name }}"
+            echo "Commit: ${{ gitea.sha }}"
+            echo "Workflow: ${{ gitea.workflow }}"
+            echo "Run ID: ${{ gitea.run_id }}"
+          else
+            echo "❌ Workflow failed!"
+            echo "Lint: ${{ needs.lint-and-typecheck.result }}"
+            echo "Build: ${{ needs.build.result }}"
+            echo "Test: ${{ needs.test.result }}"
+            echo "Docker: ${{ needs.docker-build.result }}"
+            echo "Repository: ${{ gitea.repository }}"
+            echo "Branch: ${{ gitea.ref_name }}"
+            echo "Commit: ${{ gitea.sha }}"
+          fi
