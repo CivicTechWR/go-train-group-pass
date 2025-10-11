@@ -22,13 +22,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        run: |
+          # Clone the repository
+          git clone https://gitea.dredre.net/dre/go-transit-group.git .
+          git checkout ${{ gitea.sha }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
+        run: |
+          # Install Node.js 20 using NodeSource repository
+          curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+          node --version
+          npm --version
 
       - name: Install dependencies
         run: npm ci
@@ -54,13 +59,18 @@ jobs:
     needs: lint-and-typecheck
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        run: |
+          # Clone the repository
+          git clone https://gitea.dredre.net/dre/go-transit-group.git .
+          git checkout ${{ gitea.sha }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
+        run: |
+          # Install Node.js 20 using NodeSource repository
+          curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+          node --version
+          npm --version
 
       - name: Install dependencies
         run: npm ci
@@ -73,11 +83,11 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-output
-          path: .next
-          retention-days: 7
+        run: |
+          # Create artifacts directory
+          mkdir -p /tmp/artifacts
+          cp -r .next /tmp/artifacts/build-output
+          echo "Build artifacts saved to /tmp/artifacts/build-output"
 
       - name: Notify on build failure
         if: failure()
@@ -94,13 +104,18 @@ jobs:
     needs: lint-and-typecheck
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        run: |
+          # Clone the repository
+          git clone https://gitea.dredre.net/dre/go-transit-group.git .
+          git checkout ${{ gitea.sha }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
+        run: |
+          # Install Node.js 20 using NodeSource repository
+          curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+          node --version
+          npm --version
 
       - name: Install dependencies
         run: npm ci
@@ -116,7 +131,10 @@ jobs:
     if: gitea.event_name == 'push' && (gitea.ref == 'refs/heads/main' || gitea.ref == 'refs/heads/develop')
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        run: |
+          # Clone the repository
+          git clone https://gitea.dredre.net/dre/go-transit-group.git .
+          git checkout ${{ gitea.sha }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
