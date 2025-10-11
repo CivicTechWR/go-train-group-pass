@@ -67,11 +67,20 @@ jobs:
             
             # Move contents to current directory
             echo "Moving contents..."
-            mv go-transit-group-*/* . 2>/dev/null || {
+            # Try different patterns for the extracted directory
+            if [ -d "go-transit-group" ]; then
+              echo "Found go-transit-group directory, moving contents..."
+              mv go-transit-group/* . 2>/dev/null
+              rmdir go-transit-group 2>/dev/null
+            elif [ -d "go-transit-group-*" ]; then
+              echo "Found go-transit-group-* directory, moving contents..."
+              mv go-transit-group-*/* . 2>/dev/null
+              rm -rf go-transit-group-* 2>/dev/null
+            else
               echo "Failed to move contents, checking what we have..."
               ls -la
               find . -name "package.json" -type f
-            }
+            fi
             
             # Clean up
             rm -f repo.zip
@@ -179,11 +188,20 @@ jobs:
             
             # Move contents to current directory
             echo "Moving contents..."
-            mv go-transit-group-*/* . 2>/dev/null || {
+            # Try different patterns for the extracted directory
+            if [ -d "go-transit-group" ]; then
+              echo "Found go-transit-group directory, moving contents..."
+              mv go-transit-group/* . 2>/dev/null
+              rmdir go-transit-group 2>/dev/null
+            elif [ -d "go-transit-group-*" ]; then
+              echo "Found go-transit-group-* directory, moving contents..."
+              mv go-transit-group-*/* . 2>/dev/null
+              rm -rf go-transit-group-* 2>/dev/null
+            else
               echo "Failed to move contents, checking what we have..."
               ls -la
               find . -name "package.json" -type f
-            }
+            fi
             
             # Clean up
             rm -f repo.zip
@@ -299,11 +317,20 @@ jobs:
             
             # Move contents to current directory
             echo "Moving contents..."
-            mv go-transit-group-*/* . 2>/dev/null || {
+            # Try different patterns for the extracted directory
+            if [ -d "go-transit-group" ]; then
+              echo "Found go-transit-group directory, moving contents..."
+              mv go-transit-group/* . 2>/dev/null
+              rmdir go-transit-group 2>/dev/null
+            elif [ -d "go-transit-group-*" ]; then
+              echo "Found go-transit-group-* directory, moving contents..."
+              mv go-transit-group-*/* . 2>/dev/null
+              rm -rf go-transit-group-* 2>/dev/null
+            else
               echo "Failed to move contents, checking what we have..."
               ls -la
               find . -name "package.json" -type f
-            }
+            fi
             
             # Clean up
             rm -f repo.zip
@@ -401,11 +428,20 @@ jobs:
             
             # Move contents to current directory
             echo "Moving contents..."
-            mv go-transit-group-*/* . 2>/dev/null || {
+            # Try different patterns for the extracted directory
+            if [ -d "go-transit-group" ]; then
+              echo "Found go-transit-group directory, moving contents..."
+              mv go-transit-group/* . 2>/dev/null
+              rmdir go-transit-group 2>/dev/null
+            elif [ -d "go-transit-group-*" ]; then
+              echo "Found go-transit-group-* directory, moving contents..."
+              mv go-transit-group-*/* . 2>/dev/null
+              rm -rf go-transit-group-* 2>/dev/null
+            else
               echo "Failed to move contents, checking what we have..."
               ls -la
               find . -name "package.json" -type f
-            }
+            fi
             
             # Clean up
             rm -f repo.zip
