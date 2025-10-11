@@ -89,11 +89,25 @@ export async function middleware(request: NextRequest) {
 
   // Protect routes
   const isAuthPage = request.nextUrl.pathname.startsWith('/login');
+  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin');
   const isProtectedRoute = !isAuthPage && !request.nextUrl.pathname.startsWith('/auth/callback');
 
   // Require authentication for protected routes
   if (!session && isProtectedRoute) {
     return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  // Check admin access for admin routes
+  if (session && isAdminRoute) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_community_admin')
+      .eq('id', session.user.id)
+      .single();
+
+    if (!profile?.is_community_admin) {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
   }
 
   if (session && isAuthPage) {
