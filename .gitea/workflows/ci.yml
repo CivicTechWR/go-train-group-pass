@@ -94,7 +94,7 @@ jobs:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
     needs: [build, test]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    if: gitea.event_name == 'push' && (gitea.ref == 'refs/heads/main' || gitea.ref == 'refs/heads/develop')
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -136,7 +136,7 @@ jobs:
     name: Deploy to Development
     runs-on: ubuntu-latest
     needs: docker-build
-    if: github.ref == 'refs/heads/develop'
+    if: gitea.ref == 'refs/heads/develop'
     environment:
       name: development
       url: https://dev.go-transit.dredre.net
@@ -151,7 +151,7 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: docker-build
-    if: github.ref == 'refs/heads/main'
+    if: gitea.ref == 'refs/heads/main'
     environment:
       name: production
       url: https://go-transit.dredre.net
