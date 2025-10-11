@@ -70,12 +70,19 @@ jobs:
             # Try different patterns for the extracted directory
             if [ -d "go-transit-group" ]; then
               echo "Found go-transit-group directory, moving contents..."
-              mv go-transit-group/* . 2>/dev/null
-              rmdir go-transit-group 2>/dev/null
+              # Use cp and rm instead of mv to handle hidden files better
+              cp -r go-transit-group/* . 2>/dev/null || {
+                echo "cp failed, trying with hidden files..."
+                cp -r go-transit-group/.* . 2>/dev/null || true
+              }
+              rm -rf go-transit-group
             elif [ -d "go-transit-group-*" ]; then
               echo "Found go-transit-group-* directory, moving contents..."
-              mv go-transit-group-*/* . 2>/dev/null
-              rm -rf go-transit-group-* 2>/dev/null
+              cp -r go-transit-group-*/* . 2>/dev/null || {
+                echo "cp failed, trying with hidden files..."
+                cp -r go-transit-group-*/.* . 2>/dev/null || true
+              }
+              rm -rf go-transit-group-*
             else
               echo "Failed to move contents, checking what we have..."
               ls -la
@@ -191,12 +198,19 @@ jobs:
             # Try different patterns for the extracted directory
             if [ -d "go-transit-group" ]; then
               echo "Found go-transit-group directory, moving contents..."
-              mv go-transit-group/* . 2>/dev/null
-              rmdir go-transit-group 2>/dev/null
+              # Use cp and rm instead of mv to handle hidden files better
+              cp -r go-transit-group/* . 2>/dev/null || {
+                echo "cp failed, trying with hidden files..."
+                cp -r go-transit-group/.* . 2>/dev/null || true
+              }
+              rm -rf go-transit-group
             elif [ -d "go-transit-group-*" ]; then
               echo "Found go-transit-group-* directory, moving contents..."
-              mv go-transit-group-*/* . 2>/dev/null
-              rm -rf go-transit-group-* 2>/dev/null
+              cp -r go-transit-group-*/* . 2>/dev/null || {
+                echo "cp failed, trying with hidden files..."
+                cp -r go-transit-group-*/.* . 2>/dev/null || true
+              }
+              rm -rf go-transit-group-*
             else
               echo "Failed to move contents, checking what we have..."
               ls -la
@@ -320,12 +334,19 @@ jobs:
             # Try different patterns for the extracted directory
             if [ -d "go-transit-group" ]; then
               echo "Found go-transit-group directory, moving contents..."
-              mv go-transit-group/* . 2>/dev/null
-              rmdir go-transit-group 2>/dev/null
+              # Use cp and rm instead of mv to handle hidden files better
+              cp -r go-transit-group/* . 2>/dev/null || {
+                echo "cp failed, trying with hidden files..."
+                cp -r go-transit-group/.* . 2>/dev/null || true
+              }
+              rm -rf go-transit-group
             elif [ -d "go-transit-group-*" ]; then
               echo "Found go-transit-group-* directory, moving contents..."
-              mv go-transit-group-*/* . 2>/dev/null
-              rm -rf go-transit-group-* 2>/dev/null
+              cp -r go-transit-group-*/* . 2>/dev/null || {
+                echo "cp failed, trying with hidden files..."
+                cp -r go-transit-group-*/.* . 2>/dev/null || true
+              }
+              rm -rf go-transit-group-*
             else
               echo "Failed to move contents, checking what we have..."
               ls -la
@@ -431,12 +452,19 @@ jobs:
             # Try different patterns for the extracted directory
             if [ -d "go-transit-group" ]; then
               echo "Found go-transit-group directory, moving contents..."
-              mv go-transit-group/* . 2>/dev/null
-              rmdir go-transit-group 2>/dev/null
+              # Use cp and rm instead of mv to handle hidden files better
+              cp -r go-transit-group/* . 2>/dev/null || {
+                echo "cp failed, trying with hidden files..."
+                cp -r go-transit-group/.* . 2>/dev/null || true
+              }
+              rm -rf go-transit-group
             elif [ -d "go-transit-group-*" ]; then
               echo "Found go-transit-group-* directory, moving contents..."
-              mv go-transit-group-*/* . 2>/dev/null
-              rm -rf go-transit-group-* 2>/dev/null
+              cp -r go-transit-group-*/* . 2>/dev/null || {
+                echo "cp failed, trying with hidden files..."
+                cp -r go-transit-group-*/.* . 2>/dev/null || true
+              }
+              rm -rf go-transit-group-*
             else
               echo "Failed to move contents, checking what we have..."
               ls -la
