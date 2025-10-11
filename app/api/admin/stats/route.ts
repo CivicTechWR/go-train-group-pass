@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
     // Check for critical issues
     if (totalUsers === 0) {
       systemHealth = 'critical';
-    } else if (totalUsers < 10) {
+    } else if (totalUsers && totalUsers < 10) {
       systemHealth = 'warning';
     }
 

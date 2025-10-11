@@ -7,7 +7,7 @@ export const phoneSchema = z.string().regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone
 export const displayNameSchema = z.string().min(1, 'Display name required').max(50, 'Display name too long');
 export const coachNumberSchema = z.string().regex(/^\d{4}$/, 'Coach number must be 4 digits');
 export const coachLevelSchema = z.enum(['upper', 'lower', 'middle'], {
-  errorMap: () => ({ message: 'Coach level must be upper, lower, or middle' })
+  message: 'Coach level must be upper, lower, or middle'
 });
 
 // Trip-related validations
@@ -70,7 +70,7 @@ export const rateLimitSchema = z.object({
 
 // File upload validations
 export const fileUploadSchema = z.object({
-  file: z.instanceof(File, 'File required'),
+  file: z.instanceof(File, { message: 'File required' }),
   maxSize: z.number().int().min(1, 'Max size must be positive').default(5 * 1024 * 1024), // 5MB default
   allowedTypes: z.array(z.string()).default(['image/jpeg', 'image/png', 'image/webp']),
 });
@@ -90,7 +90,7 @@ export const sanitizeCoachNumber = (input: string): string => {
 
 // Validation error formatter
 export const formatValidationError = (error: z.ZodError): string => {
-  return error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+  return error.issues.map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`).join(', ');
 };
 
 // Common validation patterns
