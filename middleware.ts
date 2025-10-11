@@ -56,6 +56,30 @@ export async function middleware(request: NextRequest) {
 
   const { data: { session } } = await supabase.auth.getSession();
 
+  // If user is authenticated, ensure profile exists
+  if (session?.user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', session.user.id)
+      .single();
+
+    // Create profile if it doesn't exist
+    if (!profile) {
+      const { error } = await supabase.from('profiles').insert({
+        id: session.user.id,
+        phone: session.user.phone || '',
+        email: session.user.email || '',
+        display_name: session.user.user_metadata?.display_name || session.user.email?.split('@')[0] || 'User',
+        profile_photo_url: session.user.user_metadata?.avatar_url || null,
+      });
+
+      if (error) {
+        console.error('Failed to create profile:', error);
+      }
+    }
+  }
+
   // Protect routes
   const isAuthPage = request.nextUrl.pathname.startsWith('/login');
   const isProtectedRoute = !isAuthPage && !request.nextUrl.pathname.startsWith('/auth/callback');

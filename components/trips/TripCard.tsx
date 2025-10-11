@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 
 interface TripCardProps {
   trip: TripWithDetails;
-  currentUserId: string;
+  currentUserId?: string;
 }
 
 export function TripCard({ trip, currentUserId }: TripCardProps) {

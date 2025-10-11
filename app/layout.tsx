@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { TRPCProvider } from "@/lib/trpc/Provider";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "sonner";
 import { BottomNav } from "@/components/navigation/BottomNav";
 
@@ -17,13 +18,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        <TRPCProvider>
-          <div className="md:pl-64">
-            {children}
-          </div>
-          <BottomNav />
-          <Toaster />
-        </TRPCProvider>
+        <AuthProvider>
+          <TRPCProvider>
+            <div className="md:pl-64">
+              {children}
+            </div>
+            <BottomNav />
+            <Toaster />
+          </TRPCProvider>
+        </AuthProvider>
       </body>
     </html>
   );

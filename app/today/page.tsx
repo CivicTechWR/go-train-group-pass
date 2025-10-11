@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TripCard } from '@/components/trips/TripCard';
 import { TripCardSkeleton } from '@/components/trips/TripCardSkeleton';
 import { useGroupUpdates } from '@/hooks/useGroupUpdates';
+import { useAuth } from '@/contexts/AuthContext';
 import { trpc } from '@/lib/trpc/client';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +15,7 @@ import { AlertCircle, Wifi, WifiOff } from 'lucide-react';
 export const dynamic = 'force-dynamic';
 
 export default function TodayPage() {
+  const { user, loading: authLoading } = useAuth();
   const today = new Date();
   const tomorrow = addDays(today, 1);
 
@@ -33,18 +35,20 @@ export default function TodayPage() {
 
   // Fetch user's joined trips (including departed ones) - using direct API for now
   const todayMyTripsQuery = useQuery({
-    queryKey: ['trips', 'my', todayStr],
+    queryKey: ['trips', 'my', todayStr, user?.id],
     queryFn: async () => {
+      if (!user?.id) return [];
       const response = await fetch(`/api/trips?startDate=${todayStr}&endDate=${todayStr}`);
       if (!response.ok) throw new Error('Failed to fetch trips');
       const trips = await response.json();
       // Filter to only trips where user is a member
       return trips.filter((trip: any) =>
         trip.groups.some((group: any) =>
-          group.memberships.some((membership: any) => membership.user_id === 'a702251f-4686-4a79-aa8a-3fc936194860')
+          group.memberships.some((membership: any) => membership.user_id === user.id)
         )
       );
     },
+    enabled: !!user?.id,
     refetchInterval: 30000
   });
 
@@ -75,9 +79,39 @@ export default function TodayPage() {
     enabled: tomorrowTripIds.length > 0,
   });
 
-  // Test user ID from database (in production, get from auth context)
-  // TODO: Replace with actual user ID from auth context
-  const currentUserId = 'a702251f-4686-4a79-aa8a-3fc936194860';
+  // Get current user ID from auth context
+  const currentUserId = user?.id;
+
+  // Show loading state while auth is loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 pb-20 md:pb-6">
+        <div className="container max-w-4xl mx-auto px-4 py-6 space-y-6">
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <TripCardSkeleton key={i} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show auth required message if no user
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 pb-20 md:pb-6">
+        <div className="container max-w-4xl mx-auto px-4 py-6">
+          <div className="flex items-center gap-2 p-4 border border-orange-500/50 rounded-lg bg-orange-500/10">
+            <AlertCircle className="h-5 w-5 text-orange-600" />
+            <p className="text-sm text-orange-700">
+              Please sign in to view and join trips
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 pb-20 md:pb-6">
