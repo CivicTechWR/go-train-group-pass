@@ -75,21 +75,55 @@ When working on this project, configure these MCP servers in `.claude/mcp.json`:
 
 See `.claude/mcp.json` for the complete configuration. All required environment variables are documented in `.env.example` and `MCP_SETUP.md`.
 
-## Connected MCP Servers
+## Connected MCP Servers (12 Active)
 
 The following servers are actively connected in this workspace:
 
-| Server                | Description                                                                 | Used By                                                         |
-| --------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `supabase`            | Database and RLS policy checks                                              | `@go-train-security-reviewer`, `@go-train-payment-tracker`      |
-| `filesystem`          | File system read/write at `/Users/andrelevesque/Projects/go-transit-group`  | All agents                                                      |
-| `memory`              | Persistent session state                                                    | `@go-train-security-reviewer`, `@go-train-gtfs-integrator`      |
-| `sequential-thinking` | Structured reasoning engine                                                 | `@go-train-ocr-specialist`, `@go-train-security-reviewer`       |
-| `fetch`               | External HTTP requests (Python fetch server)                                | `@go-train-gtfs-integrator`, `@go-train-notifications-engineer` |
-| `brave-search`        | Public web and doc search                                                   | `@go-train-gtfs-integrator`, `@go-train-security-reviewer`      |
-| `git`                 | Repo diffs and commits for `/Users/andrelevesque/Projects/go-transit-group` | All agents                                                      |
-| `playwright`          | Browser automation and UI testing                                           | `@go-train-ocr-specialist`                                      |
-| `chrome-devtools`     | Frontend runtime introspection                                              | `@go-train-notifications-engineer`                              |
+### Core Servers (5)
+| Server                | Description                                                    | Used By                                                         |
+| --------------------- | -------------------------------------------------------------- | --------------------------------------------------------------- |
+| `filesystem`          | File system operations at `/opt/go-transit-group`               | All agents                                                      |
+| `memory`              | Persistent session state and context                            | `@go-train-security-reviewer`, `@go-train-gtfs-integrator`      |
+| `sequential-thinking` | Structured reasoning engine for complex problems                | `@go-train-ocr-specialist`, `@go-train-security-reviewer`       |
+| `git`                 | Git operations and commit history for `/opt/go-transit-group`  | All agents                                                      |
+| `fetch`               | External HTTP requests (uvx Python server)                      | `@go-train-gtfs-integrator`, `@go-train-notifications-engineer` |
+
+### Database Servers (2)
+| Server                | Description                                                    | Used By                                                         |
+| --------------------- | -------------------------------------------------------------- | --------------------------------------------------------------- |
+| `supabase`            | Supabase operations, RLS policy checks, auth, storage          | `@go-train-security-reviewer`, `@go-train-payment-tracker`      |
+| `postgres`            | Direct PostgreSQL access for advanced queries                   | Database optimization, performance analysis                     |
+
+### Development Servers (3)
+| Server                | Description                                                    | Used By                                                         |
+| --------------------- | -------------------------------------------------------------- | --------------------------------------------------------------- |
+| `playwright`          | E2E browser automation and testing                              | `@go-train-ocr-specialist`, test suite                          |
+| `chrome-devtools`     | Frontend debugging and performance monitoring                   | `@go-train-notifications-engineer`                              |
+| `github`              | GitHub integration for PRs, issues, and workflows               | CI/CD, issue tracking                                           |
+
+### Documentation & Utilities (2)
+| Server                | Description                                                    | Used By                                                         |
+| --------------------- | -------------------------------------------------------------- | --------------------------------------------------------------- |
+| `context7`            | AI-powered documentation and code examples (with API key)       | All agents for up-to-date library docs                          |
+| `everything`          | Advanced file search and indexing                               | Code navigation, refactoring                                    |
+
+### Setup & Verification
+
+```bash
+# Install all MCP servers
+./scripts/setup-all-mcp-servers.sh
+
+# Verify server health
+./scripts/verify-mcp-health.sh
+
+# List connected servers
+claude mcp list
+```
+
+**Documentation:**
+- Quick reference: [README_MCP.md](README_MCP.md)
+- Troubleshooting: [docs/MCP_TROUBLESHOOTING.md](docs/MCP_TROUBLESHOOTING.md)
+- Setup guide: [MCP_SETUP.md](MCP_SETUP.md)
 
 _Tip:_ Prefer `supabase` MCP for DB work; use `postgres` MCP only for advanced SQL/perf analysis.
 
@@ -336,11 +370,14 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ### Infrastructure
 
-- **Hosting:** Vercel (edge functions, ISR)
+- **Hosting:** Vercel (edge functions, ISR) / Docker (self-hosted option)
 - **Database:** Supabase Cloud
 - **CDN:** Vercel Edge Network
 - **Monitoring:** Sentry + Vercel Analytics
-- **CI/CD:** GitHub Actions
+- **CI/CD:** Gitea Actions (local runners)
+- **Registry:** Docker Registry at gitea.dredre.net:5005
+- **Secrets:** HashiCorp Vault + Gitea Secrets
+- **Email:** Resend SMTP
 
 ### External APIs
 
