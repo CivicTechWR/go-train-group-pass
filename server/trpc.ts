@@ -32,18 +32,8 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
 
   const { data: { session } } = await supabase.auth.getSession();
 
-  // Development bypass - if no session, try to get a test user profile
-  let userId: string | undefined;
-  if (!session && process.env.NODE_ENV === 'development') {
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('id')
-      .limit(1);
-    
-    if (profiles && profiles.length > 0) {
-      userId = profiles[0].id;
-    }
-  }
+  // No development bypass - require proper authentication
+  const userId = session?.user?.id;
 
   return {
     supabase,
@@ -64,12 +54,15 @@ export const publicProcedure = t.procedure;
 
 // Protected procedure (requires authentication)
 export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
-  // Use userId from context (either from session or development bypass)
-  const userId = ctx.userId;
-
-  if (!userId) {
-    throw new TRPCError({ code: 'UNAUTHORIZED' });
+  // Require valid session and user ID
+  if (!ctx.session || !ctx.userId) {
+    throw new TRPCError({ 
+      code: 'UNAUTHORIZED',
+      message: 'Authentication required'
+    });
   }
+
+  const userId = ctx.userId;
 
   // Ensure user profile exists (create if missing for authenticated users)
   if (ctx.session) {

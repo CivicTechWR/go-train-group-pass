@@ -3,6 +3,8 @@ import { router, protectedProcedure } from '../trpc';
 import { formGroups } from '@/lib/group-formation';
 import { TRPCError } from '@trpc/server';
 import type { GroupWithMemberships, Profile } from '@/types/database';
+import { joinTripSchema, leaveTripSchema, withRateLimit, rateLimits } from '@/lib/rate-limit';
+import { sanitizeString } from '@/lib/validations';
 
 export const tripsRouter = router({
   // Get trips for date range
@@ -115,9 +117,8 @@ export const tripsRouter = router({
 
   // Join a trip
   join: protectedProcedure
-    .input(z.object({
-      tripId: z.string().uuid(),
-    }))
+    .use(withRateLimit(rateLimits.tripActions))
+    .input(joinTripSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.userId;
 
@@ -265,9 +266,8 @@ export const tripsRouter = router({
 
   // Leave a trip
   leave: protectedProcedure
-    .input(z.object({
-      tripId: z.string().uuid(),
-    }))
+    .use(withRateLimit(rateLimits.tripActions))
+    .input(leaveTripSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.userId;
 

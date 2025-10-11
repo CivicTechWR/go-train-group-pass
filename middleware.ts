@@ -1,7 +1,14 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { securityHeadersMiddleware, validateRequestSize, logSecurityEvent } from './lib/security-headers';
 
 export async function middleware(request: NextRequest) {
+  // Validate request size
+  if (!validateRequestSize(request)) {
+    logSecurityEvent('REQUEST_SIZE_EXCEEDED', { url: request.url }, request);
+    return new NextResponse('Request too large', { status: 413 });
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -84,12 +91,8 @@ export async function middleware(request: NextRequest) {
   const isAuthPage = request.nextUrl.pathname.startsWith('/login');
   const isProtectedRoute = !isAuthPage && !request.nextUrl.pathname.startsWith('/auth/callback');
 
-  // TEMPORARY: Allow access in development mode for testing
+  // Require authentication for protected routes
   if (!session && isProtectedRoute) {
-    if (process.env.NODE_ENV === 'development') {
-      // Allow access to the app in development
-      return response;
-    }
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
@@ -97,7 +100,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  return response;
+  // Add security headers
+  return securityHeadersMiddleware(request);
 }
 
 export const config = {
