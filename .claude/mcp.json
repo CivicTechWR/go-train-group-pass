@@ -62,6 +62,14 @@
       "command": "npx",
       "args": ["-y", "chrome-devtools-mcp@latest"],
       "description": "Chrome DevTools MCP server for debugging and performance monitoring"
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "env": {
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
+      },
+      "description": "Context7 MCP - AI-powered documentation and context retrieval"
     }
   }
 }
