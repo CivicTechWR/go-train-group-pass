@@ -132,9 +132,8 @@ jobs:
 
       - name: Setup Node.js
         run: |
-          # Install Node.js 20 using NodeSource repository
-          curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-          sudo apt-get install -y nodejs
+          # Install Node.js 20 using Alpine package manager
+          apk add --no-cache nodejs npm
           node --version
           npm --version
 
@@ -272,9 +271,8 @@ jobs:
 
       - name: Setup Node.js
         run: |
-          # Install Node.js 20 using NodeSource repository
-          curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-          sudo apt-get install -y nodejs
+          # Install Node.js 20 using Alpine package manager
+          apk add --no-cache nodejs npm
           node --version
           npm --version
 
@@ -420,9 +418,8 @@ jobs:
 
       - name: Setup Node.js
         run: |
-          # Install Node.js 20 using NodeSource repository
-          curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-          sudo apt-get install -y nodejs
+          # Install Node.js 20 using Alpine package manager
+          apk add --no-cache nodejs npm
           node --version
           npm --version
 
