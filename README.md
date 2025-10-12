@@ -27,7 +27,6 @@ Coordinate weekday GO Train group passes between Kitchener and Union Station wit
 - Real-time trip updates powered by Supabase Realtime and tRPC.
 - Steward tools for pass uploads, payment tracking, and alerting.
 - Playwright + @axe-core/playwright for browser automation and accessibility audits.
-- Lighthouse CI configuration for performance and quality scoring.
 
 ## Getting Started
 
