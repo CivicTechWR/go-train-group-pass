@@ -36,16 +36,19 @@ After migrations are complete, seed the train schedules and trip instances:
 **Option A: Via API Route (Recommended)**
 
 1. Start the development server:
+
 ```bash
 npm run dev
 ```
 
 2. Call the seed endpoint:
+
 ```bash
 curl -X POST http://localhost:3000/api/seed
 ```
 
 You should see a response like:
+
 ```json
 {
   "success": true,
@@ -60,6 +63,7 @@ You should see a response like:
 **Option B: Manually via Supabase Dashboard**
 
 Insert trains directly in Supabase > Table Editor > trains table:
+
 - 6:38 AM KW → Union
 - 6:53 AM KW → Union
 - 7:07 AM KW → Union
@@ -83,6 +87,7 @@ Since authentication is mocked in Week 2, you need to manually create a test pro
    - `display_name`: "Test User"
 
 6. Update `/app/today/page.tsx` line 49 to use your user UUID:
+
 ```typescript
 const currentUserId = 'YOUR_USER_UUID_HERE';
 ```
@@ -94,6 +99,7 @@ const currentUserId = 'YOUR_USER_UUID_HERE';
 Navigate to: `http://localhost:3000/today`
 
 You should see:
+
 - Tabs for "Today" and "Tomorrow"
 - List of 5 morning trains (6:38 AM - 7:38 AM)
 - Each train shows departure time, route, and countdown timer
@@ -118,6 +124,7 @@ Open multiple browser windows (or use incognito) to simulate multiple users:
 4. Watch groups form and rebalance in real-time
 
 Expected behavior:
+
 - 1 user → Group 1 (1 person, $16.32 solo)
 - 2 users → Group 1 (2 people, $15.00/person)
 - 3 users → Group 1 (3 people, $13.33/person)
@@ -203,17 +210,20 @@ The system prevents joining/leaving within 30 minutes of departure. To test:
 ## Architecture Overview
 
 **Frontend:**
+
 - `/app/today/page.tsx` - Main trips page
 - `/components/trips/TripCard.tsx` - Individual trip display
 - `/components/groups/GroupCard.tsx` - Group details
 - `/hooks/useGroupUpdates.ts` - Realtime subscriptions
 
 **Backend:**
+
 - `/server/routers/trips.ts` - tRPC endpoints (list, join, leave)
 - `/lib/group-formation.ts` - Group balancing algorithm
 - `/app/api/seed/route.ts` - Seed data endpoint
 
 **Database:**
+
 - `trains` - Static schedule
 - `trips` - Daily instances
 - `groups` - Formed groups per trip

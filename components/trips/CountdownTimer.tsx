@@ -10,7 +10,9 @@ interface CountdownTimerProps {
 
 export function CountdownTimer({ departureTime }: CountdownTimerProps) {
   const [timeRemaining, setTimeRemaining] = useState('');
-  const [status, setStatus] = useState<'upcoming' | 'soon' | 'departed'>('upcoming');
+  const [status, setStatus] = useState<'upcoming' | 'soon' | 'departed'>(
+    'upcoming'
+  );
 
   useEffect(() => {
     const updateTimer = () => {
@@ -53,11 +55,11 @@ export function CountdownTimer({ departureTime }: CountdownTimerProps) {
         status === 'departed'
           ? 'text-muted-foreground'
           : status === 'soon'
-          ? 'text-orange-600 font-semibold'
-          : 'text-muted-foreground'
+            ? 'text-orange-600 font-semibold'
+            : 'text-muted-foreground'
       }`}
     >
-      <Clock className="h-4 w-4" />
+      <Clock className='h-4 w-4' />
       <span>{timeRemaining}</span>
     </div>
   );

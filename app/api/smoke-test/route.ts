@@ -18,10 +18,18 @@ export async function GET() {
   try {
     const { error } = await supabase.from('profiles').select('id').limit(1);
     if (error) throw error;
-    results.tests.push({ name: 'Database Schema', status: 'PASS', message: 'All tables accessible' });
+    results.tests.push({
+      name: 'Database Schema',
+      status: 'PASS',
+      message: 'All tables accessible',
+    });
     results.summary.passed++;
   } catch (error: any) {
-    results.tests.push({ name: 'Database Schema', status: 'FAIL', message: error.message });
+    results.tests.push({
+      name: 'Database Schema',
+      status: 'FAIL',
+      message: error.message,
+    });
     results.summary.failed++;
   }
 
@@ -31,10 +39,18 @@ export async function GET() {
       p_trip_id: '00000000-0000-0000-0000-000000000000',
       p_new_groups: [],
     });
-    results.tests.push({ name: 'Rebalance Function', status: 'PASS', message: 'Function exists and callable' });
+    results.tests.push({
+      name: 'Rebalance Function',
+      status: 'PASS',
+      message: 'Function exists and callable',
+    });
     results.summary.passed++;
   } catch (error: any) {
-    results.tests.push({ name: 'Rebalance Function', status: 'FAIL', message: error.message });
+    results.tests.push({
+      name: 'Rebalance Function',
+      status: 'FAIL',
+      message: error.message,
+    });
     results.summary.failed++;
   }
 
@@ -46,7 +62,8 @@ export async function GET() {
       .eq('email', 'test@dredre.net')
       .single();
 
-    if (profileError) throw new Error(`Profile not found: ${profileError.message}`);
+    if (profileError)
+      throw new Error(`Profile not found: ${profileError.message}`);
 
     // Check if user exists in auth.users
     const { data: authUser, error: authError } = await supabase
@@ -59,7 +76,8 @@ export async function GET() {
       results.tests.push({
         name: 'Test User Auth',
         status: 'WARN',
-        message: 'Profile exists but not linked to auth.users. Run FIX_TEST_USER.sql',
+        message:
+          'Profile exists but not linked to auth.users. Run FIX_TEST_USER.sql',
         details: { profileId: profiles.id },
       });
       results.summary.warnings++;
@@ -94,7 +112,9 @@ export async function GET() {
 
     const now = new Date();
     const joinableTrips = trips?.filter((trip: any) => {
-      const departureTime = new Date(`${trip.date}T${trip.train.departure_time.split('.')[0]}`);
+      const departureTime = new Date(
+        `${trip.date}T${trip.train.departure_time.split('.')[0]}`
+      );
       const minutesUntil = (departureTime.getTime() - now.getTime()) / 60000;
       return minutesUntil > 30;
     });
@@ -144,10 +164,7 @@ export async function GET() {
 
   // Test 6: RLS policies allow reads
   try {
-    const { data, error } = await supabase
-      .from('trips')
-      .select('id')
-      .limit(1);
+    const { data, error } = await supabase.from('trips').select('id').limit(1);
 
     if (error) throw error;
 

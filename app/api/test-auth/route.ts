@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 export async function GET() {
   try {
     const supabase = await createClient();
-    
+
     // Test the development bypass
     const { data: profiles } = await supabase
       .from('profiles')
@@ -12,11 +12,14 @@ export async function GET() {
       .limit(1);
 
     if (!profiles || profiles.length === 0) {
-      return NextResponse.json({
-        success: false,
-        error: 'No profiles found in database',
-        message: 'Please run the database setup first'
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'No profiles found in database',
+          message: 'Please run the database setup first',
+        },
+        { status: 400 }
+      );
     }
 
     const testUserId = profiles[0].id;
@@ -32,17 +35,18 @@ export async function GET() {
       context: {
         hasSession: !!context.session,
         userId: context.userId || 'No userId in context',
-        supabaseConnected: !!context.supabase
+        supabaseConnected: !!context.supabase,
       },
-      message: 'Authentication test successful!'
+      message: 'Authentication test successful!',
     });
-
   } catch (error: any) {
-    return NextResponse.json({
-      success: false,
-      error: error.message,
-      message: 'Authentication test failed'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message,
+        message: 'Authentication test failed',
+      },
+      { status: 500 }
+    );
   }
 }
-

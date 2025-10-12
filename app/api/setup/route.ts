@@ -17,27 +17,61 @@ export async function POST() {
       .limit(1);
 
     if (tableError) {
-      return NextResponse.json({
-        success: false,
-        error: 'Database schema not set up. Please run migrations in Supabase dashboard first.',
-        instructions: [
-          '1. Go to https://supabase.com/dashboard/project/gwljtlrlbiygermawabm/sql',
-          '2. Copy/paste contents from supabase/migrations/001_initial_schema.sql',
-          '3. Run the SQL',
-          '4. Copy/paste contents from supabase/migrations/002_rebalance_groups_function.sql',
-          '5. Run the SQL',
-          '6. Call this endpoint again',
-        ],
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            'Database schema not set up. Please run migrations in Supabase dashboard first.',
+          instructions: [
+            '1. Go to https://supabase.com/dashboard/project/gwljtlrlbiygermawabm/sql',
+            '2. Copy/paste contents from supabase/migrations/001_initial_schema.sql',
+            '3. Run the SQL',
+            '4. Copy/paste contents from supabase/migrations/002_rebalance_groups_function.sql',
+            '5. Run the SQL',
+            '6. Call this endpoint again',
+          ],
+        },
+        { status: 400 }
+      );
     }
 
     // Step 2: Seed train data (upsert to avoid duplicates)
     const trains = [
-      { departure_time: '06:38:00', origin: 'Kitchener GO', destination: 'Union Station', direction: 'outbound', days_of_week: [1,2,3,4,5] },
-      { departure_time: '06:53:00', origin: 'Kitchener GO', destination: 'Union Station', direction: 'outbound', days_of_week: [1,2,3,4,5] },
-      { departure_time: '07:07:00', origin: 'Kitchener GO', destination: 'Union Station', direction: 'outbound', days_of_week: [1,2,3,4,5] },
-      { departure_time: '07:22:00', origin: 'Kitchener GO', destination: 'Union Station', direction: 'outbound', days_of_week: [1,2,3,4,5] },
-      { departure_time: '07:38:00', origin: 'Kitchener GO', destination: 'Union Station', direction: 'outbound', days_of_week: [1,2,3,4,5] },
+      {
+        departure_time: '06:38:00',
+        origin: 'Kitchener GO',
+        destination: 'Union Station',
+        direction: 'outbound',
+        days_of_week: [1, 2, 3, 4, 5],
+      },
+      {
+        departure_time: '06:53:00',
+        origin: 'Kitchener GO',
+        destination: 'Union Station',
+        direction: 'outbound',
+        days_of_week: [1, 2, 3, 4, 5],
+      },
+      {
+        departure_time: '07:07:00',
+        origin: 'Kitchener GO',
+        destination: 'Union Station',
+        direction: 'outbound',
+        days_of_week: [1, 2, 3, 4, 5],
+      },
+      {
+        departure_time: '07:22:00',
+        origin: 'Kitchener GO',
+        destination: 'Union Station',
+        direction: 'outbound',
+        days_of_week: [1, 2, 3, 4, 5],
+      },
+      {
+        departure_time: '07:38:00',
+        origin: 'Kitchener GO',
+        destination: 'Union Station',
+        direction: 'outbound',
+        days_of_week: [1, 2, 3, 4, 5],
+      },
     ];
 
     // Check if trains already exist
@@ -56,10 +90,13 @@ export async function POST() {
         .select('id');
 
       if (trainError) {
-        return NextResponse.json({
-          success: false,
-          error: `Failed to seed trains: ${trainError.message}`,
-        }, { status: 500 });
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Failed to seed trains: ${trainError.message}`,
+          },
+          { status: 500 }
+        );
       }
 
       trainIds = insertedTrains?.map(t => t.id) || [];
@@ -69,7 +106,9 @@ export async function POST() {
 
     // Step 3: Create trip instances for today and tomorrow
     const today = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split('T')[0];
 
     const trips = [];
     for (const trainId of trainIds) {
@@ -80,18 +119,19 @@ export async function POST() {
     }
 
     // Upsert trips (avoid duplicates)
-    const { error: tripError } = await supabase
-      .from('trips')
-      .upsert(trips, {
-        onConflict: 'train_id,date',
-        ignoreDuplicates: true,
-      });
+    const { error: tripError } = await supabase.from('trips').upsert(trips, {
+      onConflict: 'train_id,date',
+      ignoreDuplicates: true,
+    });
 
     if (tripError) {
-      return NextResponse.json({
-        success: false,
-        error: `Failed to create trips: ${tripError.message}`,
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Failed to create trips: ${tripError.message}`,
+        },
+        { status: 500 }
+      );
     }
 
     // Step 4: Create a test user profile (bypassing auth for testing)
@@ -119,10 +159,13 @@ export async function POST() {
         .single();
 
       if (profileError && !profileError.message.includes('duplicate')) {
-        return NextResponse.json({
-          success: false,
-          error: `Failed to create test profile: ${profileError.message}`,
-        }, { status: 500 });
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Failed to create test profile: ${profileError.message}`,
+          },
+          { status: 500 }
+        );
       }
 
       testUserId = newProfile?.id || testUuid;
@@ -142,11 +185,13 @@ export async function POST() {
         '3. Try joining and leaving trains!',
       ],
     });
-
   } catch (error) {
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   }
 }

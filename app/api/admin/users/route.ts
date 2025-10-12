@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-    
+
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -28,7 +28,9 @@ export async function GET(request: NextRequest) {
     );
 
     // Check if user is admin
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -40,13 +42,17 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (!profile?.is_community_admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 403 }
+      );
     }
 
     // Get users with their activity data
     const { data: users, error } = await supabase
       .from('profiles')
-      .select(`
+      .select(
+        `
         id,
         display_name,
         email,
@@ -57,7 +63,8 @@ export async function GET(request: NextRequest) {
         is_community_admin,
         created_at,
         updated_at
-      `)
+      `
+      )
       .order('created_at', { ascending: false })
       .limit(50);
 
@@ -66,13 +73,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Add last active time (using updated_at as proxy)
-    const usersWithActivity = users?.map(user => ({
-      ...user,
-      last_active: user.updated_at
-    })) || [];
+    const usersWithActivity =
+      users?.map(user => ({
+        ...user,
+        last_active: user.updated_at,
+      })) || [];
 
     return NextResponse.json(usersWithActivity);
-
   } catch (error) {
     console.error('Admin users error:', error);
     return NextResponse.json(
@@ -85,7 +92,7 @@ export async function GET(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-    
+
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -108,7 +115,9 @@ export async function PATCH(request: NextRequest) {
     );
 
     // Check if user is admin
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -120,7 +129,10 @@ export async function PATCH(request: NextRequest) {
       .single();
 
     if (!profile?.is_community_admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 403 }
+      );
     }
 
     const { userId, updates } = await request.json();
@@ -140,7 +152,6 @@ export async function PATCH(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true });
-
   } catch (error) {
     console.error('Admin user update error:', error);
     return NextResponse.json(

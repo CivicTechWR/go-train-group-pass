@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-    
+
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -28,7 +28,9 @@ export async function GET(request: NextRequest) {
     );
 
     // Check if user is admin
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -40,7 +42,10 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (!profile?.is_community_admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 403 }
+      );
     }
 
     // Get statistics
@@ -50,19 +55,30 @@ export async function GET(request: NextRequest) {
       { count: totalGroups },
       { count: totalAlerts },
       { data: activeUsersData },
-      { data: activeTripsData }
+      { data: activeTripsData },
     ] = await Promise.all([
       supabase.from('profiles').select('*', { count: 'exact', head: true }),
       supabase.from('trips').select('*', { count: 'exact', head: true }),
       supabase.from('groups').select('*', { count: 'exact', head: true }),
-      supabase.from('fare_inspection_alerts').select('*', { count: 'exact', head: true }),
-      supabase.from('profiles').select('id').gte('updated_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
-      supabase.from('trips').select('id').eq('date', new Date().toISOString().split('T')[0])
+      supabase
+        .from('fare_inspection_alerts')
+        .select('*', { count: 'exact', head: true }),
+      supabase
+        .from('profiles')
+        .select('id')
+        .gte(
+          'updated_at',
+          new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+        ),
+      supabase
+        .from('trips')
+        .select('id')
+        .eq('date', new Date().toISOString().split('T')[0]),
     ]);
 
     // Determine system health
     let systemHealth: 'healthy' | 'warning' | 'critical' = 'healthy';
-    
+
     // Check for critical issues
     if (totalUsers === 0) {
       systemHealth = 'critical';
@@ -74,7 +90,10 @@ export async function GET(request: NextRequest) {
     const { data: recentErrors } = await supabase
       .from('fare_inspection_alerts')
       .select('id')
-      .gte('triggered_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+      .gte(
+        'triggered_at',
+        new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+      );
 
     if (recentErrors && recentErrors.length > 10) {
       systemHealth = 'warning';
@@ -87,11 +106,10 @@ export async function GET(request: NextRequest) {
       activeTrips: activeTripsData?.length || 0,
       totalGroups: totalGroups || 0,
       totalAlerts: totalAlerts || 0,
-      systemHealth
+      systemHealth,
     };
 
     return NextResponse.json(stats);
-
   } catch (error) {
     console.error('Admin stats error:', error);
     return NextResponse.json(

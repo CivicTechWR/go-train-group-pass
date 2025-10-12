@@ -35,15 +35,19 @@ export class RateLimiter {
     }
   }
 
-  checkLimit(identifier: string, action: string, options: RateLimitOptions): boolean {
+  checkLimit(
+    identifier: string,
+    action: string,
+    options: RateLimitOptions
+  ): boolean {
     this.cleanup();
-    
+
     const key = this.getKey(identifier, action);
     const now = Date.now();
     const windowStart = now - options.windowMs;
-    
+
     const current = this.store.get(key);
-    
+
     if (!current || now > current.resetTime) {
       // First request or window expired
       this.store.set(key, {
@@ -52,11 +56,11 @@ export class RateLimiter {
       });
       return true;
     }
-    
+
     if (current.count >= options.limit) {
       return false;
     }
-    
+
     // Increment counter
     current.count++;
     this.store.set(key, current);
@@ -66,9 +70,9 @@ export class RateLimiter {
   getRemainingTime(identifier: string, action: string): number {
     const key = this.getKey(identifier, action);
     const current = this.store.get(key);
-    
+
     if (!current) return 0;
-    
+
     const now = Date.now();
     return Math.max(0, current.resetTime - now);
   }
@@ -82,22 +86,24 @@ export class RateLimiter {
 // Rate limiting middleware for tRPC
 export const createRateLimitMiddleware = (options: RateLimitOptions) => {
   const rateLimiter = RateLimiter.getInstance();
-  
+
   return async ({ ctx, next, path }: { ctx: any; next: any; path: string }) => {
     // Get identifier from context (user ID, IP, etc.)
     const identifier = options.identifier || ctx.userId || 'anonymous';
-    
+
     // Check rate limit
     const allowed = rateLimiter.checkLimit(identifier, path, options);
-    
+
     if (!allowed) {
       const remainingTime = rateLimiter.getRemainingTime(identifier, path);
       throw new TRPCError({
         code: 'TOO_MANY_REQUESTS',
-        message: options.message || `Rate limit exceeded. Try again in ${Math.ceil(remainingTime / 1000)} seconds.`,
+        message:
+          options.message ||
+          `Rate limit exceeded. Try again in ${Math.ceil(remainingTime / 1000)} seconds.`,
       });
     }
-    
+
     return next();
   };
 };
@@ -110,40 +116,41 @@ export const rateLimits = {
     windowMs: 15 * 60 * 1000, // 15 minutes
     message: 'Too many requests. Please try again later.',
   },
-  
+
   // Trip joining/leaving
   tripActions: {
     limit: 10,
     windowMs: 5 * 60 * 1000, // 5 minutes
     message: 'Too many trip actions. Please wait before trying again.',
   },
-  
+
   // Alert triggering
   alerts: {
     limit: 1,
     windowMs: 60 * 60 * 1000, // 1 hour
     message: 'You can only trigger one alert per hour.',
   },
-  
+
   // Profile updates
   profileUpdates: {
     limit: 5,
     windowMs: 15 * 60 * 1000, // 15 minutes
     message: 'Too many profile updates. Please wait before trying again.',
   },
-  
+
   // File uploads
   fileUploads: {
     limit: 3,
     windowMs: 5 * 60 * 1000, // 5 minutes
     message: 'Too many file uploads. Please wait before trying again.',
   },
-  
+
   // Authentication attempts
   auth: {
     limit: 5,
     windowMs: 15 * 60 * 1000, // 15 minutes
-    message: 'Too many authentication attempts. Please wait before trying again.',
+    message:
+      'Too many authentication attempts. Please wait before trying again.',
   },
 } as const;
 
@@ -152,19 +159,19 @@ export const getClientIP = (headers: Headers): string => {
   const forwarded = headers.get('x-forwarded-for');
   const realIP = headers.get('x-real-ip');
   const remoteAddr = headers.get('x-remote-addr');
-  
+
   if (forwarded) {
     return forwarded.split(',')[0].trim();
   }
-  
+
   if (realIP) {
     return realIP;
   }
-  
+
   if (remoteAddr) {
     return remoteAddr;
   }
-  
+
   return 'unknown';
 };
 

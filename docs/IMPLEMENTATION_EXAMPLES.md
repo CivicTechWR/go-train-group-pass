@@ -41,7 +41,9 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
   if (!session) {
     throw new Error('Unauthorized');
@@ -69,14 +71,17 @@ import { formGroups } from '@/lib/group-formation';
 export const tripsRouter = router({
   // Get trips for date range
   list: protectedProcedure
-    .input(z.object({
-      startDate: z.string(),
-      endDate: z.string(),
-    }))
+    .input(
+      z.object({
+        startDate: z.string(),
+        endDate: z.string(),
+      })
+    )
     .query(async ({ ctx, input }) => {
       const { data, error } = await ctx.supabase
         .from('trips')
-        .select(`
+        .select(
+          `
           *,
           train:trains(*),
           groups(
@@ -86,7 +91,8 @@ export const tripsRouter = router({
               user:profiles(id, display_name, profile_photo_url)
             )
           )
-        `)
+        `
+        )
         .gte('date', input.startDate)
         .lte('date', input.endDate)
         .order('date');
@@ -97,9 +103,11 @@ export const tripsRouter = router({
 
   // Join a trip
   join: protectedProcedure
-    .input(z.object({
-      tripId: z.string().uuid(),
-    }))
+    .input(
+      z.object({
+        tripId: z.string().uuid(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
 
@@ -112,9 +120,12 @@ export const tripsRouter = router({
 
       if (!trip) throw new Error('Trip not found');
 
-      const departureTime = new Date(`${trip.date}T${trip.train.departure_time}`);
+      const departureTime = new Date(
+        `${trip.date}T${trip.train.departure_time}`
+      );
       const now = new Date();
-      const minutesUntilDeparture = (departureTime.getTime() - now.getTime()) / 60000;
+      const minutesUntilDeparture =
+        (departureTime.getTime() - now.getTime()) / 60000;
 
       if (minutesUntilDeparture < 30) {
         throw new Error('Cannot join less than 30 minutes before departure');
@@ -126,9 +137,10 @@ export const tripsRouter = router({
         .select('*, memberships:group_memberships(*)')
         .eq('trip_id', input.tripId);
 
-      const allMembers = existingGroups?.flatMap(g =>
-        g.memberships.map(m => ({ id: m.user_id, displayName: '' }))
-      ) || [];
+      const allMembers =
+        existingGroups?.flatMap(g =>
+          g.memberships.map(m => ({ id: m.user_id, displayName: '' }))
+        ) || [];
 
       // Add new user
       allMembers.push({ id: userId, displayName: '' });
@@ -165,9 +177,11 @@ export const tripsRouter = router({
 
   // Leave a trip
   leave: protectedProcedure
-    .input(z.object({
-      tripId: z.string().uuid(),
-    }))
+    .input(
+      z.object({
+        tripId: z.string().uuid(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
 
@@ -180,9 +194,12 @@ export const tripsRouter = router({
 
       if (!trip) throw new Error('Trip not found');
 
-      const departureTime = new Date(`${trip.date}T${trip.train.departure_time}`);
+      const departureTime = new Date(
+        `${trip.date}T${trip.train.departure_time}`
+      );
       const now = new Date();
-      const minutesUntilDeparture = (departureTime.getTime() - now.getTime()) / 60000;
+      const minutesUntilDeparture =
+        (departureTime.getTime() - now.getTime()) / 60000;
 
       if (minutesUntilDeparture < 30) {
         throw new Error('Cannot leave less than 30 minutes before departure');
@@ -211,9 +228,10 @@ export const tripsRouter = router({
         .select('*, memberships:group_memberships(*)')
         .eq('trip_id', input.tripId);
 
-      const remainingMembers = remainingGroups?.flatMap(g =>
-        g.memberships.map(m => ({ id: m.user_id, displayName: '' }))
-      ) || [];
+      const remainingMembers =
+        remainingGroups?.flatMap(g =>
+          g.memberships.map(m => ({ id: m.user_id, displayName: '' }))
+        ) || [];
 
       if (remainingMembers.length > 0) {
         const newGroups = formGroups(remainingMembers);
@@ -259,9 +277,11 @@ import crypto from 'crypto';
 export const groupsRouter = router({
   // Volunteer to steward
   volunteerSteward: protectedProcedure
-    .input(z.object({
-      groupId: z.string().uuid(),
-    }))
+    .input(
+      z.object({
+        groupId: z.string().uuid(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
 
@@ -277,20 +297,24 @@ export const groupsRouter = router({
 
   // Upload pass screenshot
   uploadPass: protectedProcedure
-    .input(z.object({
-      groupId: z.string().uuid(),
-      ticketNumber: z.string(),
-      passengerCount: z.number().min(2).max(5),
-      activatedAt: z.string(),
-      screenshotFile: z.string(), // base64
-    }))
+    .input(
+      z.object({
+        groupId: z.string().uuid(),
+        ticketNumber: z.string(),
+        passengerCount: z.number().min(2).max(5),
+        activatedAt: z.string(),
+        screenshotFile: z.string(), // base64
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
 
       // Verify user is steward
       const { data: group } = await ctx.supabase
         .from('groups')
-        .select('steward_id, cost_per_person, memberships:group_memberships(count)')
+        .select(
+          'steward_id, cost_per_person, memberships:group_memberships(count)'
+        )
         .eq('id', input.groupId)
         .single();
 
@@ -302,7 +326,9 @@ export const groupsRouter = router({
       const memberCount = group.memberships[0].count;
       if (input.passengerCount !== memberCount) {
         // Warning, but allow (steward might have bought wrong pass)
-        console.warn(`Pass shows ${input.passengerCount} but group has ${memberCount} members`);
+        console.warn(
+          `Pass shows ${input.passengerCount} but group has ${memberCount} members`
+        );
       }
 
       // Hash ticket number to prevent reuse
@@ -320,7 +346,9 @@ export const groupsRouter = router({
         .single();
 
       if (existingPass) {
-        throw new Error('This ticket number has already been used by another group');
+        throw new Error(
+          'This ticket number has already been used by another group'
+        );
       }
 
       // Upload screenshot to storage
@@ -353,11 +381,13 @@ export const groupsRouter = router({
 
   // Update coach location
   updateLocation: protectedProcedure
-    .input(z.object({
-      groupId: z.string().uuid(),
-      coachNumber: z.string(),
-      coachLevel: z.enum(['upper', 'lower', 'middle']),
-    }))
+    .input(
+      z.object({
+        groupId: z.string().uuid(),
+        coachNumber: z.string(),
+        coachLevel: z.enum(['upper', 'lower', 'middle']),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
 
@@ -377,9 +407,11 @@ export const groupsRouter = router({
 
   // Mark payment as sent
   markPaymentSent: protectedProcedure
-    .input(z.object({
-      groupId: z.string().uuid(),
-    }))
+    .input(
+      z.object({
+        groupId: z.string().uuid(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
 
@@ -408,9 +440,11 @@ import { router, protectedProcedure } from '../trpc';
 export const alertsRouter = router({
   // Trigger fare inspection alert
   trigger: protectedProcedure
-    .input(z.object({
-      groupId: z.string().uuid(),
-    }))
+    .input(
+      z.object({
+        groupId: z.string().uuid(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
 
@@ -449,25 +483,30 @@ export const alertsRouter = router({
         : 'steward location';
 
       // Send notifications (call separate API route)
-      await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notifications/fare-inspection`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          alertId: alert.id,
-          groupId: input.groupId,
-          meetLocation,
-          members: memberships?.filter(m => m.user_id !== userId),
-        }),
-      });
+      await fetch(
+        `${process.env.NEXT_PUBLIC_APP_URL}/api/notifications/fare-inspection`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            alertId: alert.id,
+            groupId: input.groupId,
+            meetLocation,
+            members: memberships?.filter(m => m.user_id !== userId),
+          }),
+        }
+      );
 
       return { success: true, alertId: alert.id };
     }),
 
   // Acknowledge alert
   acknowledge: protectedProcedure
-    .input(z.object({
-      alertId: z.string().uuid(),
-    }))
+    .input(
+      z.object({
+        alertId: z.string().uuid(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
 
@@ -564,7 +603,7 @@ export function useFareInspectionAlerts() {
           schema: 'public',
           table: 'fare_inspection_alerts',
         },
-        async (payload) => {
+        async payload => {
           // Check if user is in this group
           const { data: membership } = await supabase
             .from('group_memberships')
@@ -738,7 +777,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { messaging } from '@/lib/firebase-admin';
 
 export async function POST(req: NextRequest) {
-  const { userId, fcmToken, stewardName, amount, groupNumber } = await req.json();
+  const { userId, fcmToken, stewardName, amount, groupNumber } =
+    await req.json();
 
   try {
     await messaging.send({
@@ -807,12 +847,42 @@ export const syncSchedules = inngest.createFunction(
       // For MVP: hardcode KW→Union and Union→KW trains
       const trains = [
         // Morning KW → Union
-        { departure_time: '06:38:00', origin: 'Kitchener GO', destination: 'Union Station', direction: 'outbound', days_of_week: [1,2,3,4,5] },
-        { departure_time: '07:08:00', origin: 'Kitchener GO', destination: 'Union Station', direction: 'outbound', days_of_week: [1,2,3,4,5] },
+        {
+          departure_time: '06:38:00',
+          origin: 'Kitchener GO',
+          destination: 'Union Station',
+          direction: 'outbound',
+          days_of_week: [1, 2, 3, 4, 5],
+        },
+        {
+          departure_time: '07:08:00',
+          origin: 'Kitchener GO',
+          destination: 'Union Station',
+          direction: 'outbound',
+          days_of_week: [1, 2, 3, 4, 5],
+        },
         // Evening Union → KW
-        { departure_time: '15:34:00', origin: 'Union Station', destination: 'Kitchener GO', direction: 'inbound', days_of_week: [1,2,3,4,5] },
-        { departure_time: '16:22:00', origin: 'Union Station', destination: 'Kitchener GO', direction: 'inbound', days_of_week: [1,2,3,4,5] },
-        { departure_time: '16:52:00', origin: 'Union Station', destination: 'Kitchener GO', direction: 'inbound', days_of_week: [1,2,3,4,5] },
+        {
+          departure_time: '15:34:00',
+          origin: 'Union Station',
+          destination: 'Kitchener GO',
+          direction: 'inbound',
+          days_of_week: [1, 2, 3, 4, 5],
+        },
+        {
+          departure_time: '16:22:00',
+          origin: 'Union Station',
+          destination: 'Kitchener GO',
+          direction: 'inbound',
+          days_of_week: [1, 2, 3, 4, 5],
+        },
+        {
+          departure_time: '16:52:00',
+          origin: 'Union Station',
+          destination: 'Kitchener GO',
+          direction: 'inbound',
+          days_of_week: [1, 2, 3, 4, 5],
+        },
       ];
 
       for (const train of trains) {
@@ -899,7 +969,8 @@ export const checkDelays = inngest.createFunction(
       // If any trips changed to 'delayed' or 'cancelled', notify affected users
       const { data: delayedTrips } = await supabase
         .from('trips')
-        .select(`
+        .select(
+          `
           *,
           groups(
             *,
@@ -908,7 +979,8 @@ export const checkDelays = inngest.createFunction(
               user:profiles(*)
             )
           )
-        `)
+        `
+        )
         .in('status', ['delayed', 'cancelled'])
         .gte('updated_at', new Date(Date.now() - 5 * 60 * 1000).toISOString()); // Changed in last 5 min
 
@@ -946,18 +1018,19 @@ export const dailyCommitmentReminder = inngest.createFunction(
         .select('id, fcm_token')
         .not('fcm_token', 'is', null);
 
-      const notifications = profiles?.map(profile =>
-        messaging.send({
-          token: profile.fcm_token!,
-          notification: {
-            title: "Tomorrow's Trains",
-            body: 'Plan your commute - join a group now',
-          },
-          data: {
-            type: 'DAILY_REMINDER',
-          },
-        })
-      ) || [];
+      const notifications =
+        profiles?.map(profile =>
+          messaging.send({
+            token: profile.fcm_token!,
+            notification: {
+              title: "Tomorrow's Trains",
+              body: 'Plan your commute - join a group now',
+            },
+            data: {
+              type: 'DAILY_REMINDER',
+            },
+          })
+        ) || [];
 
       await Promise.allSettled(notifications);
 
@@ -995,12 +1068,11 @@ export const cleanupScreenshots = inngest.createFunction(
         .not('pass_screenshot_url', 'is', null);
 
       // Delete from storage
-      const filesToDelete = oldGroups?.map(g => g.pass_screenshot_url).filter(Boolean) || [];
+      const filesToDelete =
+        oldGroups?.map(g => g.pass_screenshot_url).filter(Boolean) || [];
 
       if (filesToDelete.length > 0) {
-        await supabase.storage
-          .from('pass-screenshots')
-          .remove(filesToDelete);
+        await supabase.storage.from('pass-screenshots').remove(filesToDelete);
       }
 
       // Clear URLs from database
@@ -1033,19 +1105,19 @@ export interface PassDetails {
   confidence: number;
 }
 
-export async function extractPassDetails(imageFile: File): Promise<PassDetails> {
+export async function extractPassDetails(
+  imageFile: File
+): Promise<PassDetails> {
   try {
-    const { data: { text, confidence } } = await Tesseract.recognize(
-      imageFile,
-      'eng',
-      {
-        logger: (m) => {
-          if (m.status === 'recognizing text') {
-            console.log(`OCR Progress: ${Math.round(m.progress * 100)}%`);
-          }
-        },
-      }
-    );
+    const {
+      data: { text, confidence },
+    } = await Tesseract.recognize(imageFile, 'eng', {
+      logger: m => {
+        if (m.status === 'recognizing text') {
+          console.log(`OCR Progress: ${Math.round(m.progress * 100)}%`);
+        }
+      },
+    });
 
     console.log('OCR Text:', text);
 
@@ -1054,12 +1126,14 @@ export async function extractPassDetails(imageFile: File): Promise<PassDetails> 
     const ticketNumber = ticketMatch ? ticketMatch[0] : null;
 
     // Extract passenger count (format: x4, x5, etc.)
-    const passengerMatch = text.match(/x\s*(\d)/i) || text.match(/Passenger.*?(\d)/i);
+    const passengerMatch =
+      text.match(/x\s*(\d)/i) || text.match(/Passenger.*?(\d)/i);
     const passengerCount = passengerMatch ? parseInt(passengerMatch[1]) : null;
 
     // Extract activation time (various formats)
-    const timeMatch = text.match(/(\d{1,2}:\d{2}:\d{2}\s*[AP]M)/i) ||
-                      text.match(/(\d{1,2}:\d{2}\s*[AP]M)/i);
+    const timeMatch =
+      text.match(/(\d{1,2}:\d{2}:\d{2}\s*[AP]M)/i) ||
+      text.match(/(\d{1,2}:\d{2}\s*[AP]M)/i);
     const activationTime = timeMatch ? timeMatch[0] : null;
 
     return {
@@ -1365,7 +1439,7 @@ registerRoute(
 );
 
 // Handle push notifications
-self.addEventListener('push', (event) => {
+self.addEventListener('push', event => {
   const data = event.data?.json();
 
   const options = {
@@ -1379,16 +1453,12 @@ self.addEventListener('push', (event) => {
     actions: data.actions || [],
   };
 
-  event.waitUntil(
-    self.registration.showNotification(data.title, options)
-  );
+  event.waitUntil(self.registration.showNotification(data.title, options));
 });
 
-self.addEventListener('notificationclick', (event) => {
+self.addEventListener('notificationclick', event => {
   event.notification.close();
 
-  event.waitUntil(
-    clients.openWindow(event.notification.data.url)
-  );
+  event.waitUntil(clients.openWindow(event.notification.data.url));
 });
 ```

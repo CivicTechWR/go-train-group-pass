@@ -1,28 +1,28 @@
 name: MCP Smoke Check
 
 on:
-    workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
-    smoke:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-            - name: Validate required secrets
-              run: |
-                  required=(NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY POSTGRES_CONNECTION_STRING)
-                  missing=()
-                  for v in "${required[@]}"; do
-                    if [ -z "${!v}" ]; then
-                      missing+=("$v")
-                    fi
-                  done
-                  if [ ${#missing[@]} -ne 0 ]; then
-                    echo "Missing required env vars: ${missing[*]}"
-                    exit 1
-                  fi
+      - name: Validate required secrets
+        run: |
+          required=(NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY POSTGRES_CONNECTION_STRING)
+          missing=()
+          for v in "${required[@]}"; do
+            if [ -z "${!v}" ]; then
+              missing+=("$v")
+            fi
+          done
+          if [ ${#missing[@]} -ne 0 ]; then
+            echo "Missing required env vars: ${missing[*]}"
+            exit 1
+          fi
 
-            - name: Supabase MCP smoke (help)
-              run: npx --yes @designcomputer/supabase_mcp_server@1.1.0 --help
+      - name: Supabase MCP smoke (help)
+        run: npx --yes @designcomputer/supabase_mcp_server@1.1.0 --help

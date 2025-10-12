@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-    
+
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -28,7 +28,9 @@ export async function GET(request: NextRequest) {
     );
 
     // Check if user is admin
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -40,13 +42,17 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (!profile?.is_community_admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 403 }
+      );
     }
 
     // Get recent trips with groups and memberships
     const { data: trips, error } = await supabase
       .from('trips')
-      .select(`
+      .select(
+        `
         id,
         date,
         status,
@@ -76,7 +82,8 @@ export async function GET(request: NextRequest) {
             )
           )
         )
-      `)
+      `
+      )
       .order('date', { ascending: false })
       .order('train(departure_time)', { ascending: true })
       .limit(20);
@@ -86,7 +93,6 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(trips || []);
-
   } catch (error) {
     console.error('Admin trips error:', error);
     return NextResponse.json(

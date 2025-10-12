@@ -7,6 +7,7 @@
 **Cause:** Claude Code can't find MCP configuration
 
 **Fix:**
+
 ```bash
 # Run the setup script
 ./scripts/setup-all-mcp-servers.sh
@@ -18,11 +19,13 @@
 ### Issue: Servers showing as "Failed to connect"
 
 **Causes:**
+
 1. Missing environment variables
 2. Network issues
 3. Package installation failures
 
 **Fix:**
+
 ```bash
 # 1. Check environment variables
 cat .env.local | grep -E "SUPABASE|GITEA|POSTGRES"
@@ -40,6 +43,7 @@ claude mcp remove <server-name>
 **Cause:** .env.local not sourced
 
 **Fix:**
+
 ```bash
 # Add to your shell profile (~/.bashrc or ~/.zshrc)
 if [ -f "$PWD/.env.local" ]; then
@@ -110,6 +114,7 @@ Create `.vscode/tasks.json` for automatic setup:
 ### uvx: command not found
 
 **Fix:**
+
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
@@ -119,6 +124,7 @@ source ~/.bashrc
 ### npx: permission denied
 
 **Fix:**
+
 ```bash
 # Fix npm permissions
 mkdir -p ~/.npm-global
@@ -130,6 +136,7 @@ source ~/.bashrc
 ### Supabase MCP not connecting
 
 **Check:**
+
 1. Environment variables are set:
    ```bash
    echo $NEXT_PUBLIC_SUPABASE_URL
@@ -139,6 +146,7 @@ source ~/.bashrc
 3. Service role key has correct permissions
 
 **Fix:**
+
 ```bash
 # Remove and re-add with correct credentials
 claude mcp remove supabase
@@ -151,6 +159,7 @@ source .env.local
 **Issue:** Using Gitea token instead of GitHub token
 
 **Fix:**
+
 ```bash
 # Get GitHub personal access token from:
 # https://github.com/settings/tokens
@@ -166,26 +175,31 @@ claude mcp remove github
 ## Debugging Commands
 
 ### Check MCP configuration file
+
 ```bash
 cat ~/.claude.json | jq '.mcpServers'
 ```
 
 ### List all MCP servers with status
+
 ```bash
 claude mcp list
 ```
 
 ### Get details about specific server
+
 ```bash
 claude mcp get <server-name>
 ```
 
 ### Remove problematic server
+
 ```bash
 claude mcp remove <server-name>
 ```
 
 ### Reset all MCP configuration
+
 ```bash
 rm ~/.claude.json
 ./scripts/setup-all-mcp-servers.sh
@@ -208,20 +222,24 @@ Required for full functionality:
 ## Server-Specific Troubleshooting
 
 ### Filesystem Server
+
 - Ensure directory exists: `/opt/go-transit-group`
 - Check permissions: `ls -la /opt/go-transit-group`
 
 ### Git Server
+
 - Verify git repository: `git status` in project directory
 - Check git config: `git config --list`
 
 ### PostgreSQL Server
+
 - Test connection string:
   ```bash
   psql "$POSTGRES_CONNECTION_STRING" -c "SELECT version();"
   ```
 
 ### Playwright Server
+
 - May need browser installation:
   ```bash
   npx playwright install chromium
@@ -230,6 +248,7 @@ Required for full functionality:
 ## Getting Help
 
 1. **Check logs:**
+
    ```bash
    claude mcp list > mcp-status.log
    cat mcp-status.log
@@ -248,16 +267,19 @@ Required for full functionality:
 ## Maintenance
 
 ### Weekly checks
+
 ```bash
 ./scripts/verify-mcp-health.sh
 ```
 
 ### After updating .env.local
+
 ```bash
 ./scripts/setup-all-mcp-servers.sh
 ```
 
 ### After Claude Code update
+
 ```bash
 claude mcp list
 # If issues, re-run setup

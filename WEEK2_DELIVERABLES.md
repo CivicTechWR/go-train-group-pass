@@ -9,6 +9,7 @@ All Week 2 MVP features have been successfully implemented. The GO Train Group P
 ## Deliverables Checklist
 
 ### 1. Type Definitions ✅
+
 **File:** `types/database.ts`
 
 - [x] Profile type
@@ -25,6 +26,7 @@ All Week 2 MVP features have been successfully implemented. The GO Train Group P
 ---
 
 ### 2. Seed Train Data ✅
+
 **File:** `app/api/seed/route.ts`
 
 - [x] 6:38 AM KW → Union
@@ -43,6 +45,7 @@ All Week 2 MVP features have been successfully implemented. The GO Train Group P
 ---
 
 ### 3. Create Trip Instances ✅
+
 **Included in:** `app/api/seed/route.ts`
 
 - [x] Generates trips for today
@@ -54,9 +57,11 @@ All Week 2 MVP features have been successfully implemented. The GO Train Group P
 ---
 
 ### 4. Trip List UI ✅
+
 **File:** `app/today/page.tsx`
 
 **Features:**
+
 - [x] Header with "Your Trains" title
 - [x] Tabs for Today / Tomorrow
 - [x] Badge showing number of trains per tab
@@ -77,9 +82,11 @@ All Week 2 MVP features have been successfully implemented. The GO Train Group P
 ---
 
 ### 5. Group Display Component ✅
+
 **File:** `components/groups/GroupCard.tsx`
 
 **Features:**
+
 - [x] Group number (e.g., "Group 1")
 - [x] Member count badge
 - [x] Cost per person display
@@ -96,9 +103,11 @@ All Week 2 MVP features have been successfully implemented. The GO Train Group P
 ---
 
 ### 6. Real-time Updates Hook ✅
+
 **File:** `hooks/useGroupUpdates.ts`
 
 **Features:**
+
 - [x] Subscribes to `groups` table changes
 - [x] Subscribes to `group_memberships` table changes
 - [x] Filters by trip_id
@@ -113,9 +122,11 @@ All Week 2 MVP features have been successfully implemented. The GO Train Group P
 ---
 
 ### 7. Countdown Timer Component ✅
+
 **File:** `components/trips/CountdownTimer.tsx`
 
 **Features:**
+
 - [x] Updates every second
 - [x] Shows hours:minutes format (e.g., "2h 15m")
 - [x] Shows "Departs soon" when <5 min
@@ -134,6 +145,7 @@ All Week 2 MVP features have been successfully implemented. The GO Train Group P
 ### 8. Integration ✅
 
 **tRPC Integration:**
+
 - [x] `trpc.trips.list.useQuery()` for fetching trips
 - [x] `trpc.trips.join.useMutation()` for joining
 - [x] `trpc.trips.leave.useMutation()` for leaving
@@ -143,6 +155,7 @@ All Week 2 MVP features have been successfully implemented. The GO Train Group P
 - [x] 30-min cutoff validation
 
 **React Query:**
+
 - [x] 30-second refetch interval
 - [x] Automatic cache invalidation
 - [x] Loading states
@@ -154,6 +167,7 @@ All Week 2 MVP features have been successfully implemented. The GO Train Group P
 ### 9. Mobile-First Responsive Design ✅
 
 **Mobile (<768px):**
+
 - [x] Full-width cards
 - [x] Bottom navigation bar
 - [x] Touch-friendly buttons (44px min height)
@@ -161,6 +175,7 @@ All Week 2 MVP features have been successfully implemented. The GO Train Group P
 - [x] Single column layout
 
 **Tablet/Desktop (≥768px):**
+
 - [x] Left sidebar navigation
 - [x] Max-width container (max-w-4xl)
 - [x] Centered content
@@ -168,6 +183,7 @@ All Week 2 MVP features have been successfully implemented. The GO Train Group P
 - [x] Desktop padding (md:pl-64)
 
 **Animations:**
+
 - [x] Smooth transitions on hover
 - [x] Expandable sections with ChevronUp/Down
 - [x] Fade-in for loading states
@@ -175,9 +191,11 @@ All Week 2 MVP features have been successfully implemented. The GO Train Group P
 ---
 
 ### 10. Navigation ✅
+
 **File:** `components/navigation/BottomNav.tsx`
 
 **Mobile Navigation:**
+
 - [x] Fixed bottom bar
 - [x] Three tabs: Today, Profile, Steward
 - [x] Active state highlighting
@@ -185,6 +203,7 @@ All Week 2 MVP features have been successfully implemented. The GO Train Group P
 - [x] Labels below icons
 
 **Desktop Navigation:**
+
 - [x] Fixed left sidebar
 - [x] Logo and app name at top
 - [x] Same three routes
@@ -192,6 +211,7 @@ All Week 2 MVP features have been successfully implemented. The GO Train Group P
 - [x] Hover states
 
 **Routes:**
+
 - [x] `/today` - Main trips page
 - [x] `/profile` - Profile page (placeholder)
 - [x] `/steward` - Steward dashboard (placeholder)
@@ -203,6 +223,7 @@ All Week 2 MVP features have been successfully implemented. The GO Train Group P
 ## Additional Files Created
 
 ### Skeleton Loading Component ✅
+
 **File:** `components/trips/TripCardSkeleton.tsx`
 
 - [x] Matches TripCard layout
@@ -214,6 +235,7 @@ All Week 2 MVP features have been successfully implemented. The GO Train Group P
 ---
 
 ### Database Function ✅
+
 **File:** `supabase/migrations/002_rebalance_groups_function.sql`
 
 - [x] `rebalance_trip_groups(p_trip_id, p_new_groups)` function
@@ -230,6 +252,7 @@ All Week 2 MVP features have been successfully implemented. The GO Train Group P
 ---
 
 ### Updated Layout ✅
+
 **File:** `app/layout.tsx`
 
 - [x] Includes BottomNav component
@@ -244,6 +267,7 @@ All Week 2 MVP features have been successfully implemented. The GO Train Group P
 ### shadcn/ui Components ✅
 
 Installed via `npx shadcn add`:
+
 - [x] `components/ui/button.tsx`
 - [x] `components/ui/card.tsx`
 - [x] `components/ui/badge.tsx`
@@ -277,6 +301,7 @@ Installed via `npx shadcn add`:
 ## Statistics
 
 ### Code Metrics
+
 - **Total Files Created:** 15
 - **Total Lines of Code:** ~1,500+
 - **Components:** 8
@@ -286,6 +311,7 @@ Installed via `npx shadcn add`:
 - **Pages:** 3
 
 ### Bundle Size
+
 - **Main Page (/today):** 210 kB First Load JS
 - **Shared Chunks:** 102 kB
 - **Build Time:** ~10 seconds
@@ -297,6 +323,7 @@ Installed via `npx shadcn add`:
 ## Testing Status
 
 ### Manual Testing Required
+
 - [ ] Run database migrations
 - [ ] Seed train data
 - [ ] Create test user profiles
@@ -311,6 +338,7 @@ Installed via `npx shadcn add`:
 - [ ] Test error handling
 
 ### Automated Testing (Future)
+
 - [ ] Unit tests for group formation algorithm
 - [ ] Integration tests for tRPC endpoints
 - [ ] E2E tests with Playwright
@@ -337,6 +365,7 @@ Installed via `npx shadcn add`:
 ## Integration with Existing Code
 
 ### Works With
+
 - [x] Existing tRPC setup (`server/trpc.ts`)
 - [x] Existing trips router (`server/routers/trips.ts`)
 - [x] Existing group formation algorithm (`lib/group-formation.ts`)
@@ -344,6 +373,7 @@ Installed via `npx shadcn add`:
 - [x] Existing type definitions (`types/database.ts`)
 
 ### Dependencies
+
 - [x] tRPC 11 for API calls
 - [x] React Query for data fetching
 - [x] Supabase for database and realtime
@@ -359,6 +389,7 @@ Installed via `npx shadcn add`:
 ## Deployment Checklist
 
 ### Pre-deployment
+
 - [ ] Set up Supabase project
 - [ ] Run migrations in Supabase
 - [ ] Seed train data via API
@@ -367,6 +398,7 @@ Installed via `npx shadcn add`:
 - [ ] Test in staging environment
 
 ### Deployment
+
 - [ ] Deploy to Vercel
 - [ ] Verify environment variables
 - [ ] Test production build
@@ -374,6 +406,7 @@ Installed via `npx shadcn add`:
 - [ ] Check Vercel Analytics
 
 ### Post-deployment
+
 - [ ] Create test accounts
 - [ ] Test all features in production
 - [ ] Monitor database performance
@@ -384,6 +417,7 @@ Installed via `npx shadcn add`:
 ## Success Criteria
 
 ### Functionality ✅
+
 - [x] Users can view trains for today and tomorrow
 - [x] Users can join a train with one tap
 - [x] Users can leave a train
@@ -394,6 +428,7 @@ Installed via `npx shadcn add`:
 - [x] Countdown timers update every second
 
 ### User Experience ✅
+
 - [x] Responsive on mobile and desktop
 - [x] Loading states provide feedback
 - [x] Error messages are clear
@@ -403,6 +438,7 @@ Installed via `npx shadcn add`:
 - [x] No confusing UI elements
 
 ### Code Quality ✅
+
 - [x] TypeScript strict mode
 - [x] No TypeScript errors
 - [x] ESLint compliant
@@ -412,6 +448,7 @@ Installed via `npx shadcn add`:
 - [x] Clean separation of concerns
 
 ### Performance ✅
+
 - [x] Build succeeds in <30 seconds
 - [x] Page loads in <3 seconds (estimated)
 - [x] No memory leaks (cleanup in hooks)
@@ -423,18 +460,21 @@ Installed via `npx shadcn add`:
 ## Next Steps (Week 3)
 
 ### Priority 1: Authentication
+
 - Implement real Supabase auth
 - Add login/logout
 - Protected routes
 - Session management
 
 ### Priority 2: Steward Workflow
+
 - Steward volunteer button
 - Pass upload functionality
 - OCR implementation
 - Manual pass entry
 
 ### Priority 3: Payment Tracking
+
 - Payment request generator
 - Mark as sent functionality
 - Steward payment dashboard

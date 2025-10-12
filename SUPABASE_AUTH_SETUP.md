@@ -3,12 +3,15 @@
 ## Option 1: Reset Password via Supabase Dashboard (Recommended)
 
 ### Step 1: Go to Authentication
+
 Visit: https://supabase.com/dashboard/project/gwljtlrlbiygermawabm/auth/users
 
 ### Step 2: Find Your User
+
 Look for: `test@dredre.net` (User 1)
 
 ### Step 3: Reset Password
+
 1. Click on the user
 2. Click "Send Password Recovery Email"
    - OR -
@@ -113,6 +116,7 @@ supabase auth reset-password test@dredre.net --project-ref gwljtlrlbiygermawabm
 ## Quick Fix: Use Existing User
 
 Your database already has this user:
+
 - **ID:** `a702251f-4686-4a79-aa8a-3fc936194860`
 - **Email:** `test@dredre.net`
 - **Display Name:** User 1
@@ -138,10 +142,12 @@ Your database already has this user:
 ## Current Workaround (No Auth Required)
 
 The app currently works WITHOUT authentication for testing:
+
 - User ID is hardcoded in `app/today/page.tsx:52`
 - You can join/leave trains without logging in
 - Perfect for testing the core functionality
 
 To test WITHOUT password:
+
 - Just visit http://localhost:3000/today
 - Everything works with the hardcoded user ID

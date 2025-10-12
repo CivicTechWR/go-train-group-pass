@@ -7,12 +7,14 @@ This project uses several Model Context Protocol (MCP) servers to enhance Claude
 ### Prerequisites
 
 **Option 1: Using `uvx` (Recommended)**
+
 ```bash
 # Install uv (if not already installed)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 **Option 2: Using Python venv**
+
 ```bash
 # Requires Python 3.8+
 python3 --version
@@ -39,6 +41,7 @@ pip install -r requirements-mcp.txt
 ```
 
 Then update `.claude/mcp.json` to use venv:
+
 ```json
 "fetch": {
   "command": ".venv/bin/python",
@@ -50,17 +53,17 @@ Then update `.claude/mcp.json` to use venv:
 
 ### Essential (Pre-configured)
 
-| Server | Purpose | Setup Required |
-|--------|---------|----------------|
-| `supabase` | Database operations | Environment variables (see `.env.example`) |
-| `filesystem` | File operations | None (uses current directory) |
-| `git` | Version control | None (`uvx` auto-installs) |
-| `memory` | Persistent context | None |
-| `sequential-thinking` | Complex reasoning | None |
-| `fetch` | HTTP requests | None (`uvx` auto-installs) |
-| `brave-search` | Web search | `BRAVE_API_KEY` env var |
-| `playwright` | Browser automation | None (`npx` auto-installs) |
-| `chrome-devtools` | Frontend debugging | None (`npx` auto-installs) |
+| Server                | Purpose             | Setup Required                             |
+| --------------------- | ------------------- | ------------------------------------------ |
+| `supabase`            | Database operations | Environment variables (see `.env.example`) |
+| `filesystem`          | File operations     | None (uses current directory)              |
+| `git`                 | Version control     | None (`uvx` auto-installs)                 |
+| `memory`              | Persistent context  | None                                       |
+| `sequential-thinking` | Complex reasoning   | None                                       |
+| `fetch`               | HTTP requests       | None (`uvx` auto-installs)                 |
+| `brave-search`        | Web search          | `BRAVE_API_KEY` env var                    |
+| `playwright`          | Browser automation  | None (`npx` auto-installs)                 |
+| `chrome-devtools`     | Frontend debugging  | None (`npx` auto-installs)                 |
 
 ### Environment Variables
 
@@ -82,6 +85,7 @@ BRAVE_API_KEY=your_brave_api_key
 ### "uvx: command not found"
 
 Install `uv`:
+
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 # Or on macOS: brew install uv
@@ -91,11 +95,13 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ### Python MCP servers failing
 
 Option 1 - Switch to uvx (recommended):
+
 ```bash
 # Already configured! Just install uv (see above)
 ```
 
 Option 2 - Use venv:
+
 ```bash
 ./scripts/setup-mcp.sh
 # Then update .claude/mcp.json to use .venv/bin/python
@@ -110,6 +116,7 @@ Option 2 - Use venv:
 ### Git MCP not working
 
 Ensure you're in a git repository:
+
 ```bash
 git init  # If not already initialized
 ```
@@ -117,6 +124,7 @@ git init  # If not already initialized
 ## Platform Compatibility
 
 The configuration uses relative paths (`.` for current directory) and works on:
+
 - ✅ Linux
 - ✅ macOS
 - ✅ Windows (with Git Bash or WSL)
@@ -135,7 +143,7 @@ To add a new MCP server, edit `.claude/mcp.json`:
 {
   "mcpServers": {
     "your-server": {
-      "command": "uvx",  // or "npx" for Node packages
+      "command": "uvx", // or "npx" for Node packages
       "args": ["your-mcp-package"],
       "env": {
         "API_KEY": "${YOUR_API_KEY}"

@@ -3,14 +3,17 @@
 ## Quick Start (3 Options)
 
 ### Option 1: Demo Mode (No Database Required) ⚡ FASTEST
+
 1. Visit: **http://localhost:3000/today-demo**
 2. Click "Join" buttons to test UI
 3. All data is local, no Supabase needed
 
 ### Option 2: Full Setup with Supabase (Recommended)
+
 Follow steps below for complete database setup and real-time testing.
 
 ### Option 3: Use PostgreSQL MCP
+
 If you have the PostgreSQL MCP configured, skip manual SQL and use MCP tools.
 
 ---
@@ -22,12 +25,14 @@ If you have the PostgreSQL MCP configured, skip manual SQL and use MCP tools.
 Go to your Supabase dashboard: https://supabase.com/dashboard/project/gwljtlrlbiygermawabm/editor
 
 **Run Migration 001 (Initial Schema):**
+
 1. Click "SQL Editor" → "+ New query"
 2. Copy/paste contents from `supabase/migrations/001_initial_schema.sql`
 3. Click "Run"
 4. Verify: Should see "Success. No rows returned"
 
 **Run Migration 002 (Rebalance Function):**
+
 1. Create another new query
 2. Copy/paste contents from `supabase/migrations/002_rebalance_groups_function.sql`
 3. Click "Run"
@@ -36,11 +41,13 @@ Go to your Supabase dashboard: https://supabase.com/dashboard/project/gwljtlrlbi
 ### Step 2: Seed Train Data
 
 **Option A: Via API Endpoint**
+
 ```bash
 curl -X POST http://localhost:3000/api/seed
 ```
 
 **Option B: Via SQL (Manual)**
+
 ```sql
 -- Insert 5 morning trains KW → Union
 INSERT INTO trains (departure_time, origin, destination, direction, days_of_week) VALUES
@@ -131,11 +138,13 @@ const currentUserId = 'PASTE_YOUR_UUID_HERE';
 ### 🎯 Expected Behavior
 
 **Group Formation Rules:**
+
 - 1 person → Solo ($16.32/person)
 - 2-5 people → One group
 - 6+ people → Multiple groups (balanced)
 
 **Cost Calculations:**
+
 - 2 people → $15.00/person
 - 3 people → $13.33/person
 - 4 people → $12.50/person
@@ -152,19 +161,23 @@ const currentUserId = 'PASTE_YOUR_UUID_HERE';
 ## Troubleshooting
 
 ### "No trips showing"
+
 - Check: Did you run `/api/seed` or manual SQL?
 - Verify: In Supabase dashboard, run `SELECT * FROM trips;`
 
 ### "Can't join train"
+
 - Check: Is `currentUserId` set in `app/today/page.tsx`?
 - Verify: User exists in `profiles` table
 - Check console for errors
 
 ### "Groups not rebalancing"
+
 - Verify migration 002 was run successfully
 - Check function exists: `SELECT * FROM pg_proc WHERE proname = 'rebalance_trip_groups';`
 
 ### "Real-time not working"
+
 - Check Supabase Realtime is enabled (Settings → API → Realtime)
 - Verify publications: `SELECT * FROM pg_publication_tables WHERE pubname = 'supabase_realtime';`
 - Check browser console for WebSocket errors
@@ -173,13 +186,13 @@ const currentUserId = 'PASTE_YOUR_UUID_HERE';
 
 ## Demo vs Production
 
-| Feature | Demo Mode | Full Supabase |
-|---------|-----------|---------------|
-| URL | `/today-demo` | `/today` |
-| Database | Local state | Real Supabase |
-| Real-time | ❌ No | ✅ Yes |
-| Multi-user | ❌ No | ✅ Yes |
-| Persistent | ❌ No | ✅ Yes |
+| Feature    | Demo Mode     | Full Supabase |
+| ---------- | ------------- | ------------- |
+| URL        | `/today-demo` | `/today`      |
+| Database   | Local state   | Real Supabase |
+| Real-time  | ❌ No         | ✅ Yes        |
+| Multi-user | ❌ No         | ✅ Yes        |
+| Persistent | ❌ No         | ✅ Yes        |
 
 ---
 

@@ -4,7 +4,6 @@ export async function GET() {
   return NextResponse.json({
     success: true,
     message: 'Query test endpoint working',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 }
-

@@ -26,7 +26,10 @@ function calculateCostPerPerson(groupSize: number): number {
   return PASS_COSTS[groupSize as keyof typeof PASS_COSTS] / groupSize;
 }
 
-export function formGroups(users: User[], options?: GroupFormationOptions): Group[] {
+export function formGroups(
+  users: User[],
+  options?: GroupFormationOptions
+): Group[] {
   const count = users.length;
   const existingStewards = options?.existingStewards || new Map();
 
@@ -35,23 +38,27 @@ export function formGroups(users: User[], options?: GroupFormationOptions): Grou
   if (count === 1) {
     // Solo rider - show individual ticket option
     const stewardId = existingStewards.get(users[0].id) ? users[0].id : null;
-    return [{
-      groupNumber: 1,
-      members: [users[0]],
-      costPerPerson: 16.32, // Individual Presto fare KW→Union
-      stewardId,
-    }];
+    return [
+      {
+        groupNumber: 1,
+        members: [users[0]],
+        costPerPerson: 16.32, // Individual Presto fare KW→Union
+        stewardId,
+      },
+    ];
   }
 
   if (count <= 5) {
     // Find if any user was previously a steward
     const stewardId = users.find(u => existingStewards.has(u.id))?.id || null;
-    return [{
-      groupNumber: 1,
-      members: users,
-      costPerPerson: calculateCostPerPerson(count),
-      stewardId,
-    }];
+    return [
+      {
+        groupNumber: 1,
+        members: users,
+        costPerPerson: calculateCostPerPerson(count),
+        stewardId,
+      },
+    ];
   }
 
   // For 6+ riders: distribute evenly while preserving steward assignments
@@ -79,7 +86,10 @@ export function formGroups(users: User[], options?: GroupFormationOptions): Grou
 
     // Fill remaining slots with non-stewards
     const slotsNeeded = size - groupMembers.length;
-    const availableNonStewards = nonStewards.slice(nonStewardIndex, nonStewardIndex + slotsNeeded);
+    const availableNonStewards = nonStewards.slice(
+      nonStewardIndex,
+      nonStewardIndex + slotsNeeded
+    );
     groupMembers.push(...availableNonStewards);
     nonStewardIndex += availableNonStewards.length;
 

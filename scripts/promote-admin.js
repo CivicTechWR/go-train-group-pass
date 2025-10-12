@@ -13,7 +13,9 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('❌ Missing required environment variables');
-  console.error('Please ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set');
+  console.error(
+    'Please ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set'
+  );
   process.exit(1);
 }
 
@@ -22,7 +24,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 async function promoteToAdmin(userEmail) {
   try {
     console.log(`🔍 Looking for user with email: ${userEmail}`);
-    
+
     // Find user by email
     const { data: profile, error: findError } = await supabase
       .from('profiles')
@@ -39,7 +41,9 @@ async function promoteToAdmin(userEmail) {
     }
 
     if (profile.is_community_admin) {
-      console.log(`✅ User ${profile.display_name} (${profile.email}) is already an admin`);
+      console.log(
+        `✅ User ${profile.display_name} (${profile.email}) is already an admin`
+      );
       return;
     }
 
@@ -53,9 +57,10 @@ async function promoteToAdmin(userEmail) {
       throw updateError;
     }
 
-    console.log(`✅ Successfully promoted ${profile.display_name} (${profile.email}) to admin`);
+    console.log(
+      `✅ Successfully promoted ${profile.display_name} (${profile.email}) to admin`
+    );
     console.log(`🔗 Admin dashboard: http://localhost:3000/admin`);
-
   } catch (error) {
     console.error('❌ Error promoting user to admin:', error.message);
     process.exit(1);
@@ -83,10 +88,11 @@ async function listAdmins() {
     admins.forEach((admin, index) => {
       console.log(`  ${index + 1}. ${admin.display_name} (${admin.email})`);
       console.log(`     ID: ${admin.id}`);
-      console.log(`     Created: ${new Date(admin.created_at).toLocaleDateString()}`);
+      console.log(
+        `     Created: ${new Date(admin.created_at).toLocaleDateString()}`
+      );
       console.log('');
     });
-
   } catch (error) {
     console.error('❌ Error listing admins:', error.message);
     process.exit(1);
@@ -95,7 +101,7 @@ async function listAdmins() {
 
 async function main() {
   const args = process.argv.slice(2);
-  
+
   if (args.length === 0) {
     console.log('Usage: node scripts/promote-admin.js <user-email>');
     console.log('       node scripts/promote-admin.js --list');

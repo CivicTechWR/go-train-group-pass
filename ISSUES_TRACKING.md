@@ -3,10 +3,11 @@
 ## Completed Issues ✅
 
 ### Issue #1: Departed Trips Filtering
+
 - **Status**: ✅ Completed
 - **Date**: 2025-10-09
 - **Description**: Departed trips should not appear as available to join, but users should still see their joined trips
-- **Solution**: 
+- **Solution**:
   - Added `trips.myTrips` endpoint to fetch user's joined trips (including departed)
   - Updated `trips.list` to filter out departed trips
   - Modified `/today` page to show two sections: "Your Trips" and "Available to Join"
@@ -14,6 +15,7 @@
 - **Commit**: `8efe1b8`
 
 ### Issue #2: Trip Sorting by Departure Time
+
 - **Status**: ✅ Completed
 - **Date**: 2025-10-09
 - **Description**: Trips should be sorted by departure time within each date
@@ -25,6 +27,7 @@
 - **Commit**: `e044e94`
 
 ### Issue #3: Direct Train Route Validation
+
 - **Status**: ✅ Completed
 - **Date**: 2025-10-09
 - **Description**: Only direct train routes (no bus transfers) should be supported for group passes
@@ -38,17 +41,19 @@
 ## Open Issues 🔄
 
 ### Issue #4: User Profile Authentication Error
+
 - **Status**: 🔄 Open
 - **Priority**: High
 - **Description**: Join functionality fails with "User profile not found for ID: d9f85de2-dc1f-4508-8af7-dbf70f0a0772"
 - **Root Cause**: Mismatch between hardcoded test user ID and actual session user ID
 - **Impact**: Users cannot join trips
-- **Solution Needed**: 
+- **Solution Needed**:
   - Implement proper phone-based authentication via Twilio
   - Create user profiles automatically on first login
   - Remove hardcoded test user ID
 
 ### Issue #5: Authentication Bypass in Development
+
 - **Status**: 🔄 Open
 - **Priority**: Medium
 - **Description**: Currently using hardcoded test user ID for development
@@ -59,6 +64,7 @@
   - Add proper session management
 
 ### Issue #6: Missing Return Trip Support
+
 - **Status**: 🔄 Open
 - **Priority**: Low
 - **Description**: Currently only supports outbound trips (Kitchener → Union)
@@ -71,22 +77,25 @@
 ## Technical Debt 📋
 
 ### Issue #7: Debug Logging Cleanup
+
 - **Status**: ✅ Completed
 - **Description**: Remove debug console.log statements from production code
 - **Solution**: Cleaned up debug logging in `app/today/page.tsx` and `lib/trpc/Provider.tsx`
 
 ### Issue #8: Build Optimization
+
 - **Status**: 🔄 Open
 - **Description**: Webpack cache warnings and module not found errors
 - **Impact**: Development server instability
 - **Solution Needed**: Investigate and fix build cache issues
 
 ### Issue #9: Administrative Backend System
+
 - **Status**: 🔄 Open
 - **Priority**: Medium
 - **Description**: Create admin dashboard for system monitoring and management
 - **Impact**: Cannot monitor system health or manage basic operations
-- **Solution Needed**: 
+- **Solution Needed**:
   - Admin authentication and access control
   - User management (view profiles, basic moderation)
   - Trip monitoring (view all trips, groups, memberships)

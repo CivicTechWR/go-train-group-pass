@@ -6,10 +6,10 @@ const securityHeaders = {
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
   'X-XSS-Protection': '1; mode=block',
-  
+
   // Referrer policy
   'Referrer-Policy': 'strict-origin-when-cross-origin',
-  
+
   // Permissions policy
   'Permissions-Policy': [
     'camera=()',
@@ -22,7 +22,7 @@ const securityHeaders = {
     'gyroscope=()',
     'accelerometer=()',
   ].join(', '),
-  
+
   // Content Security Policy
   'Content-Security-Policy': [
     "default-src 'self'",
@@ -36,12 +36,12 @@ const securityHeaders = {
     "form-action 'self'",
     "frame-ancestors 'none'",
     "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co wss://*.supabase.in",
-    "upgrade-insecure-requests",
+    'upgrade-insecure-requests',
   ].join('; '),
-  
+
   // Strict Transport Security (HTTPS only)
   'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-  
+
   // Cross-Origin policies
   'Cross-Origin-Embedder-Policy': 'require-corp',
   'Cross-Origin-Opener-Policy': 'same-origin',
@@ -52,8 +52,8 @@ const securityHeaders = {
 const apiHeaders = {
   ...securityHeaders,
   'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-  'Pragma': 'no-cache',
-  'Expires': '0',
+  Pragma: 'no-cache',
+  Expires: '0',
 } as const;
 
 // Headers for static assets
@@ -68,24 +68,32 @@ const htmlHeaders = {
   'Cache-Control': 'public, max-age=0, must-revalidate',
 } as const;
 
-export function addSecurityHeaders(response: NextResponse, type: 'api' | 'html' | 'static' = 'html'): NextResponse {
-  const headers = type === 'api' ? apiHeaders : type === 'static' ? staticHeaders : htmlHeaders;
-  
+export function addSecurityHeaders(
+  response: NextResponse,
+  type: 'api' | 'html' | 'static' = 'html'
+): NextResponse {
+  const headers =
+    type === 'api'
+      ? apiHeaders
+      : type === 'static'
+        ? staticHeaders
+        : htmlHeaders;
+
   Object.entries(headers).forEach(([key, value]) => {
     response.headers.set(key, value);
   });
-  
+
   return response;
 }
 
 // Middleware for adding security headers
 export function securityHeadersMiddleware(request: NextRequest): NextResponse {
   const response = NextResponse.next();
-  
+
   // Determine content type
   const pathname = request.nextUrl.pathname;
   let type: 'api' | 'html' | 'static' = 'html';
-  
+
   if (pathname.startsWith('/api/')) {
     type = 'api';
   } else if (
@@ -95,17 +103,19 @@ export function securityHeadersMiddleware(request: NextRequest): NextResponse {
   ) {
     type = 'static';
   }
-  
+
   return addSecurityHeaders(response, type);
 }
 
 // CORS configuration for API routes
 export const corsHeaders = {
-  'Access-Control-Allow-Origin': process.env.NODE_ENV === 'production' 
-    ? 'https://go-transit.dredre.net' 
-    : 'http://localhost:3000',
+  'Access-Control-Allow-Origin':
+    process.env.NODE_ENV === 'production'
+      ? 'https://go-transit.dredre.net'
+      : 'http://localhost:3000',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+  'Access-Control-Allow-Headers':
+    'Content-Type, Authorization, X-Requested-With',
   'Access-Control-Allow-Credentials': 'true',
   'Access-Control-Max-Age': '86400',
 } as const;
@@ -117,7 +127,10 @@ export function generateCSRFToken(): string {
   return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
-export function validateCSRFToken(token: string, sessionToken: string): boolean {
+export function validateCSRFToken(
+  token: string,
+  sessionToken: string
+): boolean {
   if (!token || !sessionToken) return false;
   return token === sessionToken;
 }
@@ -135,11 +148,11 @@ export function validateRequestSize(request: NextRequest): boolean {
   if (contentLength && parseInt(contentLength) > REQUEST_LIMITS.MAX_BODY_SIZE) {
     return false;
   }
-  
+
   if (request.url.length > REQUEST_LIMITS.MAX_URL_LENGTH) {
     return false;
   }
-  
+
   return true;
 }
 
@@ -157,7 +170,7 @@ export function logSecurityEvent(
     userAgent: request.headers.get('user-agent'),
     url: request.url,
   };
-  
+
   // In production, send to security monitoring service
   if (process.env.NODE_ENV === 'production') {
     console.log('SECURITY_EVENT:', JSON.stringify(logData));
@@ -171,18 +184,18 @@ function getClientIP(headers: Headers): string {
   const forwarded = headers.get('x-forwarded-for');
   const realIP = headers.get('x-real-ip');
   const remoteAddr = headers.get('x-remote-addr');
-  
+
   if (forwarded) {
     return forwarded.split(',')[0].trim();
   }
-  
+
   if (realIP) {
     return realIP;
   }
-  
+
   if (remoteAddr) {
     return remoteAddr;
   }
-  
+
   return 'unknown';
 }

@@ -13,7 +13,8 @@ export async function GET() {
     .maybeSingle();
 
   // Test 2: Check if auth user exists
-  const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(testUserId);
+  const { data: authUser, error: authError } =
+    await supabase.auth.admin.getUserById(testUserId);
 
   return NextResponse.json({
     testUserId,

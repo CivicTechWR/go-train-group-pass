@@ -1,8 +1,19 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
-import { securityHeadersMiddleware, validateRequestSize, logSecurityEvent } from './lib/security-headers';
+import {
+  securityHeadersMiddleware,
+  validateRequestSize,
+  logSecurityEvent,
+} from './lib/security-headers';
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Skip middleware for API routes
+  if (pathname.startsWith('/api')) {
+    return NextResponse.next();
+  }
+
   // Validate request size
   if (!validateRequestSize(request)) {
     logSecurityEvent('REQUEST_SIZE_EXCEEDED', { url: request.url }, request);
@@ -61,7 +72,9 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
   // If user is authenticated, ensure profile exists
   if (session?.user) {
@@ -77,7 +90,10 @@ export async function middleware(request: NextRequest) {
         id: session.user.id,
         phone: session.user.phone || '',
         email: session.user.email || '',
-        display_name: session.user.user_metadata?.display_name || session.user.email?.split('@')[0] || 'User',
+        display_name:
+          session.user.user_metadata?.display_name ||
+          session.user.email?.split('@')[0] ||
+          'User',
         profile_photo_url: session.user.user_metadata?.avatar_url || null,
       });
 
@@ -90,7 +106,11 @@ export async function middleware(request: NextRequest) {
   // Protect routes
   const isAuthPage = request.nextUrl.pathname.startsWith('/login');
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin');
-  const isProtectedRoute = !isAuthPage && !request.nextUrl.pathname.startsWith('/auth/callback');
+  const isApiRoute = request.nextUrl.pathname.startsWith('/api');
+  const isProtectedRoute =
+    !isAuthPage &&
+    !request.nextUrl.pathname.startsWith('/auth/callback') &&
+    !isApiRoute;
 
   // Require authentication for protected routes
   if (!session && isProtectedRoute) {
@@ -119,5 +139,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\.).*)'],
 };

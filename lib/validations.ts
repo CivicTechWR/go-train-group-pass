@@ -3,11 +3,18 @@ import { z } from 'zod';
 // Common validation schemas
 export const uuidSchema = z.string().uuid('Invalid UUID format');
 export const emailSchema = z.string().email('Invalid email format');
-export const phoneSchema = z.string().regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format');
-export const displayNameSchema = z.string().min(1, 'Display name required').max(50, 'Display name too long');
-export const coachNumberSchema = z.string().regex(/^\d{4}$/, 'Coach number must be 4 digits');
+export const phoneSchema = z
+  .string()
+  .regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format');
+export const displayNameSchema = z
+  .string()
+  .min(1, 'Display name required')
+  .max(50, 'Display name too long');
+export const coachNumberSchema = z
+  .string()
+  .regex(/^\d{4}$/, 'Coach number must be 4 digits');
 export const coachLevelSchema = z.enum(['upper', 'lower', 'middle'], {
-  message: 'Coach level must be upper, lower, or middle'
+  message: 'Coach level must be upper, lower, or middle',
 });
 
 // Trip-related validations
@@ -33,9 +40,16 @@ export const volunteerStewardSchema = z.object({
 export const uploadPassSchema = z.object({
   groupId: uuidSchema,
   passScreenshotUrl: z.string().url('Invalid URL format'),
-  passTicketNumber: z.string().min(1, 'Ticket number required').max(20, 'Ticket number too long'),
+  passTicketNumber: z
+    .string()
+    .min(1, 'Ticket number required')
+    .max(20, 'Ticket number too long'),
   passActivatedAt: z.string().datetime('Invalid datetime format'),
-  passengerCount: z.number().int().min(1, 'Passenger count must be at least 1').max(10, 'Passenger count too high'),
+  passengerCount: z
+    .number()
+    .int()
+    .min(1, 'Passenger count must be at least 1')
+    .max(10, 'Passenger count too high'),
 });
 
 export const markPaymentSentSchema = z.object({
@@ -71,8 +85,14 @@ export const rateLimitSchema = z.object({
 // File upload validations
 export const fileUploadSchema = z.object({
   file: z.instanceof(File, { message: 'File required' }),
-  maxSize: z.number().int().min(1, 'Max size must be positive').default(5 * 1024 * 1024), // 5MB default
-  allowedTypes: z.array(z.string()).default(['image/jpeg', 'image/png', 'image/webp']),
+  maxSize: z
+    .number()
+    .int()
+    .min(1, 'Max size must be positive')
+    .default(5 * 1024 * 1024), // 5MB default
+  allowedTypes: z
+    .array(z.string())
+    .default(['image/jpeg', 'image/png', 'image/webp']),
 });
 
 // Sanitization helpers
@@ -90,7 +110,9 @@ export const sanitizeCoachNumber = (input: string): string => {
 
 // Validation error formatter
 export const formatValidationError = (error: z.ZodError): string => {
-  return error.issues.map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`).join(', ');
+  return error.issues
+    .map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`)
+    .join(', ');
 };
 
 // Common validation patterns

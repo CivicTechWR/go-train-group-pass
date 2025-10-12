@@ -7,22 +7,27 @@ Successfully implemented all Week 2 MVP features for the GO Train Group Pass app
 ## Files Created/Modified
 
 ### Type Definitions
+
 - `types/database.ts` - Complete TypeScript type definitions (already existed, verified)
 
 ### UI Components
 
 #### Trip Components
+
 - `components/trips/TripCard.tsx` - Main trip card with join/leave functionality
 - `components/trips/CountdownTimer.tsx` - Real-time countdown timer
 - `components/trips/TripCardSkeleton.tsx` - Loading skeleton component
 
 #### Group Components
+
 - `components/groups/GroupCard.tsx` - Group display with members and steward
 
 #### Navigation
+
 - `components/navigation/BottomNav.tsx` - Responsive navigation (mobile bottom bar, desktop sidebar)
 
 #### shadcn/ui Components (installed)
+
 - `components/ui/button.tsx`
 - `components/ui/card.tsx`
 - `components/ui/badge.tsx`
@@ -30,29 +35,36 @@ Successfully implemented all Week 2 MVP features for the GO Train Group Pass app
 - `components/ui/tabs.tsx`
 
 ### Hooks
+
 - `hooks/useGroupUpdates.ts` - Supabase Realtime subscriptions for live group updates
 
 ### Pages
+
 - `app/today/page.tsx` - Main trips page with today/tomorrow tabs
 - `app/profile/page.tsx` - Profile placeholder (Week 3)
 - `app/steward/page.tsx` - Steward dashboard placeholder (Week 3)
 
 ### API Routes
+
 - `app/api/seed/route.ts` - Seed train schedules and trip instances
 
 ### Database
+
 - `supabase/migrations/002_rebalance_groups_function.sql` - PostgreSQL function for atomic group rebalancing
 
 ### Layout
+
 - `app/layout.tsx` - Updated to include navigation component
 
 ### Documentation
+
 - `SETUP_WEEK2.md` - Complete setup and testing guide
 - `WEEK2_IMPLEMENTATION_SUMMARY.md` - This file
 
 ## Features Implemented
 
 ### 1. Trip List Display
+
 - Today and Tomorrow tabs
 - 5 morning trains (6:38 AM - 7:38 AM KW → Union)
 - Real-time countdown timers
@@ -60,6 +72,7 @@ Successfully implemented all Week 2 MVP features for the GO Train Group Pass app
 - Expandable group details
 
 ### 2. Join/Leave Functionality
+
 - One-tap join with optimistic updates
 - Success/error toast notifications
 - 30-minute cutoff before departure
@@ -67,6 +80,7 @@ Successfully implemented all Week 2 MVP features for the GO Train Group Pass app
 - Loading states during mutations
 
 ### 3. Group Formation
+
 - Automatic balancing to minimize cost variance
 - Cost display per person
 - Member list with avatars
@@ -74,6 +88,7 @@ Successfully implemented all Week 2 MVP features for the GO Train Group Pass app
 - "You're in Group X" badge for current user
 
 ### 4. Real-time Updates
+
 - Supabase Realtime subscriptions
 - Live group rebalancing
 - Connection status indicator (green wifi = connected)
@@ -81,6 +96,7 @@ Successfully implemented all Week 2 MVP features for the GO Train Group Pass app
 - 30-second polling fallback
 
 ### 5. Responsive Design
+
 - Mobile-first approach
 - Bottom navigation on mobile (touch-friendly)
 - Sidebar navigation on desktop
@@ -89,6 +105,7 @@ Successfully implemented all Week 2 MVP features for the GO Train Group Pass app
 - Proper spacing for bottom nav (pb-20 on mobile)
 
 ### 6. Countdown Timer
+
 - Updates every second
 - Shows "2h 15m" format
 - Displays "Departs soon" when <5 min
@@ -96,11 +113,13 @@ Successfully implemented all Week 2 MVP features for the GO Train Group Pass app
 - Color coding (orange for soon, gray for departed)
 
 ### 7. Loading States
+
 - Skeleton screens while loading
 - Disabled buttons during mutations
 - Loading text ("Joining...", "Leaving...")
 
 ### 8. Error Handling
+
 - Toast notifications for errors
 - Error boundaries for failed queries
 - User-friendly error messages
@@ -109,6 +128,7 @@ Successfully implemented all Week 2 MVP features for the GO Train Group Pass app
 ## Technical Architecture
 
 ### Frontend Stack
+
 - Next.js 15 App Router
 - TypeScript 5.3+
 - tRPC 11 for type-safe API calls
@@ -120,6 +140,7 @@ Successfully implemented all Week 2 MVP features for the GO Train Group Pass app
 - Lucide React for icons
 
 ### Backend Stack
+
 - tRPC router with protected procedures
 - Supabase Auth for session management
 - Supabase Postgres for database
@@ -127,6 +148,7 @@ Successfully implemented all Week 2 MVP features for the GO Train Group Pass app
 - PostgreSQL stored function for atomic operations
 
 ### Data Flow
+
 1. User clicks "Join Train"
 2. tRPC mutation called
 3. Server validates 30-min cutoff
@@ -139,6 +161,7 @@ Successfully implemented all Week 2 MVP features for the GO Train Group Pass app
 10. All connected clients update automatically
 
 ### Group Formation Algorithm
+
 - Located in `lib/group-formation.ts`
 - Distributes users evenly across groups
 - Minimizes cost variance
@@ -146,6 +169,7 @@ Successfully implemented all Week 2 MVP features for the GO Train Group Pass app
 - Handles edge cases (1-5 users, 6+, etc.)
 
 ### Real-time Architecture
+
 - Two channels per tab (today/tomorrow)
 - One channel for `groups` table changes
 - One channel for `group_memberships` table changes
@@ -175,6 +199,7 @@ Successfully implemented all Week 2 MVP features for the GO Train Group Pass app
 ## Next Steps (Week 3)
 
 ### Steward Workflow
+
 - Steward volunteer system
 - Pass upload with OCR
 - Manual pass entry fallback
@@ -182,12 +207,14 @@ Successfully implemented all Week 2 MVP features for the GO Train Group Pass app
 - Payment tracking dashboard
 
 ### Payment System
+
 - Mark payment as sent
 - Steward payment tracking
 - Payment reminder notifications
 - Payment history
 
 ### User Profile
+
 - Profile management
 - Display name and photo
 - Email and phone settings
@@ -255,6 +282,7 @@ Route (app)                                 Size  First Load JS
 ## Success Metrics
 
 ### Completeness
+
 - ✅ All Week 2 tasks completed
 - ✅ All components implemented
 - ✅ All hooks created
@@ -264,6 +292,7 @@ Route (app)                                 Size  First Load JS
 - ✅ API routes implemented
 
 ### Code Quality
+
 - ✅ TypeScript strict mode
 - ✅ No TypeScript errors
 - ✅ ESLint compliant
@@ -274,6 +303,7 @@ Route (app)                                 Size  First Load JS
 - ✅ Loading states implemented
 
 ### User Experience
+
 - ✅ Mobile-first responsive design
 - ✅ Touch-friendly buttons (44px min)
 - ✅ Smooth animations
@@ -286,6 +316,7 @@ Route (app)                                 Size  First Load JS
 ## Deployment Readiness
 
 ### Pre-deployment Checklist
+
 - [ ] Set up Supabase project
 - [ ] Run database migrations
 - [ ] Seed train data
@@ -296,6 +327,7 @@ Route (app)                                 Size  First Load JS
 - [ ] Test in production-like environment
 
 ### Environment Variables Required
+
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key

@@ -4,7 +4,13 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ChevronDown, ChevronUp, Users, ArrowRight, Calendar } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronUp,
+  Users,
+  ArrowRight,
+  Calendar,
+} from 'lucide-react';
 import { format, parse, isToday, isTomorrow } from 'date-fns';
 import { CountdownTimer } from './CountdownTimer';
 import { GroupCard } from '@/components/groups/GroupCard';
@@ -27,7 +33,7 @@ export function TripCard({ trip, currentUserId }: TripCardProps) {
       utils.trips.list.invalidate();
       utils.trips.myTrips.invalidate();
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(error.message);
     },
   });
@@ -38,18 +44,18 @@ export function TripCard({ trip, currentUserId }: TripCardProps) {
       utils.trips.list.invalidate();
       utils.trips.myTrips.invalidate();
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(error.message);
     },
   });
 
   // Check if user is in this trip
   const userMembership = trip.groups
-    .flatMap((g) => g.memberships)
-    .find((m) => m.user_id === currentUserId);
+    .flatMap(g => g.memberships)
+    .find(m => m.user_id === currentUserId);
 
-  const userGroup = trip.groups.find((g) =>
-    g.memberships.some((m) => m.user_id === currentUserId)
+  const userGroup = trip.groups.find(g =>
+    g.memberships.some(m => m.user_id === currentUserId)
   );
 
   const totalRiders = trip.groups.reduce(
@@ -74,16 +80,16 @@ export function TripCard({ trip, currentUserId }: TripCardProps) {
   };
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="pb-4">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <div className="flex items-baseline gap-2">
-              <CardTitle className="text-2xl font-bold">
+    <Card className='overflow-hidden'>
+      <CardHeader className='pb-4'>
+        <div className='flex items-start justify-between'>
+          <div className='space-y-1'>
+            <div className='flex items-baseline gap-2'>
+              <CardTitle className='text-2xl font-bold'>
                 {format(parse(cleanTime, 'HH:mm:ss', new Date()), 'h:mm a')}
               </CardTitle>
-              <Badge variant="outline" className="text-xs">
-                <Calendar className="h-3 w-3 mr-1" />
+              <Badge variant='outline' className='text-xs'>
+                <Calendar className='h-3 w-3 mr-1' />
                 {(() => {
                   // Create a proper date object for comparison
                   const tripDate = new Date(trip.date + 'T00:00:00');
@@ -91,9 +97,9 @@ export function TripCard({ trip, currentUserId }: TripCardProps) {
                   today.setHours(0, 0, 0, 0);
                   const tomorrow = new Date(today);
                   tomorrow.setDate(tomorrow.getDate() + 1);
-                  
+
                   const dateStr = format(tripDate, 'MMM d');
-                  
+
                   if (tripDate.getTime() === today.getTime()) {
                     return `Today (${dateStr})`;
                   } else if (tripDate.getTime() === tomorrow.getTime()) {
@@ -104,9 +110,9 @@ export function TripCard({ trip, currentUserId }: TripCardProps) {
                 })()}
               </Badge>
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className='flex items-center gap-2 text-sm text-muted-foreground'>
               <span>{trip.train.origin.replace(' GO', '')}</span>
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className='h-4 w-4' />
               <span>{trip.train.destination.replace(' Station', '')}</span>
             </div>
           </div>
@@ -114,31 +120,34 @@ export function TripCard({ trip, currentUserId }: TripCardProps) {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className='space-y-4'>
         {/* Status and stats */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <Badge variant="outline" className="flex items-center gap-1">
-            <Users className="h-3 w-3" />
+        <div className='flex items-center gap-2 flex-wrap'>
+          <Badge variant='outline' className='flex items-center gap-1'>
+            <Users className='h-3 w-3' />
             {totalRiders} {totalRiders === 1 ? 'rider' : 'riders'}
           </Badge>
           {trip.groups.length > 0 && (
-            <Badge variant="secondary">
-              {trip.groups.length} {trip.groups.length === 1 ? 'group' : 'groups'}
+            <Badge variant='secondary'>
+              {trip.groups.length}{' '}
+              {trip.groups.length === 1 ? 'group' : 'groups'}
             </Badge>
           )}
           {userMembership && (
-            <Badge variant="default">You&apos;re in Group {userGroup?.group_number}</Badge>
+            <Badge variant='default'>
+              You&apos;re in Group {userGroup?.group_number}
+            </Badge>
           )}
         </div>
 
         {/* Action buttons */}
-        <div className="flex gap-2">
+        <div className='flex gap-2'>
           {userMembership ? (
             <Button
-              variant="outline"
+              variant='outline'
               onClick={handleLeave}
               disabled={leaveMutation.isPending}
-              className="flex-1"
+              className='flex-1'
             >
               {leaveMutation.isPending ? 'Leaving...' : 'Leave Train'}
             </Button>
@@ -146,7 +155,7 @@ export function TripCard({ trip, currentUserId }: TripCardProps) {
             <Button
               onClick={handleJoin}
               disabled={joinMutation.isPending}
-              className="flex-1"
+              className='flex-1'
             >
               {joinMutation.isPending ? 'Joining...' : 'Join Train'}
             </Button>
@@ -154,14 +163,14 @@ export function TripCard({ trip, currentUserId }: TripCardProps) {
 
           {trip.groups.length > 0 && (
             <Button
-              variant="ghost"
-              size="icon"
+              variant='ghost'
+              size='icon'
               onClick={() => setIsExpanded(!isExpanded)}
             >
               {isExpanded ? (
-                <ChevronUp className="h-4 w-4" />
+                <ChevronUp className='h-4 w-4' />
               ) : (
-                <ChevronDown className="h-4 w-4" />
+                <ChevronDown className='h-4 w-4' />
               )}
             </Button>
           )}
@@ -169,12 +178,12 @@ export function TripCard({ trip, currentUserId }: TripCardProps) {
 
         {/* Expandable groups section */}
         {isExpanded && trip.groups.length > 0 && (
-          <div className="space-y-3 pt-3 border-t">
-            <p className="text-sm font-medium text-muted-foreground">Groups</p>
-            <div className="grid gap-3">
+          <div className='space-y-3 pt-3 border-t'>
+            <p className='text-sm font-medium text-muted-foreground'>Groups</p>
+            <div className='grid gap-3'>
               {trip.groups
                 .sort((a, b) => a.group_number - b.group_number)
-                .map((group) => (
+                .map(group => (
                   <GroupCard
                     key={group.id}
                     group={group}

@@ -28,18 +28,15 @@ When working on this project, configure these MCP servers in `.claude/mcp.json`:
 ### Essential MCP Servers
 
 1. **Git MCP** (`@gitmcp/server`)
-
    - **Use for:** Version control operations, commit history, branch management
    - **Why:** Essential for tracking changes and collaborating on the codebase
 
 2. **Supabase MCP** (`@designcomputer/supabase_mcp_server`)
-
    - **Use for:** Database queries, auth management, storage operations
    - **Why:** Direct access to Supabase without writing SQL, manages migrations
    - **Requires:** `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` environment variables
 
 3. **PostgreSQL MCP** (`@modelcontextprotocol/server-postgres`)
-
    - **Use for:** Advanced database queries, performance optimization, direct SQL access
    - **Why:** Fine-grained control over database operations
    - **Requires:** `POSTGRES_CONNECTION_STRING` environment variable
@@ -52,17 +49,14 @@ When working on this project, configure these MCP servers in `.claude/mcp.json`:
 ### Optional but Recommended
 
 5. **Sequential Thinking MCP** (`@modelcontextprotocol/server-sequential-thinking`)
-
    - **Use for:** Complex problem solving, algorithm design (especially group formation logic)
    - **Why:** Helps break down complex tasks into manageable steps
 
 6. **Memory MCP** (`@modelcontextprotocol/server-memory`)
-
    - **Use for:** Maintaining context across sessions, storing decisions and patterns
    - **Why:** Remembers architectural decisions and coding patterns
 
 7. **Fetch MCP** (`@modelcontextprotocol/server-fetch`)
-
    - **Use for:** Testing API endpoints, fetching GO Transit GTFS feeds
    - **Why:** Essential for external API integration
 
@@ -80,32 +74,36 @@ See `.claude/mcp.json` for the complete configuration. All required environment 
 The following servers are actively connected in this workspace:
 
 ### Core Servers (5)
-| Server                | Description                                                    | Used By                                                         |
-| --------------------- | -------------------------------------------------------------- | --------------------------------------------------------------- |
-| `filesystem`          | File system operations at `/opt/go-transit-group`               | All agents                                                      |
-| `memory`              | Persistent session state and context                            | `@go-train-security-reviewer`, `@go-train-gtfs-integrator`      |
-| `sequential-thinking` | Structured reasoning engine for complex problems                | `@go-train-ocr-specialist`, `@go-train-security-reviewer`       |
-| `git`                 | Git operations and commit history for `/opt/go-transit-group`  | All agents                                                      |
-| `fetch`               | External HTTP requests (uvx Python server)                      | `@go-train-gtfs-integrator`, `@go-train-notifications-engineer` |
+
+| Server                | Description                                                   | Used By                                                         |
+| --------------------- | ------------------------------------------------------------- | --------------------------------------------------------------- |
+| `filesystem`          | File system operations at `/opt/go-transit-group`             | All agents                                                      |
+| `memory`              | Persistent session state and context                          | `@go-train-security-reviewer`, `@go-train-gtfs-integrator`      |
+| `sequential-thinking` | Structured reasoning engine for complex problems              | `@go-train-ocr-specialist`, `@go-train-security-reviewer`       |
+| `git`                 | Git operations and commit history for `/opt/go-transit-group` | All agents                                                      |
+| `fetch`               | External HTTP requests (uvx Python server)                    | `@go-train-gtfs-integrator`, `@go-train-notifications-engineer` |
 
 ### Database Servers (2)
-| Server                | Description                                                    | Used By                                                         |
-| --------------------- | -------------------------------------------------------------- | --------------------------------------------------------------- |
-| `supabase`            | Supabase operations, RLS policy checks, auth, storage          | `@go-train-security-reviewer`, `@go-train-payment-tracker`      |
-| `postgres`            | Direct PostgreSQL access for advanced queries                   | Database optimization, performance analysis                     |
+
+| Server     | Description                                           | Used By                                                    |
+| ---------- | ----------------------------------------------------- | ---------------------------------------------------------- |
+| `supabase` | Supabase operations, RLS policy checks, auth, storage | `@go-train-security-reviewer`, `@go-train-payment-tracker` |
+| `postgres` | Direct PostgreSQL access for advanced queries         | Database optimization, performance analysis                |
 
 ### Development Servers (3)
-| Server                | Description                                                    | Used By                                                         |
-| --------------------- | -------------------------------------------------------------- | --------------------------------------------------------------- |
-| `playwright`          | E2E browser automation and testing                              | `@go-train-ocr-specialist`, test suite                          |
-| `chrome-devtools`     | Frontend debugging and performance monitoring                   | `@go-train-notifications-engineer`                              |
-| `github`              | GitHub integration for PRs, issues, and workflows               | CI/CD, issue tracking                                           |
+
+| Server            | Description                                       | Used By                                |
+| ----------------- | ------------------------------------------------- | -------------------------------------- |
+| `playwright`      | E2E browser automation and testing                | `@go-train-ocr-specialist`, test suite |
+| `chrome-devtools` | Frontend debugging and performance monitoring     | `@go-train-notifications-engineer`     |
+| `github`          | GitHub integration for PRs, issues, and workflows | CI/CD, issue tracking                  |
 
 ### Documentation & Utilities (2)
-| Server                | Description                                                    | Used By                                                         |
-| --------------------- | -------------------------------------------------------------- | --------------------------------------------------------------- |
-| `context7`            | AI-powered documentation and code examples (with API key)       | All agents for up-to-date library docs                          |
-| `everything`          | Advanced file search and indexing                               | Code navigation, refactoring                                    |
+
+| Server       | Description                                               | Used By                                |
+| ------------ | --------------------------------------------------------- | -------------------------------------- |
+| `context7`   | AI-powered documentation and code examples (with API key) | All agents for up-to-date library docs |
+| `everything` | Advanced file search and indexing                         | Code navigation, refactoring           |
 
 ### Setup & Verification
 
@@ -121,6 +119,7 @@ claude mcp list
 ```
 
 **Documentation:**
+
 - Quick reference: [README_MCP.md](README_MCP.md)
 - Troubleshooting: [docs/MCP_TROUBLESHOOTING.md](docs/MCP_TROUBLESHOOTING.md)
 - Setup guide: [MCP_SETUP.md](MCP_SETUP.md)
@@ -619,7 +618,6 @@ Supabase Realtime channels → React Query invalidation
 **Hooks:**
 
 1. **useGroupUpdates** (`hooks/useGroupUpdates.ts`):
-
    - Subscribe to `groups` + `group_memberships` table changes
    - Filter by `trip_id`
    - On change → invalidate trips query
@@ -662,19 +660,16 @@ Supabase Realtime channels → React Query invalidation
 **Jobs:**
 
 1. **syncSchedules** (daily 3 AM):
-
    - Download GTFS feed
    - Seed train schedules
    - Create trip instances for next 7 days
 
 2. **checkDelays** (every 5 min, 6AM-7PM weekdays):
-
    - Fetch GTFS Realtime
    - Update trip status
    - Notify affected users of delays/cancellations
 
 3. **dailyReminder** (6 PM weekdays):
-
    - Push "tomorrow's trains open" to all users with FCM tokens
 
 4. **cleanupScreenshots** (daily 4 AM):

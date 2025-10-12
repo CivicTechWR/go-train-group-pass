@@ -8,7 +8,10 @@ interface UseGroupUpdatesOptions {
   enabled?: boolean;
 }
 
-export function useGroupUpdates({ tripIds, enabled = true }: UseGroupUpdatesOptions) {
+export function useGroupUpdates({
+  tripIds,
+  enabled = true,
+}: UseGroupUpdatesOptions) {
   const [isConnected, setIsConnected] = useState(false);
   const utils = trpc.useContext();
   const supabase = createClient();
@@ -29,13 +32,13 @@ export function useGroupUpdates({ tripIds, enabled = true }: UseGroupUpdatesOpti
           table: 'groups',
           filter: `trip_id=in.(${tripIds.join(',')})`,
         },
-        (payload) => {
+        (payload: any) => {
           console.log('Groups change:', payload);
           // Invalidate trips query to refetch with new data
           utils.trips.list.invalidate();
         }
       )
-      .subscribe((status) => {
+      .subscribe((status: any) => {
         setIsConnected(status === 'SUBSCRIBED');
       });
 
@@ -51,7 +54,7 @@ export function useGroupUpdates({ tripIds, enabled = true }: UseGroupUpdatesOpti
           schema: 'public',
           table: 'group_memberships',
         },
-        (payload) => {
+        (payload: any) => {
           console.log('Memberships change:', payload);
           // Invalidate trips query to refetch
           utils.trips.list.invalidate();
@@ -63,7 +66,7 @@ export function useGroupUpdates({ tripIds, enabled = true }: UseGroupUpdatesOpti
 
     // Cleanup on unmount
     return () => {
-      channels.forEach((channel) => {
+      channels.forEach(channel => {
         supabase.removeChannel(channel);
       });
       setIsConnected(false);

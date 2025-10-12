@@ -5,6 +5,7 @@
 We've successfully bootstrapped the foundational infrastructure:
 
 ### What's Done:
+
 - ✅ Next.js 15 with TypeScript and Tailwind CSS
 - ✅ tRPC 11 for type-safe API layer
 - ✅ Supabase client setup (SSR + browser)
@@ -246,14 +247,17 @@ components/
 ## Troubleshooting
 
 ### "Invalid API key"
+
 - Double-check your `.env.local` file
 - Restart the dev server (`npm run dev`)
 
 ### Database connection errors
+
 - Verify your Supabase project is active
 - Check the Project URL is correct (no trailing slash)
 
 ### Authentication not working
+
 - Make sure the `handle_new_user()` function and trigger were created
 - Check Supabase logs: **Logs > Auth Logs**
 

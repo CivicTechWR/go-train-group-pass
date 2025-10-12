@@ -50,53 +50,55 @@ export function LoginForm() {
   };
 
   return (
-    <div className="rounded-lg border bg-card p-8 shadow-sm">
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className='rounded-lg border bg-card p-8 shadow-sm'>
+      <form onSubmit={handleSubmit} className='space-y-4'>
         <div>
-          <label htmlFor="email" className="block text-sm font-medium mb-2">
+          <label htmlFor='email' className='block text-sm font-medium mb-2'>
             Email
           </label>
           <input
-            id="email"
-            type="email"
+            id='email'
+            type='email'
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={e => setEmail(e.target.value)}
             required
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            placeholder="you@example.com"
+            className='w-full rounded-md border border-input bg-background px-3 py-2 text-sm'
+            placeholder='you@example.com'
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium mb-2">
+          <label htmlFor='password' className='block text-sm font-medium mb-2'>
             Password
           </label>
           <input
-            id="password"
-            type="password"
+            id='password'
+            type='password'
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={e => setPassword(e.target.value)}
             required
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            placeholder="••••••••"
+            className='w-full rounded-md border border-input bg-background px-3 py-2 text-sm'
+            placeholder='••••••••'
           />
         </div>
 
         <button
-          type="submit"
+          type='submit'
           disabled={isLoading}
-          className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+          className='w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50'
         >
           {isLoading ? 'Loading...' : isSignUp ? 'Sign Up' : 'Sign In'}
         </button>
 
-        <div className="text-center text-sm">
+        <div className='text-center text-sm'>
           <button
-            type="button"
+            type='button'
             onClick={() => setIsSignUp(!isSignUp)}
-            className="text-primary hover:underline"
+            className='text-primary hover:underline'
           >
-            {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+            {isSignUp
+              ? 'Already have an account? Sign in'
+              : "Don't have an account? Sign up"}
           </button>
         </div>
       </form>

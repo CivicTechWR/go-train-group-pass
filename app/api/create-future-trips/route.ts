@@ -42,10 +42,13 @@ export async function POST() {
       .select('id, departure_time');
 
     if (trainError) {
-      return NextResponse.json({
-        success: false,
-        error: `Failed to create trains: ${trainError.message}`,
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Failed to create trains: ${trainError.message}`,
+        },
+        { status: 500 }
+      );
     }
 
     // Create trip instances for today
@@ -61,10 +64,13 @@ export async function POST() {
       .select('id, date, train:trains(departure_time)');
 
     if (tripError) {
-      return NextResponse.json({
-        success: false,
-        error: `Failed to create trips: ${tripError.message}`,
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Failed to create trips: ${tripError.message}`,
+        },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
@@ -81,11 +87,13 @@ export async function POST() {
         '✅ Watch the group form!',
       ],
     });
-
   } catch (error) {
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   }
 }

@@ -10,7 +10,7 @@
 async function testEmailNotifications() {
   try {
     console.log('🧪 Testing email notifications...');
-    
+
     // Create a test issue to trigger email notifications
     const testIssue = {
       title: 'Test Email Notification - ' + new Date().toISOString(),
@@ -25,17 +25,17 @@ If you receive this email, the notification system is working correctly!`,
       labels: ['test', 'notification'],
       assignees: [],
       milestone: null,
-      closed: false
+      closed: false,
     };
 
     console.log('📧 Creating test issue...');
     console.log('   Title:', testIssue.title);
-    
+
     // Note: This would require Gitea API access with proper authentication
     // For now, we'll just log what would be sent
     console.log('✅ Test issue would be created with the following details:');
     console.log(JSON.stringify(testIssue, null, 2));
-    
+
     console.log('');
     console.log('📋 To manually test email notifications:');
     console.log('1. Go to https://gitea.dredre.net/dre/go-transit-group');
@@ -47,7 +47,6 @@ If you receive this email, the notification system is working correctly!`,
     console.log('- From: Gitea <gitea@dredre.net>');
     console.log('- Protocol: smtp+starttls');
     console.log('- Notifications: ENABLED');
-
   } catch (error) {
     console.error('❌ Error testing email notifications:', error.message);
     process.exit(1);

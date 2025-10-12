@@ -30,7 +30,9 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
     }
   );
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
   // No development bypass - require proper authentication
   const userId = session?.user?.id;
@@ -56,9 +58,9 @@ export const publicProcedure = t.procedure;
 export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
   // Require valid session and user ID
   if (!ctx.session || !ctx.userId) {
-    throw new TRPCError({ 
+    throw new TRPCError({
       code: 'UNAUTHORIZED',
-      message: 'Authentication required'
+      message: 'Authentication required',
     });
   }
 
@@ -85,9 +87,10 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
         .from('profiles')
         .insert({
           id: userId,
-          display_name: ctx.session.user.user_metadata?.display_name || 
-                       ctx.session.user.email?.split('@')[0] || 
-                       'User',
+          display_name:
+            ctx.session.user.user_metadata?.display_name ||
+            ctx.session.user.email?.split('@')[0] ||
+            'User',
           email: ctx.session.user.email,
           phone: ctx.session.user.phone || '',
           reputation_score: 100,

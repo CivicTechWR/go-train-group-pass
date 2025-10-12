@@ -16,9 +16,9 @@ export async function POST(request: NextRequest) {
     const result = await phoneVerification.sendVerificationCode(phone);
 
     if (result.success) {
-      return NextResponse.json({ 
-        success: true, 
-        message: 'Verification code sent to your phone' 
+      return NextResponse.json({
+        success: true,
+        message: 'Verification code sent to your phone',
       });
     } else {
       return NextResponse.json(
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     }
   } catch (error: any) {
     console.error('Send verification error:', error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, error: 'Invalid phone number format' },

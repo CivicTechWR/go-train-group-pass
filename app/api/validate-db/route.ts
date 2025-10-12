@@ -19,20 +19,21 @@ export async function GET() {
 
     results.tables = {};
     for (const table of tablesToCheck) {
-      const { error } = await supabase
-        .from(table)
-        .select('id')
-        .limit(1);
+      const { error } = await supabase.from(table).select('id').limit(1);
 
-      results.tables[table] = error ? { exists: false, error: error.message } : { exists: true };
+      results.tables[table] = error
+        ? { exists: false, error: error.message }
+        : { exists: true };
     }
 
     // Check 2: rebalance_trip_groups function exists
-    const { data: funcData, error: funcError } = await supabase
-      .rpc('rebalance_trip_groups', {
+    const { data: funcData, error: funcError } = await supabase.rpc(
+      'rebalance_trip_groups',
+      {
         p_trip_id: '00000000-0000-0000-0000-000000000000', // Dummy UUID to test function exists
         p_new_groups: [],
-      });
+      }
+    );
 
     results.functions = {
       rebalance_trip_groups: funcError
@@ -91,11 +92,13 @@ export async function GET() {
       .eq('pubname', 'supabase_realtime');
 
     results.realtime = {
-      enabled_tables: publications?.map(p => p.tablename) || [],
+      enabled_tables: publications?.map((p: any) => p.tablename) || [],
     };
 
     // Overall status
-    const allTablesExist = Object.values(results.tables).every((t: any) => t.exists);
+    const allTablesExist = Object.values(results.tables).every(
+      (t: any) => t.exists
+    );
     const functionsExist = results.functions.rebalance_trip_groups.exists;
     const hasData = results.counts.trains > 0 && results.counts.trips > 0;
 
@@ -111,17 +114,25 @@ export async function GET() {
     if (!allTablesExist) {
       nextSteps.push('❌ Run migrations in Supabase SQL Editor');
       nextSteps.push('   → Copy supabase/migrations/001_initial_schema.sql');
-      nextSteps.push('   → Copy supabase/migrations/002_rebalance_groups_function.sql');
+      nextSteps.push(
+        '   → Copy supabase/migrations/002_rebalance_groups_function.sql'
+      );
     }
     if (!hasData) {
-      nextSteps.push('❌ Seed data: curl -X POST http://localhost:3000/api/setup');
+      nextSteps.push(
+        '❌ Seed data: curl -X POST http://localhost:3000/api/setup'
+      );
     }
     if (results.counts.profiles === 0) {
-      nextSteps.push('❌ Create test user: curl -X POST http://localhost:3000/api/setup');
+      nextSteps.push(
+        '❌ Create test user: curl -X POST http://localhost:3000/api/setup'
+      );
     }
     if (allTablesExist && functionsExist && hasData) {
       nextSteps.push('✅ Database is ready!');
-      nextSteps.push('   → Visit http://localhost:3000/today-demo (no auth needed)');
+      nextSteps.push(
+        '   → Visit http://localhost:3000/today-demo (no auth needed)'
+      );
       if (results.counts.profiles > 0) {
         nextSteps.push('   → Visit http://localhost:3000/today (full version)');
       }
@@ -133,12 +144,14 @@ export async function GET() {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
-
   } catch (error) {
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      message: 'Failed to validate database. Check Supabase connection.',
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        message: 'Failed to validate database. Check Supabase connection.',
+      },
+      { status: 500 }
+    );
   }
 }
