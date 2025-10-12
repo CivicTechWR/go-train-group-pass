@@ -1,5 +1,13 @@
 # GO Train Group Pass Coordination App
 
+## CivicTechWR Season Project
+
+[![Template Version](https://img.shields.io/badge/template-v1.0.0-blue.svg)](https://github.com/CivicTechWR/CTWR-Project-Template-New/releases)
+[![Docs](https://img.shields.io/badge/docs-Getting%20Started-brightgreen.svg)](GETTING_STARTED.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+> New contributor? Jump to the **[Getting Started guide](GETTING_STARTED.md)** for a five-minute setup walkthrough. The documentation hub lives in [docs/index.md](docs/index.md).
+
 Coordinate weekday GO Train group passes between Kitchener and Union Station without relying on WhatsApp threads. This project pairs a Next.js client with Supabase, tRPC, and shadcn/ui to automate group formation, steward workflows, and trip coordination.
 
 ## Table of Contents
@@ -100,11 +108,12 @@ tests/                   Playwright test suites
 
 ## Documentation
 
-- [CLAUDE.md](./CLAUDE.md) – Full product brief and roadmap.
-- [SETUP.md](./SETUP.md) – Local environment configuration.
-- [TESTING_GUIDE.md](./TESTING_GUIDE.md) – Testing strategy.
-- [SECURITY_AUDIT_REPORT.md](./SECURITY_AUDIT_REPORT.md) – Prior security review notes.
-- [docs/WORKFLOWS.md](./docs/WORKFLOWS.md) – Automation and workflow reference.
+- [GETTING_STARTED.md](./GETTING_STARTED.md) – Quickstart aligned with the CTWR template.
+- [docs/index.md](./docs/index.md) – Documentation hub with user, technical, and delivery guides.
+- [docs/user-guide.md](./docs/user-guide.md) – Rider and steward walkthrough.
+- [docs/technical-design.md](./docs/technical-design.md) – Architecture, Supabase schema, rate limiting.
+- [docs/project-management.md](./docs/project-management.md) – Cadence, rituals, reporting.
+- [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) & [SECURITY.md](./SECURITY.md) – Community and security policies.
 - [docs/legacy/README.md](./docs/legacy/README.md) – Archived CivicTechWR pilot artifacts.
 
 A broader documentation index lives in the `docs/` directory.

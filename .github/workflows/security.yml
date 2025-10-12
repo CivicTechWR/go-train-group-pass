@@ -10,9 +10,22 @@ on:
 jobs:
   npm-audit:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: public-anon-key
+      SUPABASE_SERVICE_ROLE_KEY: service-role-key
+      ENABLE_ADMIN_APIS: 'false'
+      ADMIN_API_TOKEN: dummy-token
+      NEXT_PUBLIC_ENABLE_DEMO_PAGE: 'false'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Scan for committed secrets
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          log-level: warn
+          redact: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

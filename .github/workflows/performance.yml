@@ -10,6 +10,13 @@ jobs:
   lighthouse:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: public-anon-key
+      SUPABASE_SERVICE_ROLE_KEY: service-role-key
+      ENABLE_ADMIN_APIS: 'false'
+      ADMIN_API_TOKEN: dummy-token
+      NEXT_PUBLIC_ENABLE_DEMO_PAGE: 'false'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -25,6 +32,11 @@ jobs:
 
       - name: Build application
         run: npm run build
+
+      - name: Start production server
+        run: |
+          npx next start -p 3000 -H 0.0.0.0 &
+          npx wait-on http://127.0.0.1:3000
 
       - name: Run Lighthouse CI
         env:

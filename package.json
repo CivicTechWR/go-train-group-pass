@@ -82,10 +82,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/civicTechWR/go-train-group-pass.git"
+    "url": "https://github.com/CivicTechWR/go-train-group-pass.git"
   },
   "bugs": {
     "url": "https://github.com/civicTechWR/go-train-group-pass/issues"
   },
-  "homepage": "https://github.com/civicTechWR/go-train-group-pass#readme"
+  "homepage": "https://github.com/CivicTechWR/go-train-group-pass#readme",
+  "civictechwr": {
+    "template_version": "1.0.0",
+    "dvf_framework": "2024",
+    "season_lifecycle": "12-weeks",
+    "last_updated": "2024-12-01"
+  }
 }
