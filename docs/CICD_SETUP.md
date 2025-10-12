@@ -68,9 +68,9 @@ Configure these in Gitea repository settings (`Settings` → `Secrets`):
 ### Supabase
 
 ```
-NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.xxxxx
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.xxxxx
+NEXT_PUBLIC_SUPABASE_URL=https://example.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<supabase-anon-key>
+SUPABASE_SERVICE_ROLE_KEY=<supabase-service-role-key>
 ```
 
 ### Docker Registry
@@ -83,8 +83,8 @@ REGISTRY_PASSWORD=<your-registry-password>
 ### Optional Secrets
 
 ```
-TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-TWILIO_AUTH_TOKEN=your_auth_token
+TWILIO_ACCOUNT_SID=<twilio-account-sid>
+TWILIO_AUTH_TOKEN=<twilio-auth-token>
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 ```
 
@@ -102,7 +102,7 @@ FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY----
 ```bash
 # Using Gitea API
 curl -X POST https://gitea.dredre.net/api/v1/repos/dre/go-transit-group/secrets \
-  -H "Authorization: token YOUR_GITEA_TOKEN" \
+  -H "Authorization: token <gitea-api-token>" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "REGISTRY_PASSWORD",
@@ -187,7 +187,7 @@ curl -X DELETE -u dre:password \
 
 # Via API
 curl -X POST https://gitea.dredre.net/api/v1/repos/dre/go-transit-group/actions/workflows/ci.yml/dispatches \
-  -H "Authorization: token YOUR_GITEA_TOKEN" \
+  -H "Authorization: token <gitea-api-token>" \
   -H "Content-Type: application/json" \
   -d '{"ref": "main"}'
 ```
