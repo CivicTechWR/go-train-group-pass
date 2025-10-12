@@ -16,6 +16,10 @@
 # production
 /build
 
+# lighthouse
+.lighthouseci/
+.lhci/
+
 # misc
 .DS_Store
 *.pem
