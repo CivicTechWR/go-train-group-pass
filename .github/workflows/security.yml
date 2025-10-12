@@ -26,6 +26,8 @@ jobs:
         with:
           log-level: warn
           redact: true
+        env:
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
