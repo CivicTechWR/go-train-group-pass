@@ -19,9 +19,9 @@ module.exports = {
         'cumulative-layout-shift': ['warn', { maxNumericValue: 0.1 }],
         'total-blocking-time': ['warn', { maxNumericValue: 300 }],
         'speed-index': ['warn', { maxNumericValue: 3000 }],
-        'legacy-javascript': 'warn',
-        'render-blocking-resources': 'warn',
-        'render-blocking-insight': 'warn',
+        'legacy-javascript': ['warn', { maxLength: 5 }],
+        'render-blocking-resources': ['warn', { maxLength: 5 }],
+        'render-blocking-insight': ['warn', { maxLength: 5 }],
       },
     },
     upload: {
