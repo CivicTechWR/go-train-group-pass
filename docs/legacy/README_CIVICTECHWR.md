@@ -5,7 +5,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-blue?style=flat-square)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square)](https://nextjs.org/)
 
-A modern web application that replaces WhatsApp-based coordination for GO Train weekday group passes between Kitchener and Union Station. Built by the [CivicTech Waterloo Region](https://github.com/civicTechWR/) community to improve public transit coordination and accessibility.
+A modern web application that reduces reliance on WhatsApp threads for GO Train weekday group pass coordination between Kitchener and Union Station. Built by the [CivicTech Waterloo Region](https://github.com/civicTechWR/) community to improve public transit coordination and accessibility.
 
 ## 🎯 Mission
 

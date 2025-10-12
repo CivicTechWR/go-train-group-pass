@@ -17,7 +17,7 @@ For cleanup, issue tracking, and commit routines, see [docs/MAINTENANCE_PRACTICE
 
 ## Project Overview
 
-A modern web application that replaces WhatsApp-based coordination for GO Train weekday group passes between Kitchener and Union Station. The app automates group formation, payment tracking, and real-time alerts for fare inspections.
+A modern web application that reduces reliance on WhatsApp-based coordination for GO Train weekday group passes between Kitchener and Union Station. The app automates group formation, payment tracking, and real-time alerts for fare inspections.
 
 ---
 

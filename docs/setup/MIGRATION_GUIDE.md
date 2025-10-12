@@ -89,7 +89,7 @@ cd /opt/go-transit-group
 # Create new repository in CivicTechWR organization
 gh repo create civicTechWR/go-train-group-pass \
   --public \
-  --description "GO Train weekday group pass coordination app - replaces WhatsApp-based coordination" \
+  --description "GO Train weekday group pass coordination app - reduces reliance on WhatsApp-based coordination" \
   --homepage "https://github.com/civicTechWR/go-train-group-pass" \
   --add-readme=false
 ```
@@ -134,7 +134,7 @@ After migration, update the following files:
 [![CI/CD](https://github.com/civicTechWR/go-train-group-pass/workflows/CI/badge.svg)](https://github.com/civicTechWR/go-train-group-pass/actions)
 [![Security](https://github.com/civicTechWR/go-train-group-pass/workflows/Security%20Scan/badge.svg)](https://github.com/civicTechWR/go-train-group-pass/actions)
 
-A modern web application that replaces WhatsApp-based coordination for GO Train weekday group passes between Kitchener and Union Station.
+A modern web application that reduces reliance on WhatsApp-based coordination for GO Train weekday group passes between Kitchener and Union Station.
 
 ## 🏢 Organization
 
