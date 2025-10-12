@@ -1,4 +1,4 @@
-import { LoginForm } from "@/components/auth/LoginForm";
+import { PhoneLoginForm } from "@/components/auth/PhoneLoginForm";
 
 export const dynamic = 'force-dynamic';
 
@@ -11,10 +11,10 @@ export default function LoginPage() {
             GO Train Group Pass
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Sign in to coordinate your commute
+            Sign in with your phone to coordinate your commute
           </p>
         </div>
-        <LoginForm />
+        <PhoneLoginForm />
       </div>
     </div>
   );
