@@ -24,7 +24,7 @@
         "argsIgnorePattern": "^_"
       }
     ],
-    "no-unused-vars": "warn",
+    "no-unused-vars": "off",
     "no-console": "warn",
     "no-debugger": "error",
     "prefer-const": "error",
@@ -40,5 +40,13 @@
     "browser": true,
     "es2022": true,
     "node": true
-  }
+  },
+  "overrides": [
+    {
+      "files": ["scripts/**/*.{js,ts}", "test-e2e-*.js", "tests/**/*.{js,ts}", "**/*.config.{js,ts}"],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ]
 }

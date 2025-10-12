@@ -64,7 +64,7 @@ export function PhoneLoginForm({ onSuccess }: PhoneLoginFormProps) {
       } else {
         toast.error(data.error || 'Failed to send verification code');
       }
-    } catch (error: any) {
+    } catch {
       toast.error('Failed to send verification code');
     } finally {
       setIsLoading(false);
@@ -105,7 +105,7 @@ export function PhoneLoginForm({ onSuccess }: PhoneLoginFormProps) {
       } else {
         toast.error(data.error || 'Verification failed');
       }
-    } catch (error: any) {
+    } catch {
       toast.error('Verification failed');
     } finally {
       setIsLoading(false);
@@ -141,7 +141,7 @@ export function PhoneLoginForm({ onSuccess }: PhoneLoginFormProps) {
       } else {
         toast.error(data.error || 'Failed to update profile');
       }
-    } catch (error: any) {
+    } catch {
       toast.error('Failed to update profile');
     } finally {
       setIsLoading(false);

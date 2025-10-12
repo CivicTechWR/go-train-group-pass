@@ -1,14 +1,9 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { createClient as createServiceClient } from '@supabase/supabase-js';
+import { NextRequest, NextResponse } from 'next/server';
+import { adminErrorResponse, requireAdminApi } from '@/lib/admin-api';
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
-    // Use service role client to bypass RLS for setup
-    const supabase = createServiceClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const { serviceClient: supabase } = await requireAdminApi(request);
 
     // Step 1: Check if schema exists
     const { error: tableError } = await supabase
@@ -186,12 +181,6 @@ export async function POST() {
       ],
     });
   } catch (error) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    );
+    return adminErrorResponse(error);
   }
 }

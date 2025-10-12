@@ -1,7 +1,6 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Shield, Eye, Lock, Trash2, Download, Mail } from 'lucide-react';
 
 export default function PrivacyPolicyPage() {

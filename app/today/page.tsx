@@ -6,7 +6,6 @@ import { TripCard } from '@/components/trips/TripCard';
 import { TripCardSkeleton } from '@/components/trips/TripCardSkeleton';
 import { useGroupUpdates } from '@/hooks/useGroupUpdates';
 import { useAuth } from '@/contexts/AuthContext';
-import { trpc } from '@/lib/trpc/client';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { AlertCircle, Wifi, WifiOff } from 'lucide-react';
@@ -29,10 +28,17 @@ export default function TodayPage() {
       const response = await fetch(
         `/api/trips?startDate=${todayStr}&endDate=${todayStr}`
       );
-      if (!response.ok) throw new Error('Failed to fetch trips');
+      if (!response.ok) {
+        const message =
+          response.status === 401
+            ? 'Please sign in to view trips'
+            : 'Failed to fetch trips';
+        throw new Error(message);
+      }
       return response.json();
     },
     refetchInterval: 30000,
+    enabled: !!user,
   });
 
   // Fetch user's joined trips (including departed ones) - using direct API for now
@@ -41,7 +47,7 @@ export default function TodayPage() {
     queryFn: async () => {
       if (!user?.id) return [];
       const response = await fetch(
-        `/api/trips?startDate=${todayStr}&endDate=${todayStr}`
+        `/api/trips?startDate=${todayStr}&endDate=${todayStr}&includeDeparted=true`
       );
       if (!response.ok) throw new Error('Failed to fetch trips');
       const trips = await response.json();
@@ -65,10 +71,17 @@ export default function TodayPage() {
       const response = await fetch(
         `/api/trips?startDate=${tomorrowStr}&endDate=${tomorrowStr}`
       );
-      if (!response.ok) throw new Error('Failed to fetch trips');
+      if (!response.ok) {
+        const message =
+          response.status === 401
+            ? 'Please sign in to view trips'
+            : 'Failed to fetch trips';
+        throw new Error(message);
+      }
       return response.json();
     },
     refetchInterval: 30000,
+    enabled: !!user,
   });
 
   // Get user session

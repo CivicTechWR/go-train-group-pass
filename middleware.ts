@@ -5,6 +5,7 @@ import {
   validateRequestSize,
   logSecurityEvent,
 } from './lib/security-headers';
+import { logger } from './lib/logger';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -98,7 +99,7 @@ export async function middleware(request: NextRequest) {
       });
 
       if (error) {
-        console.error('Failed to create profile:', error);
+        logger.error('Failed to create profile', error);
       }
     }
   }

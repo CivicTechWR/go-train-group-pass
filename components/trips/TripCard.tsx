@@ -11,7 +11,7 @@ import {
   ArrowRight,
   Calendar,
 } from 'lucide-react';
-import { format, parse, isToday, isTomorrow } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { CountdownTimer } from './CountdownTimer';
 import { GroupCard } from '@/components/groups/GroupCard';
 import type { TripWithDetails } from '@/types/database';

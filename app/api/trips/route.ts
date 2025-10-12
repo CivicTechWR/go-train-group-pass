@@ -1,11 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
+    const includeDeparted = searchParams.get('includeDeparted') === 'true';
 
     if (!startDate || !endDate) {
       return NextResponse.json(
@@ -17,6 +18,20 @@ export async function GET(request: Request) {
     }
 
     const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        {
+          error: 'Authentication required',
+        },
+        { status: 401 }
+      );
+    }
 
     // Get trips for date range
     const { data, error } = await supabase
@@ -51,7 +66,7 @@ export async function GET(request: Request) {
     // Filter out departed trips and non-direct routes
     const now = new Date();
 
-    const availableTrips =
+    const filteredTrips =
       data?.filter((trip: any) => {
         // Only direct train routes (no bus transfers required)
         const isDirectTrain =
@@ -65,17 +80,21 @@ export async function GET(request: Request) {
           `${trip.date}T${trip.train.departure_time}`
         );
 
-        return isDirectTrain && departureTime > now;
+        if (!isDirectTrain) {
+          return false;
+        }
+
+        return includeDeparted || departureTime > now;
       }) || [];
 
     // Sort by departure time within each date
-    availableTrips.sort((a: any, b: any) => {
+    filteredTrips.sort((a: any, b: any) => {
       const timeA = new Date(`${a.date}T${a.train.departure_time}`);
       const timeB = new Date(`${b.date}T${b.train.departure_time}`);
       return timeA.getTime() - timeB.getTime();
     });
 
-    return NextResponse.json(availableTrips);
+    return NextResponse.json(filteredTrips);
   } catch (error: any) {
     return NextResponse.json(
       {

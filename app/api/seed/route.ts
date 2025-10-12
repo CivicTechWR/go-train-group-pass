@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { NextRequest, NextResponse } from 'next/server';
+import { adminErrorResponse, requireAdminApi } from '@/lib/admin-api';
 import { addDays, format } from 'date-fns';
+import { logger } from '@/lib/logger';
 
 // KW → Union morning trains
 const MORNING_TRAINS = [
@@ -31,37 +32,17 @@ const MORNING_TRAINS = [
   },
 ];
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
-    console.log('Starting seed process...');
+    logger.info('Starting seed process');
 
-    // Initialize Supabase client with service role key
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!supabaseUrl || !supabaseServiceKey) {
-      console.log('Missing environment variables');
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Missing Supabase environment variables',
-        },
-        { status: 500 }
-      );
-    }
-
-    console.log('Creating Supabase client...');
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
+    logger.info('Creating Supabase client');
+    const { serviceClient: supabase } = await requireAdminApi(request);
 
     // 1. Seed trains (upsert to avoid duplicates)
-    console.log('Seeding trains...');
+    logger.info('Seeding trains');
     const trainPromises = MORNING_TRAINS.map(async train => {
-      console.log(`Processing train: ${train.departure_time}`);
+      logger.info('Processing train', train.departure_time);
       const { data, error } = await supabase
         .from('trains')
         .insert({
@@ -73,16 +54,19 @@ export async function POST() {
         .single();
 
       if (error) {
-        console.error(`Error processing train ${train.departure_time}:`, error);
+        logger.error(
+          `Error processing train ${train.departure_time}`,
+          error as Error
+        );
         throw error;
       }
-      console.log(`Successfully processed train: ${train.departure_time}`);
+      logger.info('Successfully processed train', train.departure_time);
       return data;
     });
 
-    console.log('Waiting for all trains to be processed...');
+    logger.info('Waiting for all trains to be processed');
     const trains = await Promise.all(trainPromises);
-    console.log(`Processed ${trains.length} trains`);
+    logger.info('Processed trains count', { count: trains.length });
 
     // 2. Create trip instances for today and tomorrow
     const today = new Date();
@@ -125,15 +109,7 @@ export async function POST() {
       },
     });
   } catch (error) {
-    console.error('Seed error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        details:
-          error instanceof Error ? error.stack : 'No stack trace available',
-      },
-      { status: 500 }
-    );
+    logger.error('Seed error', error as Error);
+    return adminErrorResponse(error);
   }
 }

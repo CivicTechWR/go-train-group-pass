@@ -1,5 +1,4 @@
 import { TRPCError } from '@trpc/server';
-import { z } from 'zod';
 
 // In-memory rate limiting store (use Redis in production)
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
@@ -44,7 +43,6 @@ export class RateLimiter {
 
     const key = this.getKey(identifier, action);
     const now = Date.now();
-    const windowStart = now - options.windowMs;
 
     const current = this.store.get(key);
 

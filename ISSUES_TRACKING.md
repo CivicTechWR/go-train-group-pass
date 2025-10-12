@@ -74,6 +74,17 @@
   - Update UI to show both directions
   - Modify group formation logic for return trips
 
+### Issue #10: Accessibility Test Hang
+
+- **Status**: 🔄 Open
+- **Priority**: Medium
+- **Description**: `npm run test:a11y` (Playwright + axe) never completes locally; the command stalls while waiting for the Next.js dev server.
+- **Impact**: Accessibility workflow cannot run reliably in CI or during local verification.
+- **Solution Needed**:
+  - Investigate Playwright `webServer` startup (currently `npm run dev`); consider using `next start` against a production build or setting a longer `timeout`.
+  - Ensure the command exits when the server fails to start; capture server logs in CI.
+  - Add diagnostics or retries that do not hang indefinitely.
+
 ## Technical Debt 📋
 
 ### Issue #7: Debug Logging Cleanup

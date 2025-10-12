@@ -1,4 +1,5 @@
 import twilio from 'twilio';
+import { logger } from '@/lib/logger';
 
 // Check if we're in build mode (no environment variables)
 const isBuildMode =
@@ -56,17 +57,17 @@ export class PhoneVerificationService {
         ? phoneNumber
         : `+${phoneNumber}`;
 
-      const verification = await this.client.verify.v2
+      await this.client.verify.v2
         .services(this.verifyServiceSid)
         .verifications.create({
           to: normalizedPhone,
           channel: 'sms',
         });
 
-      console.log('Verification sent:', verification.sid);
+      logger.info('Verification code delivered successfully');
       return { success: true };
     } catch (error: any) {
-      console.error('Failed to send verification code:', error);
+      logger.error('Failed to send verification code', error);
       return {
         success: false,
         error: error.message || 'Failed to send verification code',
@@ -107,7 +108,7 @@ export class PhoneVerificationService {
         };
       }
     } catch (error: any) {
-      console.error('Failed to verify code:', error);
+      logger.error('Failed to verify code', error);
       return {
         success: false,
         error: error.message || 'Failed to verify code',
@@ -131,16 +132,16 @@ export class PhoneVerificationService {
         throw new Error('TWILIO_PHONE_NUMBER environment variable is required');
       }
 
-      const message = await this.client.messages.create({
+      await this.client.messages.create({
         body,
         from: process.env.TWILIO_PHONE_NUMBER,
         to: to.startsWith('+') ? to : `+${to}`,
       });
 
-      console.log('SMS sent:', message.sid);
+      logger.info('Notification SMS sent successfully');
       return { success: true };
     } catch (error: any) {
-      console.error('Failed to send SMS:', error);
+      logger.error('Failed to send SMS', error);
       return {
         success: false,
         error: error.message || 'Failed to send SMS',

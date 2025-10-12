@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { phoneVerification } from '@/lib/twilio';
-import { createClient } from '@/lib/supabase/server';
 import { phoneSchema } from '@/lib/validations';
 import { z } from 'zod';
+import { getServiceClient } from '@/lib/supabase/service';
+import { RateLimiter, getClientIP } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 const requestSchema = z.object({
   phone: phoneSchema,
@@ -17,8 +19,39 @@ const requestSchema = z.object({
     .optional(),
 });
 
+const verificationLimiter = RateLimiter.getInstance();
+const VERIFY_RATE_LIMIT = {
+  limit: 5,
+  windowMs: 10 * 60 * 1000,
+  message: 'Too many verification attempts. Please try again later.',
+};
+
 export async function POST(request: NextRequest) {
   try {
+    const identifier = `${getClientIP(request.headers)}:${
+      request.headers.get('x-client-id') || 'verify-phone'
+    }`;
+
+    if (
+      !verificationLimiter.checkLimit(identifier, 'auth:verify', {
+        limit: VERIFY_RATE_LIMIT.limit,
+        windowMs: VERIFY_RATE_LIMIT.windowMs,
+      })
+    ) {
+      const retryAfter = Math.ceil(
+        verificationLimiter.getRemainingTime(identifier, 'auth:verify') / 1000
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: VERIFY_RATE_LIMIT.message,
+          retryAfter,
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { phone, code, displayName } = requestSchema.parse(body);
 
@@ -33,10 +66,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Create Supabase client
-    const supabase = await createClient();
+    const serviceClient = getServiceClient();
 
     // Check if user already exists by looking up in profiles table
-    const { data: existingProfile } = await supabase
+    const { data: existingProfile } = await serviceClient
       .from('profiles')
       .select('id')
       .eq('phone', phone)
@@ -51,7 +84,7 @@ export async function POST(request: NextRequest) {
     } else {
       // Create new user with phone authentication
       const { data: newUser, error: createError } =
-        await supabase.auth.admin.createUser({
+        await serviceClient.auth.admin.createUser({
           phone: phone,
           email_confirm: true,
           phone_confirm: true,
@@ -65,7 +98,7 @@ export async function POST(request: NextRequest) {
         });
 
       if (createError) {
-        console.error('Failed to create user:', createError);
+        logger.error('Failed to create user', createError);
         return NextResponse.json(
           { success: false, error: 'Failed to create user account' },
           { status: 500 }
@@ -77,20 +110,24 @@ export async function POST(request: NextRequest) {
     }
 
     // Create or update profile
-    const { error: profileError } = await supabase.from('profiles').upsert({
-      id: userId,
-      phone,
-      display_name:
-        displayName ||
-        phone.replace('+1', '').replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3'),
-      reputation_score: 100,
-      trips_completed: 0,
-      on_time_payment_rate: 1,
-      is_community_admin: false,
-    });
+    const { error: profileError } = await serviceClient
+      .from('profiles')
+      .upsert({
+        id: userId,
+        phone,
+        display_name:
+          displayName ||
+          phone
+            .replace('+1', '')
+            .replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3'),
+        reputation_score: 100,
+        trips_completed: 0,
+        on_time_payment_rate: 1,
+        is_community_admin: false,
+      });
 
     if (profileError) {
-      console.error('Failed to create/update profile:', profileError);
+      logger.error('Failed to create/update profile', profileError);
       return NextResponse.json(
         { success: false, error: 'Failed to create user profile' },
         { status: 500 }
@@ -99,13 +136,13 @@ export async function POST(request: NextRequest) {
 
     // Generate session token for the user
     const { data: sessionData, error: sessionError } =
-      await supabase.auth.admin.generateLink({
+      await serviceClient.auth.admin.generateLink({
         type: 'magiclink',
         email: userId + '@temp.com', // Use a temporary email since we're using phone auth
       });
 
     if (sessionError) {
-      console.error('Failed to generate session:', sessionError);
+      logger.error('Failed to generate session', sessionError);
       return NextResponse.json(
         { success: false, error: 'Failed to create session' },
         { status: 500 }
@@ -121,8 +158,8 @@ export async function POST(request: NextRequest) {
       isNewUser,
       sessionUrl: sessionData.properties.action_link,
     });
-  } catch (error: any) {
-    console.error('Phone verification error:', error);
+  } catch (error) {
+    logger.error('Phone verification error', error as Error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

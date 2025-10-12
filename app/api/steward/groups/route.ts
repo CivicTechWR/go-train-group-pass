@@ -1,23 +1,26 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { logger } from '@/lib/logger';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    const supabase = await createClient();
 
-    if (!userId) {
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
       return NextResponse.json(
         {
-          error: 'Missing userId parameter',
+          error: 'Authentication required',
         },
-        { status: 400 }
+        { status: 401 }
       );
     }
 
-    const supabase = await createClient();
-
-    // Get groups where user is steward
+    // Get groups where the current user is the steward
     const { data: groups, error } = await supabase
       .from('groups')
       .select(
@@ -51,11 +54,11 @@ export async function GET(request: NextRequest) {
         )
       `
       )
-      .eq('steward_id', userId)
+      .eq('steward_id', user.id)
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching steward groups:', error);
+      logger.error('Error fetching steward groups', error);
       return NextResponse.json(
         {
           error: 'Failed to fetch steward groups',
@@ -90,7 +93,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(transformedGroups);
   } catch (error) {
-    console.error('Steward groups API error:', error);
+    logger.error('Steward groups API error', error as Error);
     return NextResponse.json(
       {
         error: 'Internal server error',

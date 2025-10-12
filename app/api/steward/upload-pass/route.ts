@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import crypto from 'crypto';
+import { RateLimiter } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 const uploadPassSchema = z.object({
   groupId: z.string().uuid(),
@@ -10,6 +12,13 @@ const uploadPassSchema = z.object({
   activatedAt: z.string(),
   screenshotFile: z.string().min(1, 'Screenshot file is required'),
 });
+
+const passUploadLimiter = RateLimiter.getInstance();
+const PASS_UPLOAD_LIMIT = {
+  limit: 5,
+  windowMs: 5 * 60 * 1000,
+  message: 'Too many pass uploads. Please wait a moment and try again.',
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -65,14 +74,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const limiterId = `steward:${user.id}`;
+    if (
+      !passUploadLimiter.checkLimit(limiterId, 'steward:pass-upload', {
+        limit: PASS_UPLOAD_LIMIT.limit,
+        windowMs: PASS_UPLOAD_LIMIT.windowMs,
+      })
+    ) {
+      const retryAfter = Math.ceil(
+        passUploadLimiter.getRemainingTime(limiterId, 'steward:pass-upload') /
+          1000
+      );
+
+      return NextResponse.json(
+        {
+          error: PASS_UPLOAD_LIMIT.message,
+          retryAfter,
+        },
+        { status: 429 }
+      );
+    }
+
     // Get member count
     const memberCount = group.memberships[0]?.count || 0;
 
     // Validate passenger count matches group size (with warning tolerance)
     if (passengerCount !== memberCount) {
-      console.warn(
-        `Pass shows ${passengerCount} passengers but group has ${memberCount} members`
-      );
+      logger.warn('Passenger count mismatch for uploaded pass', {
+        passengerCount,
+        memberCount,
+        groupId,
+        stewardId: user.id,
+      });
       // We'll allow this but log it for the steward to verify
     }
 
@@ -122,7 +155,7 @@ export async function POST(request: NextRequest) {
       });
 
     if (uploadError) {
-      console.error('Storage upload error:', uploadError);
+      logger.error('Storage upload error', uploadError as Error);
       return NextResponse.json(
         {
           error: 'Failed to upload screenshot',
@@ -150,7 +183,7 @@ export async function POST(request: NextRequest) {
       .eq('id', groupId);
 
     if (updateError) {
-      console.error('Group update error:', updateError);
+      logger.error('Group update error', updateError as Error);
       return NextResponse.json(
         {
           error: 'Failed to update group with pass information',
@@ -160,8 +193,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Log the pass upload for audit trail
-    console.log(`Pass uploaded for group ${groupId}:`, {
-      ticketNumber,
+    logger.audit('Pass uploaded for group', {
+      groupId,
+      ticketHash,
       passengerCount,
       memberCount,
       stewardId: user.id,
@@ -180,7 +214,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Upload pass error:', error);
+    logger.error('Upload pass error', error as Error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

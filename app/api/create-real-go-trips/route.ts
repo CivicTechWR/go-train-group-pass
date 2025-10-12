@@ -1,13 +1,10 @@
-import { NextResponse } from 'next/server';
-import { createClient as createServiceClient } from '@supabase/supabase-js';
+import { NextRequest, NextResponse } from 'next/server';
+import { adminErrorResponse, requireAdminApi } from '@/lib/admin-api';
+import { logger } from '@/lib/logger';
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
-    // Use service role client to bypass RLS for setup
-    const supabase = createServiceClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const { serviceClient: supabase } = await requireAdminApi(request);
 
     // Clear existing test data first
     await supabase
@@ -144,13 +141,7 @@ export async function POST() {
       ],
     });
   } catch (error) {
-    console.error('Error creating real GO trips:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: `Failed to create real GO trips: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      },
-      { status: 500 }
-    );
+    logger.error('Error creating real GO trips', error as Error);
+    return adminErrorResponse(error);
   }
 }

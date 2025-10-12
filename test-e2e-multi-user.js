@@ -241,7 +241,7 @@ async function testGroupFormation() {
     `👤 Total Riders: ${finalTrip.groups.reduce((sum, group) => sum + group.memberships.length, 0)}`
   );
 
-  finalTrip.groups.forEach((group, index) => {
+  finalTrip.groups.forEach((group, _index) => {
     console.log(`\n📦 Group ${group.group_number}:`);
     group.memberships.forEach(membership => {
       console.log(
@@ -261,7 +261,7 @@ async function testGroupFormation() {
   console.log('\n✅ Group formation test completed!');
 }
 
-async function cleanupTestUsers() {
+async function _cleanupTestUsers() {
   console.log('\n🧹 Cleaning up test users...');
 
   const { data: profiles } = await supabase
@@ -293,7 +293,7 @@ async function runE2ETest() {
     console.error('❌ Test failed:', error.message);
   } finally {
     // Uncomment to cleanup test users
-    // await cleanupTestUsers();
+    // await _cleanupTestUsers();
   }
 
   console.log('\n🏁 End-to-End test completed!');

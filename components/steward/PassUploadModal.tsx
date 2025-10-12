@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { createWorker } from 'tesseract.js';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertCircle, Upload, CheckCircle, X, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 interface PassUploadModalProps {
   groupId: string;
@@ -35,6 +37,9 @@ export function PassUploadModal({
   onClose,
   onSuccess,
 }: PassUploadModalProps) {
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const titleId = `pass-upload-title-${groupId}`;
+  const descriptionId = `${titleId}-description`;
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [ocrResult, setOcrResult] = useState<OCRResult | null>(null);
@@ -65,6 +70,19 @@ export function PassUploadModal({
     maxSize: 5 * 1024 * 1024, // 5MB
   });
 
+  useEffect(() => {
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const processImageWithOCR = async () => {
     if (!file) return;
 
@@ -82,12 +100,6 @@ export function PassUploadModal({
         data: { text, confidence },
       } = await worker.recognize(file);
       await worker.terminate();
-
-      // Parse the OCR text to extract relevant information
-      const lines = text
-        .split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 0);
 
       // Look for ticket number (alphanumeric pattern)
       const ticketNumberMatch = text.match(/[A-Z]{2}\d{8,10}/);
@@ -123,7 +135,7 @@ export function PassUploadModal({
 
       toast.success('OCR processing completed!');
     } catch (error) {
-      console.error('OCR processing error:', error);
+      logger.error('OCR processing error', error as Error);
       toast.error(
         'Failed to process image with OCR. Please enter details manually.'
       );
@@ -171,7 +183,7 @@ export function PassUploadModal({
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Upload error:', error);
+      logger.error('Upload error', error as Error);
       toast.error(
         error instanceof Error ? error.message : 'Failed to upload pass'
       );
@@ -184,18 +196,45 @@ export function PassUploadModal({
     ocrResult && ocrResult.passengerCount !== memberCount;
 
   return (
-    <div className='fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50'>
-      <Card className='w-full max-w-2xl max-h-[90vh] overflow-y-auto'>
+    <div
+      className='fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50'
+      role='presentation'
+      onClick={event => {
+        if (event.target === event.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <Card
+        role='dialog'
+        aria-modal='true'
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
+        tabIndex={-1}
+        className='w-full max-w-2xl max-h-[90vh] overflow-y-auto focus:outline-none'
+      >
         <CardHeader className='pb-4'>
           <div className='flex items-center justify-between'>
-            <CardTitle>Upload Group Pass - Group {groupNumber}</CardTitle>
-            <Button variant='ghost' size='icon' onClick={onClose}>
+            <CardTitle id={titleId}>
+              Upload Group Pass - Group {groupNumber}
+            </CardTitle>
+            <Button
+              ref={closeButtonRef}
+              variant='ghost'
+              size='icon'
+              onClick={onClose}
+              aria-label='Close pass upload dialog'
+            >
               <X className='h-4 w-4' />
             </Button>
           </div>
         </CardHeader>
 
         <CardContent className='space-y-6'>
+          <p id={descriptionId} className='sr-only'>
+            Provide your pass details and upload the group pass screenshot to
+            record it for this trip.
+          </p>
           {/* File Upload */}
           <div className='space-y-2'>
             <Label>Pass Screenshot</Label>
@@ -210,10 +249,13 @@ export function PassUploadModal({
               <input {...getInputProps()} />
               {preview ? (
                 <div className='space-y-2'>
-                  <img
+                  <Image
                     src={preview}
                     alt='Pass preview'
-                    className='max-h-48 mx-auto rounded'
+                    width={400}
+                    height={400}
+                    className='h-auto w-auto max-h-48 mx-auto rounded'
+                    unoptimized
                   />
                   <p className='text-sm text-muted-foreground'>
                     {file?.name} ({(file?.size! / 1024 / 1024).toFixed(2)} MB)

@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { logger } from '@/lib/logger';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const cookieStore = await cookies();
 
@@ -94,7 +95,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(trips || []);
   } catch (error) {
-    console.error('Admin trips error:', error);
+    logger.error('Admin trips error', error as Error);
     return NextResponse.json(
       { error: 'Failed to load trips' },
       { status: 500 }

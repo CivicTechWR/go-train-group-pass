@@ -86,7 +86,7 @@ cd /opt/go-transit-group
 gh repo create civicTechWR/go-train-group-pass \
   --public \
   --description "GO Train weekday group pass coordination app - replaces WhatsApp-based coordination" \
-  --homepage "https://go-train-group-pass.vercel.app" \
+  --homepage "https://github.com/civicTechWR/go-train-group-pass" \
   --add-readme=false
 ```
 

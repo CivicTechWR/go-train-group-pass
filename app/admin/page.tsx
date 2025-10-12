@@ -11,14 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Users,
-  Train,
-  AlertTriangle,
-  BarChart3,
-  Settings,
-  Shield,
-} from 'lucide-react';
+import { Users, Train, AlertTriangle, BarChart3, Shield } from 'lucide-react';
 
 interface AdminStats {
   totalUsers: number;

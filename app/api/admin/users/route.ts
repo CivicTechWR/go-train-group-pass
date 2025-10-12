@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { logger } from '@/lib/logger';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const cookieStore = await cookies();
 
@@ -81,7 +82,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(usersWithActivity);
   } catch (error) {
-    console.error('Admin users error:', error);
+    logger.error('Admin users error', error as Error);
     return NextResponse.json(
       { error: 'Failed to load users' },
       { status: 500 }
@@ -153,7 +154,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Admin user update error:', error);
+    logger.error('Admin user update error', error as Error);
     return NextResponse.json(
       { error: 'Failed to update user' },
       { status: 500 }

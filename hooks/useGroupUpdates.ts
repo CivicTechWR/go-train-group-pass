@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { trpc } from '@/lib/trpc/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
@@ -14,10 +14,17 @@ export function useGroupUpdates({
 }: UseGroupUpdatesOptions) {
   const [isConnected, setIsConnected] = useState(false);
   const utils = trpc.useContext();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
+  const tripIdFilter = useMemo(() => {
+    if (tripIds.length === 0) return '';
+    const formattedIds = tripIds.map(id => `"${id}"`).join(',');
+    return `trip_id=in.(${formattedIds})`;
+  }, [tripIds]);
 
   useEffect(() => {
-    if (!enabled || tripIds.length === 0) return;
+    if (!enabled || tripIds.length === 0 || !tripIdFilter) {
+      return;
+    }
 
     const channels: RealtimeChannel[] = [];
 
@@ -30,10 +37,9 @@ export function useGroupUpdates({
           event: '*', // INSERT, UPDATE, DELETE
           schema: 'public',
           table: 'groups',
-          filter: `trip_id=in.(${tripIds.join(',')})`,
+          filter: tripIdFilter,
         },
-        (payload: any) => {
-          console.log('Groups change:', payload);
+        () => {
           // Invalidate trips query to refetch with new data
           utils.trips.list.invalidate();
         }
@@ -54,8 +60,7 @@ export function useGroupUpdates({
           schema: 'public',
           table: 'group_memberships',
         },
-        (payload: any) => {
-          console.log('Memberships change:', payload);
+        () => {
           // Invalidate trips query to refetch
           utils.trips.list.invalidate();
         }
@@ -71,7 +76,7 @@ export function useGroupUpdates({
       });
       setIsConnected(false);
     };
-  }, [enabled, tripIds.join(','), supabase, utils]);
+  }, [enabled, tripIdFilter, supabase, utils, tripIds.length]);
 
   return { isConnected };
 }

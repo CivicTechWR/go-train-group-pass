@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // Security headers configuration
 const securityHeaders = {
@@ -173,9 +174,9 @@ export function logSecurityEvent(
 
   // In production, send to security monitoring service
   if (process.env.NODE_ENV === 'production') {
-    console.log('SECURITY_EVENT:', JSON.stringify(logData));
+    logger.audit('SECURITY_EVENT', JSON.stringify(logData));
   } else {
-    console.log('SECURITY_EVENT:', logData);
+    logger.info('SECURITY_EVENT', logData);
   }
 }
 

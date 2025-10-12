@@ -83,9 +83,9 @@ run_check "README.md exists" "[ -f 'README.md' ]" true
 run_check "LICENSE exists" "[ -f 'LICENSE' ]" true
 run_check ".gitignore exists" "[ -f '.gitignore' ]" true
 run_check "tsconfig.json exists" "[ -f 'tsconfig.json' ]" true
-run_check "next.config.js exists" "[ -f 'next.config.js' ]" true
-run_check "tailwind.config.js exists" "[ -f 'tailwind.config.js' ]" true
-run_check "postcss.config.js exists" "[ -f 'postcss.config.js' ]" true
+run_check "Next.js config exists" "[ -f 'next.config.ts' ] || [ -f 'next.config.js' ]" true
+run_check "Tailwind config exists" "[ -f 'tailwind.config.ts' ] || [ -f 'tailwind.config.js' ]" true
+run_check "PostCSS config exists" "[ -f 'postcss.config.mjs' ] || [ -f 'postcss.config.js' ]" true
 
 # 2. Documentation Checks
 echo ""

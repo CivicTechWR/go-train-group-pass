@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { adminErrorResponse, requireAdminApi } from '@/lib/admin-api';
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const { serviceClient: supabase } = await requireAdminApi(request);
 
     // Create test user in auth.users
     const { data: authData, error: authError } =
@@ -28,14 +28,7 @@ export async function POST() {
     }
 
     if (!authData.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'No user data returned',
-          message: 'Failed to create auth user',
-        },
-        { status: 400 }
-      );
+      throw new Error('No user data returned from Supabase');
     }
 
     // Create profile for the user
@@ -53,15 +46,7 @@ export async function POST() {
     if (profileError) {
       // If profile creation fails, clean up the auth user
       await supabase.auth.admin.deleteUser(authData.user.id);
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: profileError.message,
-          message: 'Failed to create user profile',
-        },
-        { status: 400 }
-      );
+      throw new Error(`Failed to create user profile: ${profileError.message}`);
     }
 
     return NextResponse.json({
@@ -71,14 +56,7 @@ export async function POST() {
       message:
         'Test user created successfully! You can now sign in with test@dredre.net / TestPassword123!',
     });
-  } catch (error: any) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: error.message,
-        message: 'Failed to create test user',
-      },
-      { status: 500 }
-    );
+  } catch (error) {
+    return adminErrorResponse(error);
   }
 }

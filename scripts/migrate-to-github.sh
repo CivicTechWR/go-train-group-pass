@@ -16,7 +16,7 @@ NC='\033[0m' # No Color
 ORG_NAME="civicTechWR"
 REPO_NAME="go-train-group-pass"
 REPO_DESCRIPTION="GO Train weekday group pass coordination app - replaces WhatsApp-based coordination"
-REPO_HOMEPAGE="https://go-train-group-pass.vercel.app"
+REPO_HOMEPAGE="https://github.com/$ORG_NAME/$REPO_NAME"
 
 echo -e "${BLUE}🚀 GO Train Group Pass App Migration to CivicTechWR${NC}"
 echo "=================================================="

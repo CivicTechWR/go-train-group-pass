@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { trpc } from '@/lib/trpc/client';
-import { useQuery } from '@tanstack/react-query';
 import { PassUploadModal } from '@/components/steward/PassUploadModal';
 
 export default function StewardPage() {

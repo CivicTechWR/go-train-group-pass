@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminApi } from '@/lib/admin-api';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const { serviceClient: supabase } = await requireAdminApi(request);
     const results: Record<string, any> = {};
 
     // Check 1: Tables exist
@@ -27,32 +27,26 @@ export async function GET() {
     }
 
     // Check 2: rebalance_trip_groups function exists
-    const { data: funcData, error: funcError } = await supabase.rpc(
-      'rebalance_trip_groups',
-      {
-        p_trip_id: '00000000-0000-0000-0000-000000000000', // Dummy UUID to test function exists
-        p_new_groups: [],
-      }
-    );
+    const { error: funcError } = await supabase.rpc('rebalance_trip_groups', {
+      p_trip_id: '00000000-0000-0000-0000-000000000000', // Dummy UUID to test function exists
+      p_new_groups: [],
+    });
 
     results.functions = {
       rebalance_trip_groups: funcError
         ? { exists: false, error: funcError.message }
         : { exists: true },
     };
-
     // Check 3: Count data
-    const { count: trainCount } = await supabase
-      .from('trains')
-      .select('*', { count: 'exact', head: true });
-
-    const { count: tripCount } = await supabase
-      .from('trips')
-      .select('*', { count: 'exact', head: true });
-
-    const { count: profileCount } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true });
+    const [
+      { count: trainCount },
+      { count: tripCount },
+      { count: profileCount },
+    ] = await Promise.all([
+      supabase.from('trains').select('*', { count: 'exact', head: true }),
+      supabase.from('trips').select('*', { count: 'exact', head: true }),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }),
+    ]);
 
     results.counts = {
       trains: trainCount || 0,
@@ -60,32 +54,7 @@ export async function GET() {
       profiles: profileCount || 0,
     };
 
-    // Check 4: Sample data
-    const { data: sampleTrains } = await supabase
-      .from('trains')
-      .select('departure_time, origin, destination')
-      .limit(3);
-
-    const { data: sampleProfiles } = await supabase
-      .from('profiles')
-      .select('id, display_name, email')
-      .limit(3);
-
-    results.samples = {
-      trains: sampleTrains || [],
-      profiles: sampleProfiles || [],
-    };
-
-    // Check 5: RLS policies
-    const { data: policies, error: policiesError } = await supabase
-      .rpc('pg_policies')
-      .select('tablename, policyname');
-
-    results.rls = policiesError
-      ? { error: 'Could not check RLS policies (this is OK - requires admin)' }
-      : { policies: policies || [] };
-
-    // Check 6: Realtime subscriptions
+    // Check 4: Realtime subscriptions
     const { data: publications } = await supabase
       .from('pg_publication_tables')
       .select('tablename')

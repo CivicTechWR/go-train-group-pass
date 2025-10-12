@@ -2,10 +2,9 @@ import { z } from 'zod';
 import { router, protectedProcedure } from '../trpc';
 import { formGroups } from '@/lib/group-formation';
 import { TRPCError } from '@trpc/server';
-import type { GroupWithMemberships, Profile } from '@/types/database';
+import type { GroupWithMemberships } from '@/types/database';
 import { joinTripSchema, leaveTripSchema } from '@/lib/validations';
 import { withRateLimit, rateLimits } from '@/lib/rate-limit';
-import { sanitizeString } from '@/lib/validations';
 
 export const tripsRouter = router({
   // Get trips for date range

@@ -66,7 +66,7 @@ export async function GET() {
       throw new Error(`Profile not found: ${profileError.message}`);
 
     // Check if user exists in auth.users
-    const { data: authUser, error: authError } = await supabase
+    const { error: authError } = await supabase
       .from('auth.users')
       .select('id, email')
       .eq('id', profiles.id)
@@ -164,7 +164,7 @@ export async function GET() {
 
   // Test 6: RLS policies allow reads
   try {
-    const { data, error } = await supabase.from('trips').select('id').limit(1);
+    const { error } = await supabase.from('trips').select('id').limit(1);
 
     if (error) throw error;
 

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { router, protectedProcedure } from '@/server/trpc';
 import { TRPCError } from '@trpc/server';
 import * as crypto from 'crypto';
+import { logger } from '@/lib/logger';
 
 export const stewardRouter = router({
   // Volunteer to be steward for a group
@@ -172,9 +173,12 @@ export const stewardRouter = router({
 
       // Validate passenger count matches group size
       if (input.passengerCount !== memberCount) {
-        console.warn(
-          `Pass shows ${input.passengerCount} passengers but group has ${memberCount} members`
-        );
+        logger.warn('Pass passenger count mismatch', {
+          detected: input.passengerCount,
+          expected: memberCount,
+          groupId: input.groupId,
+          stewardId: userId,
+        });
       }
 
       // Hash ticket number to prevent reuse
