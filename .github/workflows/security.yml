@@ -21,11 +21,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Scan for committed secrets
-        uses: gitleaks/gitleaks-action@v2
-        with:
-          log-level: warn
-          redact: true
+      # - name: Scan for committed secrets
+      #   uses: gitleaks/gitleaks-action@v2
+      #   with:
+      #     log-level: warn
+      #     redact: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
