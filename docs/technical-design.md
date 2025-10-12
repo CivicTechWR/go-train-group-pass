@@ -13,13 +13,13 @@ This document captures the core architecture decisions for the GO Train Group Pa
 
 ## Key Components
 
-| Feature | Location | Notes |
-| ------- | -------- | ----- |
-| Trip listings & grouping | `server/routers/trips.ts`, `app/today/page.tsx` | Rate-limited join/leave, filters out departed trains. |
-| Steward dashboard | `app/steward/page.tsx`, `components/steward/PassUploadModal.tsx` | Pass uploads stored in Supabase Storage, hashed ticket numbers prevent reuse. |
-| Auth flows | `components/auth/PhoneLoginForm.tsx`, `app/api/auth/*` | Twilio verification with service-role Supabase client for secure user creation. |
-| Security headers | `lib/security-headers.ts`, `middleware.ts` | CSP + COOP/COEP defaults from template security guide. |
-| Logging | `lib/logger.ts` | Centralized wrapper for info/warn/error/audit events. |
+| Feature                  | Location                                                         | Notes                                                                           |
+| ------------------------ | ---------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Trip listings & grouping | `server/routers/trips.ts`, `app/today/page.tsx`                  | Rate-limited join/leave, filters out departed trains.                           |
+| Steward dashboard        | `app/steward/page.tsx`, `components/steward/PassUploadModal.tsx` | Pass uploads stored in Supabase Storage, hashed ticket numbers prevent reuse.   |
+| Auth flows               | `components/auth/PhoneLoginForm.tsx`, `app/api/auth/*`           | Twilio verification with service-role Supabase client for secure user creation. |
+| Security headers         | `lib/security-headers.ts`, `middleware.ts`                       | CSP + COOP/COEP defaults from template security guide.                          |
+| Logging                  | `lib/logger.ts`                                                  | Centralized wrapper for info/warn/error/audit events.                           |
 
 ## Data Model (Supabase)
 

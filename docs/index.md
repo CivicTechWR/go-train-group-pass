@@ -2,13 +2,13 @@
 
 Welcome to the GO Train Group Pass documentation center. This structure mirrors the [CivicTechWR project template](https://github.com/CivicTechWR/CTWR-Project-Template-New) so contributors can quickly find the right playbook.
 
-| Audience | Start Here | Highlights |
-| -------- | ---------- | ---------- |
-| New contributors | [Getting Started](../GETTING_STARTED.md) | Clone, configure Supabase, run quality checks |
-| Riders / Stewards | [User Guide](./user-guide.md) | Authentication, joining trips, steward responsibilities |
-| Engineering team | [Technical Design](./technical-design.md) | System architecture, Supabase schema, rate limiting |
-| Delivery leads | [Project Management](./project-management.md) | Cadence, rituals, backlog hygiene, reporting |
-| Security & Ops | [Security Guide](./security-guide.md) | Disclosure policy, logging, secrets management |
+| Audience          | Start Here                                    | Highlights                                              |
+| ----------------- | --------------------------------------------- | ------------------------------------------------------- |
+| New contributors  | [Getting Started](../GETTING_STARTED.md)      | Clone, configure Supabase, run quality checks           |
+| Riders / Stewards | [User Guide](./user-guide.md)                 | Authentication, joining trips, steward responsibilities |
+| Engineering team  | [Technical Design](./technical-design.md)     | System architecture, Supabase schema, rate limiting     |
+| Delivery leads    | [Project Management](./project-management.md) | Cadence, rituals, backlog hygiene, reporting            |
+| Security & Ops    | [Security Guide](./security-guide.md)         | Disclosure policy, logging, secrets management          |
 
 ## Related Resources
 

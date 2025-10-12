@@ -10,12 +10,12 @@ This playbook describes how the GO Train Group Pass team operates during a Civic
 
 ## Roles
 
-| Role | Responsibilities |
-| ---- | ---------------- |
-| Product Lead | Define weekly goals, groom backlog, triage feedback. |
-| Tech Lead | Owns Supabase schema, CI/CD health, and release readiness. |
-| Delivery Lead | Facilitates stand-ups, ensures blockers are surfaced quickly. |
-| Steward Champion | Coordinates rider feedback and steward workflows. |
+| Role             | Responsibilities                                              |
+| ---------------- | ------------------------------------------------------------- |
+| Product Lead     | Define weekly goals, groom backlog, triage feedback.          |
+| Tech Lead        | Owns Supabase schema, CI/CD health, and release readiness.    |
+| Delivery Lead    | Facilitates stand-ups, ensures blockers are surfaced quickly. |
+| Steward Champion | Coordinates rider feedback and steward workflows.             |
 
 Update `docs/team.md` with team members’ names and contact handles once the season roster is set.
 

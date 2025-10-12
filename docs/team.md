@@ -1,12 +1,12 @@
 # Team Roster (Season Placeholder)
 
-| Role | Name | Contact |
-| ---- | ---- | ------- |
-| Delivery Lead | _TBD_ |  |
-| Product Lead | _TBD_ |  |
-| Technical Lead | _TBD_ |  |
-| Design / UX | _TBD_ |  |
-| Steward Champion | _TBD_ |  |
+| Role             | Name  | Contact |
+| ---------------- | ----- | ------- |
+| Delivery Lead    | _TBD_ |         |
+| Product Lead     | _TBD_ |         |
+| Technical Lead   | _TBD_ |         |
+| Design / UX      | _TBD_ |         |
+| Steward Champion | _TBD_ |         |
 
 Update this table at the start of each CivicTechWR season. Include Slack handles or preferred contact methods.
 

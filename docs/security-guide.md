@@ -38,7 +38,7 @@ This guide supplements [SECURITY.md](../SECURITY.md) with operational practices 
 
 ## Secret Scanning
 
-- Every push and scheduled security run executes the `gitleaks` scanner (see `.github/workflows/security.yml`) to prevent accidental credential commits.
+- Every push and scheduled security run executes the `gitleaks` scanner (see `.github/workflows/security.yml`). Store the `GITLEAKS_LICENSE` key as a GitHub secret to enable the scan; without it the workflow fails by design.
 - Treat any scanner failure as a high-severity incident: rotate the affected secret, purge the commit, and document the follow-up in the incident log.
 
 ## Incident Response Checklist

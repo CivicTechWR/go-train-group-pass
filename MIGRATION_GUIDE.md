@@ -7,6 +7,7 @@ This guide outlines the process for migrating the GO Train Group Pass Coordinati
 ## ✅ Pre-Migration Checklist
 
 ### Repository Hygiene Status: **PASSED** ✅
+
 - [x] Build passes successfully
 - [x] ESLint configuration working
 - [x] Prettier formatting applied
@@ -17,6 +18,7 @@ This guide outlines the process for migrating the GO Train Group Pass Coordinati
 - [x] Security workflows implemented
 
 ### Repository Structure: **READY** ✅
+
 ```
 go-transit-group/
 ├── .gitea/workflows/          # CI/CD workflows
@@ -42,6 +44,7 @@ go-transit-group/
 ### Step 1: GitHub Authentication Setup
 
 **Option A: Using GitHub CLI (Recommended)**
+
 ```bash
 # Install GitHub CLI (if not already installed)
 # On Fedora/CentOS/RHEL:
@@ -57,6 +60,7 @@ gh auth login
 ```
 
 **Option B: Using Personal Access Token**
+
 ```bash
 # Set GitHub token environment variable
 export GH_TOKEN="your_github_personal_access_token"
@@ -123,6 +127,7 @@ git push civictech feature/*
 After migration, update the following files:
 
 **1. Update README.md**
+
 ```markdown
 # GO Train Group Pass Coordination App
 
@@ -137,6 +142,7 @@ This project is maintained by [CivicTechWR](https://github.com/civicTechWR) - a 
 ```
 
 **2. Update package.json**
+
 ```json
 {
   "name": "@civictechwr/go-train-group-pass",
@@ -152,6 +158,7 @@ This project is maintained by [CivicTechWR](https://github.com/civicTechWR) - a 
 ```
 
 **3. Update GitHub Actions workflows**
+
 - Update workflow file paths from `.gitea/workflows/` to `.github/workflows/`
 - Update any organization-specific references
 
@@ -197,6 +204,7 @@ In the GitHub repository settings:
 In GitHub repository settings → Secrets and variables → Actions:
 
 **Required Secrets:**
+
 ```
 SUPABASE_URL
 SUPABASE_ANON_KEY
@@ -235,12 +243,14 @@ npm run test
 ### Gitea Actions → GitHub Actions
 
 **Key Differences:**
+
 - Gitea uses `gitea.event_name` and `gitea.ref`
 - GitHub uses `github.event_name` and `github.ref`
 - Gitea uses `actions/checkout@v4`
 - GitHub uses `actions/checkout@v4` (same)
 
 **Example Conversion:**
+
 ```yaml
 # Gitea Actions
 on:
@@ -260,12 +270,14 @@ on:
 ## 🛡️ Security Considerations
 
 ### Pre-Migration Security Audit
+
 - [x] No hardcoded secrets in code
 - [x] Environment variables properly configured
 - [x] Dependencies scanned for vulnerabilities
 - [x] Code quality checks in place
 
 ### Post-Migration Security Setup
+
 - [ ] Enable GitHub security features
 - [ ] Set up branch protection rules
 - [ ] Configure required status checks
@@ -291,6 +303,7 @@ on:
 ### Common Issues
 
 **1. Authentication Issues**
+
 ```bash
 # Re-authenticate with GitHub
 gh auth logout
@@ -298,15 +311,18 @@ gh auth login
 ```
 
 **2. Permission Issues**
+
 - Ensure you have write access to CivicTechWR organization
 - Contact organization administrators if needed
 
 **3. Workflow Issues**
+
 - Check GitHub Actions syntax
 - Verify environment variables are set
 - Check workflow file permissions
 
 **4. Build Issues**
+
 - Run `npm run build` locally first
 - Check for missing dependencies
 - Verify environment variable configuration
@@ -314,6 +330,7 @@ gh auth login
 ## 📞 Support
 
 For migration support:
+
 - Create an issue in the new repository
 - Contact CivicTechWR organization administrators
 - Check the [CivicTechWR documentation](https://github.com/civicTechWR)
@@ -321,6 +338,7 @@ For migration support:
 ## 🎉 Success Criteria
 
 Migration is complete when:
+
 - ✅ Repository is accessible at `https://github.com/civicTechWR/go-train-group-pass`
 - ✅ All workflows are running successfully
 - ✅ Build passes without errors

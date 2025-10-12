@@ -22,14 +22,14 @@ cp .env.example .env.local
 
 Minimum variables:
 
-| Key | Purpose |
-| --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Used for secure admin flows |
-| `ENABLE_ADMIN_APIS` | Set to `false` in day-to-day development |
-| `ADMIN_API_TOKEN` | Token required if you temporarily enable admin APIs |
-| `NEXT_PUBLIC_ENABLE_DEMO_PAGE` | Optional mock UI toggle for `/today-demo` |
+| Key                             | Purpose                                             |
+| ------------------------------- | --------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Supabase project URL                                |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key                                   |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Used for secure admin flows                         |
+| `ENABLE_ADMIN_APIS`             | Set to `false` in day-to-day development            |
+| `ADMIN_API_TOKEN`               | Token required if you temporarily enable admin APIs |
+| `NEXT_PUBLIC_ENABLE_DEMO_PAGE`  | Optional mock UI toggle for `/today-demo`           |
 
 Optional Twilio keys enable SMS verification (`TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_VERIFY_SERVICE_SID`, `TWILIO_PHONE_NUMBER`).
 
