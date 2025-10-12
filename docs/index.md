@@ -10,6 +10,18 @@ Welcome to the GO Train Group Pass documentation center. This structure mirrors 
 | Delivery leads    | [Project Management](./project-management.md) | Cadence, rituals, backlog hygiene, reporting            |
 | Security & Ops    | [Security Guide](./security-guide.md)         | Disclosure policy, logging, secrets management          |
 
+## Setup & Operations
+
+- [setup/SETUP.md](./setup/SETUP.md) – Local environment configuration.
+- [setup/SUPABASE_AUTH_SETUP.md](./setup/SUPABASE_AUTH_SETUP.md) – Supabase auth and service role guidance.
+- [setup/MIGRATION_GUIDE.md](./setup/MIGRATION_GUIDE.md) – Notes for environment migrations.
+- [setup/SECURITY_AUDIT_REPORT.md](./setup/SECURITY_AUDIT_REPORT.md) – Historical security findings.
+- [setup/TWILIO_SETUP.md](./setup/TWILIO_SETUP.md) – SMS integration instructions.
+
+## Testing & QA
+
+- [testing/E2E_TESTING_GUIDE.md](./testing/E2E_TESTING_GUIDE.md) – Playwright and multi-user test instructions.
+
 ## Related Resources
 
 - [CHANGELOG.md](../CHANGELOG.md) – Release notes and template version alignment.

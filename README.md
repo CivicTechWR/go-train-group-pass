@@ -120,7 +120,7 @@ A broader documentation index lives in the `docs/` directory.
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for coding standards, commit conventions, and the review process. Issues and feature ideas are tracked in [ISSUES_TRACKING.md](./ISSUES_TRACKING.md).
+Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for coding standards, commit conventions, and the review process. Issues and feature ideas are tracked in [docs/project-management/ISSUES_TRACKING.md](./docs/project-management/ISSUES_TRACKING.md).
 
 Before opening a pull request, run:
 
