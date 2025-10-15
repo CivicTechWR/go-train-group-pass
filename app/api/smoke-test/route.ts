@@ -116,14 +116,15 @@ export async function GET() {
         `${trip.date}T${trip.train.departure_time.split('.')[0]}`
       );
       const minutesUntil = (departureTime.getTime() - now.getTime()) / 60000;
-      return minutesUntil > 30;
+      const cutoffMinutes = Number(process.env.JOIN_LEAVE_CUTOFF_MINUTES ?? '10');
+      return minutesUntil > cutoffMinutes;
     });
 
     if (!joinableTrips || joinableTrips.length === 0) {
       results.tests.push({
         name: 'Joinable Trips',
         status: 'WARN',
-        message: 'No trips available to join (all depart <30 min)',
+        message: 'No trips available to join (all depart within cutoff window)',
         fix: 'Run CREATE_TEST_TRIPS.sql to create future trips',
       });
       results.summary.warnings++;

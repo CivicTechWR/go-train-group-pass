@@ -339,7 +339,7 @@ export default function FAQPage() {
                   What if I can&apos;t make the trip?
                 </h3>
                 <p className='text-sm text-muted-foreground'>
-                  You can leave a trip up to 30 minutes before departure. If
+                  You can leave a trip up to 10 minutes before departure by default (this may vary if your admin changes it). If
                   you&apos;ve already paid, you&apos;ll need to work out a
                   refund with the steward directly. We can&apos;t help with
                   refunds.

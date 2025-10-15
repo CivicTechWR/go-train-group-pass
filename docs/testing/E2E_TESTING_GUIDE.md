@@ -163,7 +163,7 @@ This script will:
 1. **Test with 1 user** (solo rider)
 2. **Test with 2 users** (minimum group)
 3. **Test with 20+ users** (large groups)
-4. **Test joining at exactly 30 minutes** before departure
+4. **Test joining at exactly the cutoff time** (default 10 minutes) before departure
 5. **Test joining after cutoff time** (should fail)
 
 ### Error Handling

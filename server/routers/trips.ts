@@ -178,10 +178,11 @@ export const tripsRouter = router({
       const minutesUntilDeparture =
         (departureTime.getTime() - now.getTime()) / 60000;
 
-      if (minutesUntilDeparture < 5) {
+      const cutoffMinutes = Number(process.env.JOIN_LEAVE_CUTOFF_MINUTES ?? '10');
+      if (minutesUntilDeparture < cutoffMinutes) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: 'Cannot join less than 5 minutes before departure',
+          message: `Cannot join less than ${cutoffMinutes} minutes before departure`,
         });
       }
 
@@ -349,10 +350,11 @@ export const tripsRouter = router({
       const minutesUntilDeparture =
         (departureTime.getTime() - now.getTime()) / 60000;
 
-      if (minutesUntilDeparture < 5) {
+      const cutoffMinutes = Number(process.env.JOIN_LEAVE_CUTOFF_MINUTES ?? '10');
+      if (minutesUntilDeparture < cutoffMinutes) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: 'Cannot leave less than 5 minutes before departure',
+          message: `Cannot leave less than ${cutoffMinutes} minutes before departure`,
         });
       }
 

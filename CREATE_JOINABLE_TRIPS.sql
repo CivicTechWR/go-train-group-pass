@@ -47,14 +47,14 @@ BEGIN
     RAISE NOTICE 'Created train departing at % (3 hours from now)', v_departure_time;
 END $$;
 
--- Verify: Show all today's trips you can join (depart >30 min from now)
+-- Verify: Show all today's trips you can join (depart >10 min from now by default)
 SELECT
     t.id as trip_id,
     tr.departure_time,
     tr.origin || ' → ' || tr.destination as route,
     EXTRACT(EPOCH FROM (CONCAT(CURRENT_DATE, ' ', tr.departure_time)::TIMESTAMP - NOW())) / 60 as minutes_until_departure,
     CASE
-        WHEN EXTRACT(EPOCH FROM (CONCAT(CURRENT_DATE, ' ', tr.departure_time)::TIMESTAMP - NOW())) / 60 > 30 THEN '✅ Can Join'
+        WHEN EXTRACT(EPOCH FROM (CONCAT(CURRENT_DATE, ' ', tr.departure_time)::TIMESTAMP - NOW())) / 60 > 10 THEN '✅ Can Join'
         ELSE '❌ Too late'
     END as status
 FROM trips t

@@ -152,7 +152,7 @@ const currentUserId = 'PASTE_YOUR_UUID_HERE';
 
 ### ⚠️ Error Cases to Test
 
-- Try joining <30 min before departure (should fail)
+- Try joining within the cutoff window (default <10 min) before departure (should fail)
 - Try joining same trip twice (should fail)
 - Try leaving a trip you're not in (should fail)
 

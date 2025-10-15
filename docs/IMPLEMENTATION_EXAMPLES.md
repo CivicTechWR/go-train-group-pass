@@ -127,8 +127,9 @@ export const tripsRouter = router({
       const minutesUntilDeparture =
         (departureTime.getTime() - now.getTime()) / 60000;
 
-      if (minutesUntilDeparture < 30) {
-        throw new Error('Cannot join less than 30 minutes before departure');
+      const cutoffMinutes = Number(process.env.JOIN_LEAVE_CUTOFF_MINUTES ?? '10');
+      if (minutesUntilDeparture < cutoffMinutes) {
+        throw new Error(`Cannot join less than ${cutoffMinutes} minutes before departure`);
       }
 
       // Get all current members
@@ -201,8 +202,9 @@ export const tripsRouter = router({
       const minutesUntilDeparture =
         (departureTime.getTime() - now.getTime()) / 60000;
 
-      if (minutesUntilDeparture < 30) {
-        throw new Error('Cannot leave less than 30 minutes before departure');
+      const cutoffMinutes = Number(process.env.JOIN_LEAVE_CUTOFF_MINUTES ?? '10');
+      if (minutesUntilDeparture < cutoffMinutes) {
+        throw new Error(`Cannot leave less than ${cutoffMinutes} minutes before departure`);
       }
 
       // Get user's group
