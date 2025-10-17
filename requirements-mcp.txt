@@ -1,4 +1,0 @@
-# Python MCP Server Dependencies
-# Install with: pip install -r requirements-mcp.txt
-
-mcp-server-fetch>=0.1.0

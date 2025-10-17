@@ -113,7 +113,6 @@ tests/                   Playwright test suites
 - [docs/technical-design.md](./docs/technical-design.md) – Architecture, Supabase schema, rate limiting.
 - [docs/project-management.md](./docs/project-management.md) – Cadence, rituals, reporting.
 - [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) & [SECURITY.md](./SECURITY.md) – Community and security policies.
-- [docs/legacy/README.md](./docs/legacy/README.md) – Archived CivicTechWR pilot artifacts.
 
 A broader documentation index lives in the `docs/` directory.
 
