@@ -12,14 +12,22 @@ Coordinate weekday GO Train group passes between Kitchener and Union Station wit
 
 ## Table of Contents
 
-- [Features](#features)
-- [Getting Started](#getting-started)
-- [Environment](#environment)
-- [Common Tasks](#common-tasks)
-- [Project Structure](#project-structure)
-- [Documentation](#documentation)
-- [Contributing](#contributing)
-- [License](#license)
+- [GO Train Group Pass Coordination App](#go-train-group-pass-coordination-app)
+  - [CivicTechWR Season Project](#civictechwr-season-project)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Current Process Flow](#current-process-flow)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+    - [Local Development](#local-development)
+  - [Environment](#environment)
+    - [Admin Automation Endpoints](#admin-automation-endpoints)
+  - [Common Tasks](#common-tasks)
+  - [Project Structure](#project-structure)
+  - [Documentation](#documentation)
+  - [Contributing](#contributing)
+  - [License](#license)
 
 ## Features
 
@@ -27,6 +35,69 @@ Coordinate weekday GO Train group passes between Kitchener and Union Station wit
 - Real-time trip updates powered by Supabase Realtime and tRPC.
 - Steward tools for pass uploads, payment tracking, and alerting.
 - Playwright + @axe-core/playwright for browser automation and accessibility audits.
+
+## Current Process Flow
+
+The following diagram illustrates the current group pass coordination process that this application is designed to enhance:
+
+```mermaid
+flowchart TD
+    %% class definitions for consistent styling
+    classDef phase fill:#f7f7f7,stroke:#bbb,stroke-width:1px,color:#222,font-size:14px,font-weight:bold;
+    classDef action fill:#e3f2fd,stroke:#64b5f6,stroke-width:1px,color:#0d47a1,font-size:12px;
+    classDef comm fill:#fff3e0,stroke:#ffb74d,stroke-width:1px,color:#e65100,font-size:12px;
+    classDef payment fill:#e8f5e9,stroke:#81c784,stroke-width:1px,color:#1b5e20,font-size:12px;
+    classDef decision fill:#fce4ec,stroke:#f06292,stroke-width:1px,color:#880e4f,font-size:12px,font-weight:bold;
+    classDef milestone fill:#ede7f6,stroke:#9575cd,stroke-width:1px,color:#4527a0,font-weight:bold,font-size:13px;
+    classDef terminal fill:#c5cae9,stroke:#5c6bc0,stroke-width:2px,color:#1a237e,font-weight:bold,font-size:13px;
+
+    %% start point
+    Start([📅 Start:<br/>day before or morning]):::milestone
+
+    %% coordination phase
+    subgraph Coordination["Group coordination (ongoing)"]
+        Poll["Poll posted in WhatsApp<br/>max 5 per group"]:::comm
+        Vote["Members vote<br/>or switch"]:::action
+        Groups["Groups evolve<br/>until boarding"]:::comm
+        Poll --> Vote --> Groups
+    end
+    class Coordination phase;
+
+    %% boarding and pass purchase
+    subgraph Boarding["Travel morning & boarding"]
+        CheckIn["Members check in<br/>(coach & location)"]:::comm
+        Confirm["Steward confirms<br/>headcount"]:::action
+        Buy["Steward buys<br/>group pass"]:::action
+        Screenshot["Post pass<br/>screenshot"]:::comm
+        Board["Board train"]:::milestone
+        CheckIn --> Confirm --> Buy --> Screenshot --> Board
+    end
+    class Boarding phase;
+
+    %% payment handling
+    subgraph PaymentFlow["Payment & accountability"]
+        PaymentReq["Post payment<br/>request"]:::comm
+        CreateTransfers["Create<br/>e-transfers"]:::payment
+        MembersPay["Members send<br/>payments"]:::payment
+        Track["Track<br/>completion"]:::payment
+        PaymentReq --> CreateTransfers --> MembersPay --> Track
+    end
+    class PaymentFlow phase;
+
+    %% inspection branch
+    Track --> Inspection{"Fare<br/>inspector?"}:::decision
+    Inspection -->|No| Arrive((Arrive at<br/>destination)):::terminal
+    Inspection -->|Yes| Alert["Post 'FARE INSPECTION'<br/>in chat"]:::comm
+    Alert --> Regroup["Group<br/>regroups"]:::action
+    Regroup --> ShowPass["Show pass<br/>& attest"]:::action
+    ShowPass --> Arrive
+
+    %% global connections
+    Start --> Poll
+    Groups --> CheckIn
+    Board --> PaymentReq
+    Arrive --> End([✅ Trip complete]):::milestone
+```
 
 ## Getting Started
 
@@ -93,7 +164,7 @@ npm run security         # npm audit with moderate threshold
 
 ## Project Structure
 
-```
+```txt
 app/                     Next.js App Router routes
 components/              Shared UI and feature components
 contexts/                React context providers
