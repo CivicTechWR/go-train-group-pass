@@ -116,7 +116,9 @@ export async function GET() {
         `${trip.date}T${trip.train.departure_time.split('.')[0]}`
       );
       const minutesUntil = (departureTime.getTime() - now.getTime()) / 60000;
-      const cutoffMinutes = Number(process.env.JOIN_LEAVE_CUTOFF_MINUTES ?? '10');
+      const cutoffMinutes = Number(
+        process.env.JOIN_LEAVE_CUTOFF_MINUTES ?? '10'
+      );
       return minutesUntil > cutoffMinutes;
     });
 

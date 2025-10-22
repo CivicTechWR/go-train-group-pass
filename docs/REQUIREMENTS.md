@@ -4,6 +4,7 @@ Version: 0.1 (compiled from current repo)
 Scope: MVP features and near‑term enhancements identified in code and docs
 
 References:
+
 - Project overview and flows: README.md:1
 - Data schema: supabase/migrations/001_initial_schema.sql:1
 - Group rebalancing: supabase/migrations/002_group_rebalancing_transaction.sql:1
@@ -44,51 +45,61 @@ A web app to coordinate weekday GO Train group passes between Kitchener and Unio
 ## 5) Functional Requirements
 
 5.1 Authentication & Profile
+
 - Users can sign up/sign in/out using Supabase Auth
 - A `profiles` record exists for each user (created/ensured on protected API use)
 - Profile includes display name, optional photo, and optional FCM token
 
-5.2 Train Schedules & Trips
+  5.2 Train Schedules & Trips
+
 - Show “Today” and “Tomorrow” trips with departure times and origins/destinations
 - Only show non‑departed, direct train trips to Union (filter logic mirrors server/routers/trips.ts)
 - Seed/creation endpoints exist for development/testing
 
-5.3 Join/Leave Trips
+  5.3 Join/Leave Trips
+
 - Users can join an available trip until cutoff minutes before departure (default 10; configurable via `JOIN_LEAVE_CUTOFF_MINUTES`)
 - Users can leave a joined trip until cutoff minutes before departure (default 10; configurable via `JOIN_LEAVE_CUTOFF_MINUTES`)
 - Users cannot join the same trip twice (guarded by memberships check)
 - Joining/leaving triggers group rebalancing atomically
 
-5.4 Group Formation & Rebalancing
+  5.4 Group Formation & Rebalancing
+
 - Target groups of 4–5 (prefer minimal cost variance); distribute evenly: examples 11 → [4,4,3], 14 → [5,5,4]
 - Preserve existing steward assignments when rebalancing
 - Compute `cost_per_person` by group size (2=$15, 3≈$13.33, 4=$12.50, 5=$12)
 - Apply in a single transaction via `rebalance_trip_groups(UUID, JSONB)` to avoid race conditions
 
-5.5 Group View & Member List
+  5.5 Group View & Member List
+
 - Display group number, member list with current user highlight
 - Show steward badge and cost per person
 - Show number of groups and total riders per trip; show countdown to departure
 
-5.6 Steward Workflow (MVP basics)
+  5.6 Steward Workflow (MVP basics)
+
 - Volunteer as steward for a group with no steward
 - Upload pass screenshot (OCR planned) or manually enter pass details
 - Store SHA‑256 hash of ticket number; refuse reuse across groups
 - Generate payment request details (copy‑paste) and track “marked as sent” by members
 
-5.7 Coach Location Reporting
+  5.7 Coach Location Reporting
+
 - Within 30 minutes of departure, allow “I’m Boarding” → set coach number and level (upper/lower/middle)
 - Display group location summary; indicate split coaches
 
-5.8 Fare Inspection Alerts
+  5.8 Fare Inspection Alerts
+
 - Any member can trigger one alert per trip; confirm before sending
 - Broadcast urgent push notification; show in‑app takeover; SMS fallback if push fails (future)
 - Allow members to acknowledge; steward can view acknowledgment state
 
-5.9 Daily Commitment Reminder
+  5.9 Daily Commitment Reminder
+
 - Send weekday 6 PM push notification reminding users to commit for tomorrow’s trains (background job)
 
-5.10 PWA
+  5.10 PWA
+
 - Installable PWA with basic offline caching: NetworkFirst for API, CacheFirst for images; push handlers in service worker
 
 ## 6) Non‑Functional Requirements
@@ -115,7 +126,7 @@ A web app to coordinate weekday GO Train group passes between Kitchener and Unio
 - trains(id PK, departure_time, origin, destination, direction, days_of_week)
 - trips(id PK, train_id FK→trains, date, status, delay_minutes, timestamps, unique(train_id,date))
 - groups(id PK, trip_id FK→trips, group_number, steward_id FK→profiles, pass fields, cost_per_person, timestamps)
-- group_memberships(id PK, group_id FK→groups ON DELETE CASCADE, user_id FK→profiles, coach_number, coach_level, checked_in_at, payment_* timestamps, joined_at, unique(group_id,user_id))
+- group*memberships(id PK, group_id FK→groups ON DELETE CASCADE, user_id FK→profiles, coach_number, coach_level, checked_in_at, payment*\* timestamps, joined_at, unique(group_id,user_id))
 - fare_inspection_alerts(id PK, group_id FK→groups, triggered_by_user_id FK→profiles, triggered_at)
 - alert_acknowledgments(id PK, alert_id FK→fare_inspection_alerts ON DELETE CASCADE, user_id FK→profiles, acknowledged_at, unique(alert_id,user_id))
 - Indexing for performance on date fields and FKs (see migration)
@@ -124,6 +135,7 @@ A web app to coordinate weekday GO Train group passes between Kitchener and Unio
 ## 8) API Surface (tRPC + REST where used)
 
 Implemented tRPC (server/routers/trips.ts:1)
+
 - trips.list({ startDate, endDate }) → TripWithDetails[]
   - Filters: direct outbound trains to Union; excludes departed; sorted by departure
 - trips.myTrips({ startDate, endDate }) → TripWithDetails[] for current user
@@ -134,6 +146,7 @@ Implemented tRPC (server/routers/trips.ts:1)
   - Validates direct train and cutoff window; rebalances or removes groups if empty
 
 Planned/outlined in docs
+
 - groups.volunteerSteward({ groupId })
 - groups.uploadPass({ groupId, ticketNumber, passengerCount, activatedAt, screenshotFile })
 - groups.updateLocation({ groupId, coachNumber, coachLevel })
@@ -142,6 +155,7 @@ Planned/outlined in docs
 - alerts.acknowledge({ alertId })
 
 REST development helpers
+
 - app/api/validate-db/route.ts: checks schema and rebalance function
 - app/api/smoke-test/route.ts: end‑to‑end smoke checks
 - CREATE_JOINABLE_TRIPS.sql and CREATE_REAL_GO_TRIPS.sql: seeding helpers
@@ -163,13 +177,16 @@ REST development helpers
 ## 11) Environment & Configuration
 
 Required (MVP)
+
 - NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY
 - SUPABASE_SERVICE_ROLE_KEY (server‑side setup/seed and RPC where needed)
 
 Optional (has defaults)
+
 - JOIN_LEAVE_CUTOFF_MINUTES (default 10)
 
 Planned/Optional
+
 - Firebase FCM credentials (push)
 - Twilio credentials (SMS fallback)
 - Inngest keys (cron/background jobs)
@@ -186,20 +203,24 @@ Planned/Optional
 ## 13) Testing & Acceptance Criteria
 
 Unit
+
 - Grouping algorithm edge cases (0/1 users; 2–5 single group; 6+ distributions; steward preservation)
 - Cost calculation correctness per group size
 
 Integration
+
 - tRPC join/leave behavior with cutoff and filters
 - Supabase RLS policy coverage
 - Realtime channel updates cause UI refresh
 
 E2E (Playwright)
+
 - Join/leave flow updates groups and costs live
 - Steward flow: volunteer → upload/enter pass → mark payments → visibility to members
 - Fare inspection: trigger → push/toast takeover → acknowledgments recorded
 
 Acceptance (MVP)
+
 - User can sign in, view Today/Tomorrow, join a trip > cutoff window (default 10 min) before departure, be placed in a group with computed cost; leave successfully with rebalancing
 
 ## 14) Success Metrics (Targets)
@@ -228,4 +249,3 @@ Acceptance (MVP)
 - Branding: product name confirmation and visual identity?
 - Support: channel (email/Discord/in‑app) and SLAs?
 - Backup steward: flow if steward becomes unavailable after purchase?
-

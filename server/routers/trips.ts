@@ -178,7 +178,9 @@ export const tripsRouter = router({
       const minutesUntilDeparture =
         (departureTime.getTime() - now.getTime()) / 60000;
 
-      const cutoffMinutes = Number(process.env.JOIN_LEAVE_CUTOFF_MINUTES ?? '10');
+      const cutoffMinutes = Number(
+        process.env.JOIN_LEAVE_CUTOFF_MINUTES ?? '10'
+      );
       if (minutesUntilDeparture < cutoffMinutes) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
@@ -350,7 +352,9 @@ export const tripsRouter = router({
       const minutesUntilDeparture =
         (departureTime.getTime() - now.getTime()) / 60000;
 
-      const cutoffMinutes = Number(process.env.JOIN_LEAVE_CUTOFF_MINUTES ?? '10');
+      const cutoffMinutes = Number(
+        process.env.JOIN_LEAVE_CUTOFF_MINUTES ?? '10'
+      );
       if (minutesUntilDeparture < cutoffMinutes) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
