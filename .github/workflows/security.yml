@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Scan for committed secrets
         uses: gitleaks/gitleaks-action@v2
@@ -39,4 +41,9 @@ jobs:
         run: npm ci
 
       - name: Run npm audit
-        run: npm run security
+        run: |
+          npm run security || {
+            echo "npm audit failed; retrying in 30 seconds";
+            sleep 30;
+            npm run security;
+          }
