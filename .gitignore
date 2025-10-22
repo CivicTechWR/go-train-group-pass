@@ -41,8 +41,10 @@ yarn-error.log*
 next-env.d.ts
 
 # MCP servers
-.claude/mcp.json
-.cursor/mcp.json
+.claude/
+.cursor/
+.qodo/
+CLAUDE.md
 tools.yaml
 test-mcp-servers.sh
 
@@ -64,3 +66,7 @@ mcp-*.log
 
 # Supabase temp files
 supabase/.temp/
+
+# Playwright test artifacts
+playwright-report/
+test-results/
