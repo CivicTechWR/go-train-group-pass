@@ -23,14 +23,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Scan for committed secrets
-        uses: gitleaks/gitleaks-action@v2
-        with:
-          log-level: warn
-          redact: true
-        env:
-          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
-
+      # Gitleaks scanning runs via organization-level reusable workflow.
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
