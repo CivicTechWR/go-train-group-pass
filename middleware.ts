@@ -116,10 +116,12 @@ export async function middleware(request: NextRequest) {
   const isAuthPage = request.nextUrl.pathname.startsWith('/login');
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin');
   const isApiRoute = request.nextUrl.pathname.startsWith('/api');
+  const isDemoPage = request.nextUrl.pathname.startsWith('/today-demo');
   const isProtectedRoute =
     !isAuthPage &&
     !request.nextUrl.pathname.startsWith('/auth/callback') &&
-    !isApiRoute;
+    !isApiRoute &&
+    !isDemoPage;
 
   // Require authentication for protected routes
   if (!session && isProtectedRoute) {
