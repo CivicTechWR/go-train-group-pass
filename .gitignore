@@ -70,3 +70,5 @@ supabase/.temp/
 # Playwright test artifacts
 playwright-report/
 test-results/
+
+.vscode/
