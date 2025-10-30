@@ -6,12 +6,22 @@ import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 const logger = new Logger('MikroORM');
 
 export default defineConfig({
-    dbName: 'go-train-group-pass',
+    // Use Supabase connection string or individual connection parameters
+    clientUrl: process.env.DATABASE_URL,
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '54322'),
+    user: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || 'postgres',
+    dbName: process.env.DB_NAME || 'postgres',
     extensions: [Migrator],
-    port: 3308,
     highlighter: new SqlHighlighter(),
-    debug: true,
+    debug: process.env.NODE_ENV !== 'production',
     logger: logger.log.bind(logger),
+    migrations: {
+        path: './src/database/migrations',
+        tableName: 'mikro_orm_migrations',
+        transactional: true,
+    },
     seeder: {
         path: './src/database/seeders',
     },
@@ -19,5 +29,5 @@ export default defineConfig({
     entitiesTs: ['./src/**/*.entity.ts'],
     metadataCache: {
         enabled: true,
-    }
+    },
 });
