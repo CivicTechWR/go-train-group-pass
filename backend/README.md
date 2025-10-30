@@ -1,98 +1,265 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Go Train Group Pass - Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Welcome to the backend for the Go Train Group Pass application! This README will help you get started, whether you're new to backend development or an experienced developer.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 📚 What's Inside?
 
-## Description
+This backend is built with a modern, powerful stack:
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **[NestJS](https://nestjs.com/)** - A progressive Node.js framework for building efficient server-side applications
+- **[TypeScript](https://www.typescriptlang.org/)** - JavaScript with types for better code quality
+- **[MikroORM](https://mikro-orm.io/)** - A TypeScript ORM (Object-Relational Mapping) that makes database work easier
+- **[PostgreSQL](https://www.postgresql.org/)** - A powerful, open-source relational database
+- **[Supabase](https://supabase.com/)** - An open-source Firebase alternative that provides PostgreSQL database, authentication, and more
 
-## Project setup
+### What Does Each Technology Do?
+
+- **NestJS**: Think of this as the foundation of your house. It organizes your code, handles HTTP requests, and makes building APIs straightforward
+- **TypeScript**: Adds "types" to JavaScript, catching errors before you run your code
+- **MikroORM**: Instead of writing raw SQL queries, you work with JavaScript/TypeScript objects. It's like having a translator between your code and the database
+- **PostgreSQL**: Where all your data lives (users, trips, schedules, etc.)
+- **Supabase**: Provides a PostgreSQL database plus bonus features like authentication and real-time subscriptions
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+Before you start, make sure you have:
+
+1. **[Node.js](https://nodejs.org/)** (version 18 or higher)
+   - Check your version: `node --version`
+   - [Download here](https://nodejs.org/)
+
+2. **[npm](https://www.npmjs.com/)** (comes with Node.js)
+   - Check your version: `npm --version`
+
+3. **A code editor** like [VS Code](https://code.visualstudio.com/) (recommended)
+
+### Two Setup Options
+
+Choose the option that works best for you:
+
+#### 🏠 Option 1: Local Development with Supabase (Recommended)
+
+**Requirements:**
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
+- At least 4GB of available RAM
+- [Supabase CLI](https://supabase.com/docs/guides/cli/getting-started) installed
+
+**When to use this:**
+- You have a machine that can run Docker
+- You want the fastest development experience
+- You want to work offline
+
+**Setup Steps:**
+
+1. **Install Supabase CLI**
+   ```bash
+   # macOS/Linux
+   brew install supabase/tap/supabase
+   
+   # Windows
+   scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
+   scoop install supabase
+   
+   # Alternative (any OS with npm)
+   npm install -g supabase
+   ```
+
+2. **Make sure Docker Desktop is running**
+   - Open Docker Desktop
+   - Wait until it says "Docker Desktop is running"
+
+3. **Start Supabase**
+   ```bash
+   # From the project root (not the backend folder)
+   cd /path/to/go-train-group-pass
+   supabase start
+   ```
+   
+   This will download and start several Docker containers. First time takes 5-10 minutes.
+   
+   You'll see output like:
+   ```
+   Started supabase local development setup.
+   
+   API URL: http://127.0.0.1:54321
+   DB URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+   Studio URL: http://127.0.0.1:54323
+   ```
+
+4. **Set up your environment variables**
+   ```bash
+   cd backend
+   cp .env.example .env
+   ```
+   
+   The default values in `.env` should work as-is for local development!
+
+5. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+6. **Run database migrations**
+   ```bash
+   npm run migration:up
+   ```
+   
+   This creates all the database tables you need.
+
+7. **Start the backend**
+   ```bash
+   npm run start:dev
+   ```
+
+8. **Visit Supabase Studio**
+   
+   Open http://localhost:54323 in your browser to see your database, run SQL queries, and more!
+
+#### ☁️ Option 2: Hosted Supabase (Alternative)
+
+**When to use this:**
+- Your machine doesn't meet Docker's requirements
+- You prefer cloud-based development
+- You're having issues with local Supabase
+
+**Setup Steps:**
+
+1. **Create a free Supabase account**
+   - Go to [supabase.com](https://supabase.com/)
+   - Click "Start your project"
+   - Sign up with GitHub (recommended) or email
+
+2. **Create a new project**
+   - Click "New Project"
+   - Give it a name like "go-train-group-pass-dev"
+   - Choose a database password (save this!)
+   - Select a region close to you
+   - Click "Create new project"
+   - Wait 2-3 minutes for setup
+
+3. **Get your database connection string**
+   - In your Supabase project, go to **Settings** → **Database**
+   - Scroll to "Connection string"
+   - Copy the "Connection pooling" string (recommended for better performance)
+   - It looks like: `postgresql://postgres.[project-ref]:[password]@[region].pooler.supabase.com:6543/postgres`
+
+4. **Set up your environment variables**
+   ```bash
+   cd backend
+   cp .env.example .env
+   ```
+   
+   Edit the `.env` file and replace the `DATABASE_URL` line:
+   ```env
+   DATABASE_URL=postgresql://postgres.[your-project-ref]:[your-password]@[region].pooler.supabase.com:6543/postgres
+   ```
+
+5. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+6. **Run database migrations**
+   ```bash
+   npm run migration:up
+   ```
+
+7. **Start the backend**
+   ```bash
+   npm run start:dev
+   ```
+
+8. **Access your database**
+   
+   Go to your Supabase project dashboard → **Table Editor** to view your data
+
+## 🛠️ Common Commands
+
+Once you're set up, here are the commands you'll use most:
+
+### Development
 
 ```bash
-$ npm install
+# Start the backend in development mode (auto-reloads on changes)
+npm run start:dev
+
+# Start in production mode
+npm run start:prod
+
+# Run tests
+npm run test
+
+# Run linting (check code quality)
+npm run lint
 ```
 
-## Compile and run the project
+### Database Migrations
 
 ```bash
-# development
-$ npm run start
+# Create a new migration (when you change entity files)
+npm run migration:create
 
-# watch mode
-$ npm run start:dev
+# Run all pending migrations
+npm run migration:up
 
-# production mode
-$ npm run start:prod
+# Rollback the last migration
+npm run migration:down
+
+# Check migration status
+npm run migration:pending
 ```
 
-## Run tests
+### Supabase (Local Only)
 
 ```bash
-# unit tests
-$ npm run test
+# Start Supabase
+supabase start
 
-# e2e tests
-$ npm run test:e2e
+# Stop Supabase
+supabase stop
 
-# test coverage
-$ npm run test:cov
+# Check Supabase status
+supabase status
+
+# Reset database (careful! deletes all data)
+supabase db reset
 ```
 
-## Deployment
+## 📁 Project Structure
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Here's what's in the backend folder:
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+```
+backend/
+├── src/
+│   ├── entities/          # Database models (Agency, Trip, etc.)
+│   ├── modules/           # Feature modules (ORM setup, etc.)
+│   ├── database/
+│   │   ├── migrations/    # Database schema changes
+│   │   └── seeders/       # Sample data for testing
+│   ├── app.module.ts      # Main application module
+│   ├── main.ts            # Application entry point
+│   └── mikro-orm.config.ts # Database configuration
+├── test/                  # Test files
+├── .env                   # Environment variables (YOU create this)
+├── .env.example           # Example environment variables
+├── package.json           # Dependencies and scripts
+├── tsconfig.json          # TypeScript configuration
+└── README.md              # This file!
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Key Files Explained
 
-## Resources
+- **entities/**: These are your data models. Each file represents a database table
+- **migrations/**: Tracks changes to your database structure over time
+- **mikro-orm.config.ts**: Tells MikroORM how to connect to your database
+- **.env**: Your secret configuration (database passwords, API keys, etc.) - NEVER commit this!
 
-Check out a few resources that may come in handy when working with NestJS:
+## 🐛 Troubleshooting
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### "Cannot connect to database"
 
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+**Local Supabase:**
+1
