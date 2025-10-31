@@ -1,7 +1,6 @@
 import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/postgresql';
-import { User } from '../entities/user.entity';
 import { SupabaseService } from './supabase.service';
+import { UsersService } from './users.service';
 
 export interface SignUpDto {
   email: string;
@@ -18,8 +17,8 @@ export interface SignInDto {
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly em: EntityManager,
     private readonly supabaseService: SupabaseService,
+    private readonly usersService: UsersService,
   ) {}
 
   /**
@@ -49,27 +48,15 @@ export class AuthService {
     }
 
     // Create user in our database
-    const user = this.em.create(User, {
+    const user = await this.usersService.create({
       email,
+      authUserId: authData.user.id,
       fullName,
       phoneNumber,
-      authUserId: authData.user.id,
-      lastSignInAt: new Date(),
-      createdAt: '',
-      updatedAt: '',
-      isActive: false
     });
 
-    await this.em.persistAndFlush(user);
-
     return {
-      user: {
-        id: user.id,
-        email: user.email,
-        fullName: user.fullName,
-        phoneNumber: user.phoneNumber,
-        createdAt: user.createdAt,
-      },
+      user: this.usersService.formatUserResponse(user),
       session: authData.session,
     };
   }
@@ -95,31 +82,18 @@ export class AuthService {
     }
 
     // Find or create user in our database
-    let user = await this.em.findOne(User, { authUserId: authData.user.id });
-
-    if (!user) {
-      // User exists in Supabase but not in our DB (shouldn't happen, but handle it)
-      user = this.em.create(User, {
-        email: authData.user.email!,
-        authUserId: authData.user.id,
-        fullName: authData.user.user_metadata?.full_name,
-        phoneNumber: authData.user.user_metadata?.phone_number,
-        isActive: false
-      });
-    }
+    const user = await this.usersService.findOrCreate({
+      email: authData.user.email!,
+      authUserId: authData.user.id,
+      fullName: authData.user.user_metadata?.full_name,
+      phoneNumber: authData.user.user_metadata?.phone_number,
+    });
 
     // Update last sign in time
-    user.lastSignInAt = new Date();
-    await this.em.flush();
+    await this.usersService.updateLastSignIn(user.id);
 
     return {
-      user: {
-        id: user.id,
-        email: user.email,
-        fullName: user.fullName,
-        phoneNumber: user.phoneNumber,
-        lastSignInAt: user.lastSignInAt,
-      },
+      user: this.usersService.formatUserResponse(user),
       session: authData.session,
     };
   }
@@ -148,22 +122,13 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired token');
     }
 
-    const user = await this.em.findOne(User, { authUserId: authUser.id });
+    const user = await this.usersService.findByAuthUserId(authUser.id);
 
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
 
-    return {
-      id: user.id,
-      email: user.email,
-      fullName: user.fullName,
-      phoneNumber: user.phoneNumber,
-      avatarUrl: user.avatarUrl,
-      isActive: user.isActive,
-      createdAt: user.createdAt,
-      lastSignInAt: user.lastSignInAt,
-    };
+    return this.usersService.formatUserResponse(user);
   }
 
   /**
