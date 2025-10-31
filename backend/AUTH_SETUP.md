@@ -1,0 +1,389 @@
+# Authentication Setup with Supabase
+
+This document explains the authentication system implemented in the Go Train Group Pass backend.
+
+## Overview
+
+The backend uses **Supabase Auth** for user authentication combined with **Fastify** as the HTTP server and **MikroORM** for database operations. Each user has their own UUID stored in both Supabase's auth system and our application database.
+
+## Stack
+
+- **NestJS + Fastify**: Backend framework and HTTP server
+- **Supabase Auth**: Authentication service (sign up, sign in, password reset, etc.)
+- **PostgreSQL**: Database (via Supabase)
+- **MikroORM**: TypeScript ORM
+- **JWT Tokens**: Session management via Supabase
+
+## Architecture
+
+### Two-Database Approach
+
+1. **Supabase Auth Database** (`auth.users` table)
+   - Managed by Supabase
+   - Stores authentication credentials (email, hashed password, etc.)
+   - Generates JWT tokens
+   - Handles password reset flows
+
+2. **Application Database** (`public.users` table)
+   - Managed by your application
+   - Stores application-specific user data (profile info, preferences, etc.)
+   - Links to Supabase auth via `authUserId` field
+
+### User Flow
+
+```
+Sign Up Request
+    ↓
+Create user in Supabase Auth (get auth UUID)
+    ↓
+Create user in App DB with auth UUID reference
+    ↓
+Return user data + session tokens
+```
+
+## File Structure
+
+```
+backend/src/auth/
+├── auth.module.ts          # Auth module definition
+├── auth.controller.ts      # HTTP endpoints for auth
+├── auth.service.ts         # Business logic for auth operations
+├── auth.guard.ts           # Protect routes requiring authentication
+└── supabase.service.ts     # Supabase client wrapper
+
+backend/src/entities/
+└── user.entity.ts          # User database model
+```
+
+## API Endpoints
+
+### POST `/auth/signup`
+Create a new user account.
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "securepassword123",
+  "fullName": "John Doe",
+  "phoneNumber": "+1234567890"
+}
+```
+
+**Response:**
+```json
+{
+  "user": {
+    "id": "uuid-here",
+    "email": "user@example.com",
+    "fullName": "John Doe",
+    "phoneNumber": "+1234567890",
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  },
+  "session": {
+    "access_token": "jwt-token-here",
+    "refresh_token": "refresh-token-here",
+    "expires_in": 3600,
+    "token_type": "bearer"
+  }
+}
+```
+
+### POST `/auth/signin`
+Sign in an existing user.
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "securepassword123"
+}
+```
+
+**Response:** Same as signup
+
+### POST `/auth/signout`
+Sign out the current user.
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Response:**
+```json
+{
+  "message": "Signed out successfully"
+}
+```
+
+### GET `/auth/me`
+Get the current user's information.
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Response:**
+```json
+{
+  "id": "uuid-here",
+  "email": "user@example.com",
+  "fullName": "John Doe",
+  "phoneNumber": "+1234567890",
+  "avatarUrl": null,
+  "isActive": true,
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "lastSignInAt": "2024-01-01T12:00:00.000Z"
+}
+```
+
+### POST `/auth/refresh`
+Refresh the access token using a refresh token.
+
+**Request Body:**
+```json
+{
+  "refreshToken": "refresh-token-here"
+}
+```
+
+**Response:**
+```json
+{
+  "session": {
+    "access_token": "new-jwt-token",
+    "refresh_token": "new-refresh-token",
+    "expires_in": 3600,
+    "token_type": "bearer"
+  }
+}
+```
+
+### POST `/auth/password/reset-request`
+Request a password reset email.
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Password reset email sent"
+}
+```
+
+### POST `/auth/password/update`
+Update user password (requires authentication).
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Request Body:**
+```json
+{
+  "newPassword": "newsecurepassword123"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Password updated successfully"
+}
+```
+
+## Using the Auth Guard
+
+To protect routes that require authentication, use the `AuthGuard`:
+
+```typescript
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '../auth/auth.guard';
+
+@Controller('protected')
+export class ProtectedController {
+  @Get()
+  @UseGuards(AuthGuard)
+  async getProtectedData() {
+    // Only authenticated users can access this
+    return { data: 'sensitive information' };
+  }
+}
+```
+
+The guard automatically:
+1. Extracts the JWT token from the `Authorization` header
+2. Validates it with Supabase
+3. Fetches the user from the database
+4. Attaches the user object to the request
+
+Access the authenticated user in your controller:
+
+```typescript
+@Get()
+@UseGuards(AuthGuard)
+async getProtectedData(@Request() req) {
+  const user = req.user; // User object attached by AuthGuard
+  return { userId: user.id, email: user.email };
+}
+```
+
+## User Entity
+
+The `User` entity represents users in your application database:
+
+```typescript
+{
+  id: string;              // UUID (generated by PostgreSQL)
+  email: string;           // User's email (unique)
+  fullName?: string;       // User's full name
+  phoneNumber?: string;    // User's phone number
+  avatarUrl?: string;      // Profile picture URL
+  createdAt: Date;         // Account creation timestamp
+  updatedAt: Date;         // Last update timestamp
+  lastSignInAt?: Date;     // Last sign-in timestamp
+  isActive: boolean;       // Account status
+  authUserId: string;      // Reference to Supabase auth user (unique)
+}
+```
+
+## Environment Variables
+
+Required environment variables in `.env`:
+
+```env
+# Supabase Auth Configuration
+SUPABASE_URL=http://127.0.0.1:54321                 # Local dev
+SUPABASE_ANON_KEY=your-anon-key-here               # For client-side
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key    # For server-side
+
+# Frontend URL (for password reset redirects)
+FRONTEND_URL=http://localhost:3000
+
+# Database (should already be configured)
+DATABASE_URL=postgresql://postgres:postgres@localhost:54322/postgres
+```
+
+### Local Development Keys
+
+For local Supabase, use these default keys:
+
+```env
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
+```
+
+### Production Keys
+
+For hosted Supabase:
+1. Go to your Supabase project dashboard
+2. Navigate to **Settings** → **API**
+3. Copy the `URL` and `anon` public key
+4. Copy the `service_role` key (keep this secret!)
+
+## Testing the Auth System
+
+### 1. Start Supabase (if using local)
+
+```bash
+supabase start
+```
+
+### 2. Run Database Migrations
+
+```bash
+cd backend
+npm run migrate:up
+```
+
+### 3. Start the Backend
+
+```bash
+npm run start:dev
+```
+
+### 4. Test Sign Up
+
+```bash
+curl -X POST http://localhost:3000/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "password": "test123456",
+    "fullName": "Test User"
+  }'
+```
+
+### 5. Test Sign In
+
+```bash
+curl -X POST http://localhost:3000/auth/signin \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "password": "test123456"
+  }'
+```
+
+### 6. Test Protected Endpoint
+
+```bash
+curl http://localhost:3000/auth/me \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN_HERE"
+```
+
+## Security Best Practices
+
+1. **Never commit `.env` files** - They contain sensitive keys
+2. **Use HTTPS in production** - Protects tokens in transit
+3. **Rotate service role keys regularly** - Especially if compromised
+4. **Set strong password requirements** - Enforce in your frontend
+5. **Implement rate limiting** - Prevent brute force attacks
+6. **Use refresh tokens** - Don't expose access tokens unnecessarily
+7. **Validate user input** - Use DTOs and validation pipes in NestJS
+
+## Common Issues
+
+### "Invalid or expired token"
+- The JWT token has expired (default: 1 hour)
+- Use the refresh token to get a new access token
+- User needs to sign in again if refresh token also expired
+
+### "User not found" after successful auth
+- User exists in Supabase but not in app database
+- Shouldn't happen with proper sign-up flow
+- Check that user creation in app DB succeeded
+
+### "Authorization header is required"
+- Client forgot to include the `Authorization` header
+- Format must be: `Authorization: Bearer <token>`
+
+### Cannot connect to Supabase
+- Check that Supabase is running: `supabase status`
+- Verify `SUPABASE_URL` in `.env`
+- Check Docker containers are up
+
+## Additional Resources
+
+- [Supabase Auth Documentation](https://supabase.com/docs/guides/auth)
+- [NestJS Guards Documentation](https://docs.nestjs.com/guards)
+- [JWT Best Practices](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html)
+- [MikroORM Documentation](https://mikro-orm.io/docs/guide)
+
+## Support
+
+If you encounter issues:
+1. Check the backend logs: `npm run start:dev`
+2. Check Supabase logs: `supabase logs`
+3. Verify environment variables are set correctly
+4. Ensure database migrations have run
+5. Check that Supabase is running (for local dev)
