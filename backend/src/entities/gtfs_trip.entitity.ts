@@ -7,21 +7,18 @@ import {
   Collection,
   Index,
 } from '@mikro-orm/core';
-import { StopTime } from '.';
+import { GTFSCalendarDate, StopTime } from '.';
 import { Route } from './gtfs_route.entity';
 
 @Entity()
-@Index({ name: 'idx_trips_route', properties: ['routeId'] })
-@Index({ name: 'idx_trips_service', properties: ['serviceId'] })
+@Index({ name: 'idx_trips_route', properties: ['route'] })
+@Index({ name: 'idx_trips_calendar_date', properties: ['calendarDate'] })
 export class Trip {
   @PrimaryKey()
   tripId!: string;
 
-  @Property()
-  routeId!: string;
-
-  @Property()
-  serviceId!: string;
+  @ManyToOne(() => GTFSCalendarDate, { referencedColumnNames: ['serviceId'] })
+  calendarDate!: GTFSCalendarDate;
 
   @Property({ nullable: true })
   tripHeadsign?: string;

@@ -30,13 +30,13 @@ export class Stop {
   @Property({ nullable: true })
   stopUrl?: string;
 
-  @Property({ fieldName: 'location_type', nullable: true })
+  @Property({ nullable: true })
   locationType?: number;
 
-  @Property({ fieldName: 'parent_station', nullable: true })
+  @Property({ nullable: true })
   parentStation?: string;
 
-  @Property({ fieldName: 'wheelchair_boarding', nullable: true })
+  @Property({ nullable: true })
   wheelchairBoarding?: number;
 
   @OneToMany(() => StopTime, (stopTime: StopTime) => stopTime.stop)
