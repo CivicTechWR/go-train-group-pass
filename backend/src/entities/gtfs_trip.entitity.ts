@@ -14,34 +14,34 @@ import { Route } from './gtfs_route.entity';
 @Index({ name: 'idx_trips_route', properties: ['routeId'] })
 @Index({ name: 'idx_trips_service', properties: ['serviceId'] })
 export class Trip {
-  @PrimaryKey({ fieldName: 'trip_id' })
+  @PrimaryKey()
   tripId!: string;
 
-  @Property({ fieldName: 'route_id' })
+  @Property()
   routeId!: string;
 
-  @Property({ fieldName: 'service_id' })
+  @Property()
   serviceId!: string;
 
-  @Property({ fieldName: 'trip_headsign', nullable: true })
+  @Property({ nullable: true })
   tripHeadsign?: string;
 
-  @Property({ fieldName: 'trip_short_name', nullable: true })
+  @Property({ nullable: true })
   tripShortName?: string;
 
-  @Property({ fieldName: 'direction_id', nullable: true })
+  @Property({ nullable: true })
   directionId?: number;
 
-  @Property({ fieldName: 'block_id', nullable: true })
+  @Property({ nullable: true })
   blockId?: string;
 
-  @Property({ fieldName: 'shape_id', nullable: true })
+  @Property({ nullable: true })
   shapeId?: string;
 
-  @Property({ fieldName: 'wheelchair_accessible', nullable: true })
+  @Property({ nullable: true })
   wheelchairAccessible?: number;
 
-  @Property({ fieldName: 'bikes_allowed', nullable: true })
+  @Property({ nullable: true })
   bikesAllowed?: number;
 
   @ManyToOne(() => Route)

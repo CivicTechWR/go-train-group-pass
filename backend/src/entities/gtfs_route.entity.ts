@@ -5,37 +5,37 @@ import {
   OneToMany,
   Collection,
 } from '@mikro-orm/core';
-import { GTFSTrip } from './gtfs_trip.entitity';
+import { Trip } from './gtfs_trip.entitity';
 
 @Entity()
 export class Route {
-  @PrimaryKey({ fieldName: 'route_id' })
-  routeId!: string;
+  @PrimaryKey()
+  id!: string;
 
-  @Property({ fieldName: 'agency_id', nullable: true })
+  @Property({ nullable: true })
   agencyId?: string;
 
-  @Property({ fieldName: 'route_short_name' })
+  @Property()
   routeShortName!: string;
 
-  @Property({ fieldName: 'route_long_name' })
+  @Property()
   routeLongName!: string;
 
-  @Property({ fieldName: 'route_desc', nullable: true })
+  @Property({ nullable: true })
   routeDesc?: string;
 
-  @Property({ fieldName: 'route_type' })
+  @Property()
   routeType!: number; // 0=Tram, 1=Subway, 2=Rail, 3=Bus
 
-  @Property({ fieldName: 'route_url', nullable: true })
+  @Property({ nullable: true })
   routeUrl?: string;
 
-  @Property({ fieldName: 'route_color', nullable: true })
+  @Property({ nullable: true })
   routeColor?: string;
 
-  @Property({ fieldName: 'route_text_color', nullable: true })
+  @Property({ nullable: true })
   routeTextColor?: string;
 
-  @OneToMany(() => GTFSTrip, (trip: GTFSTrip) => trip.route)
-  trips = new Collection<GTFSTrip>(this);
+  @OneToMany(() => Trip, (trip: Trip) => trip.route)
+  trips = new Collection<Trip>(this);
 }

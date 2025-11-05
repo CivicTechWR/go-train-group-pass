@@ -2,21 +2,21 @@ import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
 
 @Entity()
 export class Agency {
-  @PrimaryKey({ fieldName: 'agency_id' })
+  @PrimaryKey()
   agencyId!: string;
 
-  @Property({ fieldName: 'agency_name' })
+  @Property()
   agencyName!: string;
 
-  @Property({ fieldName: 'agency_url' })
+  @Property()
   agencyUrl!: string;
 
-  @Property({ fieldName: 'agency_timezone' })
+  @Property()
   agencyTimezone!: string;
 
-  @Property({ fieldName: 'agency_lang', nullable: true })
+  @Property({ nullable: true })
   agencyLang?: string;
 
-  @Property({ fieldName: 'agency_phone', nullable: true })
+  @Property({ nullable: true })
   agencyPhone?: string;
 }

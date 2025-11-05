@@ -2,33 +2,33 @@ import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
 
 @Entity()
 export class Calendar {
-  @PrimaryKey({ fieldName: 'service_id' })
+  @PrimaryKey()
   serviceId!: string;
 
-  @Property({ fieldName: 'monday', type: 'boolean' })
+  @Property({ type: 'boolean' })
   monday!: boolean;
 
-  @Property({ fieldName: 'tuesday', type: 'boolean' })
+  @Property({ type: 'boolean' })
   tuesday!: boolean;
 
-  @Property({ fieldName: 'wednesday', type: 'boolean' })
+  @Property({ type: 'boolean' })
   wednesday!: boolean;
 
-  @Property({ fieldName: 'thursday', type: 'boolean' })
+  @Property({ type: 'boolean' })
   thursday!: boolean;
 
-  @Property({ fieldName: 'friday', type: 'boolean' })
+  @Property({ type: 'boolean' })
   friday!: boolean;
 
-  @Property({ fieldName: 'saturday', type: 'boolean' })
+  @Property({ type: 'boolean' })
   saturday!: boolean;
 
-  @Property({ fieldName: 'sunday', type: 'boolean' })
+  @Property({ type: 'boolean' })
   sunday!: boolean;
 
-  @Property({ fieldName: 'start_date', type: 'date' })
+  @Property({ type: 'date' })
   startDate!: Date;
 
-  @Property({ fieldName: 'end_date', type: 'date' })
+  @Property({ type: 'date' })
   endDate!: Date;
 }
