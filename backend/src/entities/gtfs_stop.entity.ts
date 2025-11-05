@@ -9,25 +9,25 @@ import { StopTime } from '.';
 
 @Entity()
 export class Stop {
-  @PrimaryKey({ fieldName: 'stop_id' })
+  @PrimaryKey()
   stopId!: string;
 
-  @Property({ fieldName: 'stop_name' })
+  @Property()
   stopName!: string;
 
-  @Property({ fieldName: 'stop_desc', nullable: true })
+  @Property({ nullable: true })
   stopDesc?: string;
 
-  @Property({ type: 'decimal', fieldName: 'stop_lat', precision: 10, scale: 6 })
+  @Property({ type: 'decimal', precision: 10, scale: 6 })
   stopLat!: number;
 
-  @Property({ type: 'decimal', fieldName: 'stop_lon', precision: 10, scale: 6 })
+  @Property({ type: 'decimal', precision: 10, scale: 6 })
   stopLon!: number;
 
-  @Property({ fieldName: 'zone_id', nullable: true })
+  @Property({ nullable: true })
   zoneId?: string;
 
-  @Property({ fieldName: 'stop_url', nullable: true })
+  @Property({ nullable: true })
   stopUrl?: string;
 
   @Property({ fieldName: 'location_type', nullable: true })

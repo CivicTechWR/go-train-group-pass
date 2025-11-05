@@ -3,12 +3,12 @@ import { Entity, PrimaryKey, Property, Index } from '@mikro-orm/core';
 @Entity()
 @Index({ name: 'idx_calendar_dates_date', properties: ['date'] })
 export class CalendarDate {
-  @PrimaryKey({ fieldName: 'service_id' })
+  @PrimaryKey()
   serviceId!: string;
 
-  @PrimaryKey({ fieldName: 'date', type: 'date' })
+  @PrimaryKey({ type: 'date' })
   date!: Date;
 
-  @Property({ fieldName: 'exception_type' })
+  @Property()
   exceptionType!: number; // 1=added, 2=removed
 }

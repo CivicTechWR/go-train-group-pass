@@ -14,38 +14,37 @@ import { Stop, Trip } from '.';
   properties: ['stopId', 'departureTime'],
 })
 export class StopTime {
-  @PrimaryKey({ fieldName: 'trip_id' })
+  @PrimaryKey()
   tripId!: string;
 
-  @PrimaryKey({ fieldName: 'stop_sequence' })
+  @PrimaryKey()
   stopSequence!: number;
 
-  @Property({ fieldName: 'stop_id' })
+  @Property()
   stopId!: string;
 
-  @Property({ fieldName: 'arrival_time' })
+  @Property()
   arrivalTime!: string; // Keep as string for times like "25:30:00"
 
-  @Property({ fieldName: 'departure_time' })
+  @Property()
   departureTime!: string;
 
-  @Property({ fieldName: 'stop_headsign', nullable: true })
+  @Property({ nullable: true })
   stopHeadsign?: string;
 
-  @Property({ fieldName: 'pickup_type', nullable: true })
+  @Property({ nullable: true })
   pickupType?: number;
 
-  @Property({ fieldName: 'drop_off_type', nullable: true })
+  @Property({ nullable: true })
   dropOffType?: number;
 
   @Property({
     type: 'decimal',
-    fieldName: 'shape_dist_traveled',
     nullable: true,
   })
   shapeDistTraveled?: number;
 
-  @Property({ fieldName: 'timepoint', nullable: true })
+  @Property({ nullable: true })
   timepoint?: number;
 
   @ManyToOne(() => Trip)
