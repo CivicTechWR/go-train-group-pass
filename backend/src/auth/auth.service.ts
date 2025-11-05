@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { SupabaseService } from './supabase.service';
-import { UsersService } from './users.service';
+import { UsersService } from '../users/users.service';
 import { SignUpDto, SignInDto, parseUserMetadata } from './auth.schemas';
 
 @Injectable()
