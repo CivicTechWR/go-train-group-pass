@@ -1,6 +1,6 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
 
-@Entity({ tableName: 'agency' })
+@Entity()
 export class Agency {
   @PrimaryKey({ fieldName: 'agency_id' })
   agencyId!: string;

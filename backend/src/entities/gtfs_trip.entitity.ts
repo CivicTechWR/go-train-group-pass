@@ -8,9 +8,9 @@ import {
   Index,
 } from '@mikro-orm/core';
 import { StopTime } from '.';
-import { Route } from './route.entity';
+import { Route } from './gtfs_route.entity';
 
-@Entity({ tableName: 'trips' })
+@Entity()
 @Index({ name: 'idx_trips_route', properties: ['routeId'] })
 @Index({ name: 'idx_trips_service', properties: ['serviceId'] })
 export class Trip {

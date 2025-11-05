@@ -7,7 +7,7 @@ import {
 } from '@mikro-orm/core';
 import { Stop, Trip } from '.';
 
-@Entity({ tableName: 'stop_times' })
+@Entity()
 @Index({ name: 'idx_stop_times_stop', properties: ['stopId'] })
 @Index({
   name: 'idx_stop_times_stop_departure',
