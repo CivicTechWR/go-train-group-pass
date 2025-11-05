@@ -1,6 +1,6 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
 
-@Entity({ tableName: 'calendar' })
+@Entity()
 export class Calendar {
   @PrimaryKey({ fieldName: 'service_id' })
   serviceId!: string;

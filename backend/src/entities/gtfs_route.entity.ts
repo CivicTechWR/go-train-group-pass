@@ -5,9 +5,9 @@ import {
   OneToMany,
   Collection,
 } from '@mikro-orm/core';
-import { Trip } from './trip.entitity';
+import { GTFSTrip } from './gtfs_trip.entitity';
 
-@Entity({ tableName: 'routes' })
+@Entity()
 export class Route {
   @PrimaryKey({ fieldName: 'route_id' })
   routeId!: string;
@@ -36,6 +36,6 @@ export class Route {
   @Property({ fieldName: 'route_text_color', nullable: true })
   routeTextColor?: string;
 
-  @OneToMany(() => Trip, (trip) => trip.route)
-  trips = new Collection<Trip>(this);
+  @OneToMany(() => GTFSTrip, (trip: GTFSTrip) => trip.route)
+  trips = new Collection<GTFSTrip>(this);
 }
