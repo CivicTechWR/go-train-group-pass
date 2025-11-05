@@ -17,7 +17,7 @@ export class Trip {
   @PrimaryKey()
   tripId!: string;
 
-  @ManyToOne(() => GTFSCalendarDate, { referencedColumnNames: ['serviceId'] })
+  @ManyToOne(() => GTFSCalendarDate)
   calendarDate!: GTFSCalendarDate;
 
   @Property({ nullable: true })
