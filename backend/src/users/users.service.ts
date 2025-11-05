@@ -55,8 +55,6 @@ export class UsersService {
       phoneNumber,
       authUserId,
       lastSignInAt: new Date(),
-      createdAt: '',
-      updatedAt: '',
       isActive: false,
     });
 
