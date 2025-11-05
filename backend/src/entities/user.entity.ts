@@ -2,7 +2,6 @@ import { Entity, OptionalProps, PrimaryKey, Property } from '@mikro-orm/core';
 
 @Entity({ tableName: 'users' })
 export class User {
-
   [OptionalProps]?: 'createdAt' | 'updatedAt';
 
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
@@ -23,7 +22,11 @@ export class User {
   @Property({ type: 'timestamp', onCreate: () => new Date() })
   createdAt: Date = new Date();
 
-  @Property({ type: 'timestamp', onCreate: () => new Date(), onUpdate: () => new Date() })
+  @Property({
+    type: 'timestamp',
+    onCreate: () => new Date(),
+    onUpdate: () => new Date(),
+  })
   updatedAt: Date = new Date();
 
   @Property({ nullable: true, type: 'timestamp' })

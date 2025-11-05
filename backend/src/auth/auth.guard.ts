@@ -32,7 +32,10 @@ export class AuthGuard implements CanActivate {
 
     try {
       // Verify token with Supabase
-      const { data: { user: authUser }, error } = await this.supabaseService.auth.getUser(token);
+      const {
+        data: { user: authUser },
+        error,
+      } = await this.supabaseService.auth.getUser(token);
 
       if (error || !authUser) {
         throw new UnauthorizedException('Invalid or expired token');

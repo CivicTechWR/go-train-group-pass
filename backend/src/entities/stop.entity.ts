@@ -1,4 +1,10 @@
-import { Entity, PrimaryKey, Property, OneToMany, Collection } from '@mikro-orm/core';
+import {
+  Entity,
+  PrimaryKey,
+  Property,
+  OneToMany,
+  Collection,
+} from '@mikro-orm/core';
 import { StopTime } from '.';
 
 @Entity({ tableName: 'stops' })
@@ -33,6 +39,6 @@ export class Stop {
   @Property({ fieldName: 'wheelchair_boarding', nullable: true })
   wheelchairBoarding?: number;
 
-  @OneToMany(() => StopTime, stopTime => stopTime.stop)
+  @OneToMany(() => StopTime, (stopTime) => stopTime.stop)
   stopTimes = new Collection<StopTime>(this);
 }
