@@ -70,7 +70,7 @@ export class UsersService {
    */
   async updateLastSignIn(userId: string): Promise<void> {
     const user = await this.em.findOne(User, { id: userId });
-    
+
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }

@@ -1,7 +1,14 @@
-import { Entity, PrimaryKey, Property, ManyToOne, OneToMany, Collection, Index } from '@mikro-orm/core';
+import {
+  Entity,
+  PrimaryKey,
+  Property,
+  ManyToOne,
+  OneToMany,
+  Collection,
+  Index,
+} from '@mikro-orm/core';
 import { StopTime } from '.';
 import { Route } from './route.entity';
-
 
 @Entity({ tableName: 'trips' })
 @Index({ name: 'idx_trips_route', properties: ['routeId'] })
@@ -40,6 +47,6 @@ export class Trip {
   @ManyToOne(() => Route)
   route!: Route;
 
-  @OneToMany(() => StopTime, stopTime => stopTime.trip)
+  @OneToMany(() => StopTime, (stopTime) => stopTime.trip)
   stopTimes = new Collection<StopTime>(this);
 }

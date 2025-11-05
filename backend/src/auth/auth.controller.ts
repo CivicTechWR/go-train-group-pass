@@ -78,7 +78,9 @@ export class AuthController {
 
     const parts = authorization.split(' ');
     if (parts.length !== 2 || parts[0] !== 'Bearer') {
-      throw new UnauthorizedException('Invalid authorization header format. Expected: Bearer <token>');
+      throw new UnauthorizedException(
+        'Invalid authorization header format. Expected: Bearer <token>',
+      );
     }
 
     return parts[1];

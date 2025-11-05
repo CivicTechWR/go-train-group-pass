@@ -1,10 +1,18 @@
-import { Entity, PrimaryKey, Property, ManyToOne, Index } from '@mikro-orm/core';
+import {
+  Entity,
+  PrimaryKey,
+  Property,
+  ManyToOne,
+  Index,
+} from '@mikro-orm/core';
 import { Stop, Trip } from '.';
-
 
 @Entity({ tableName: 'stop_times' })
 @Index({ name: 'idx_stop_times_stop', properties: ['stopId'] })
-@Index({ name: 'idx_stop_times_stop_departure', properties: ['stopId', 'departureTime'] })
+@Index({
+  name: 'idx_stop_times_stop_departure',
+  properties: ['stopId', 'departureTime'],
+})
 export class StopTime {
   @PrimaryKey({ fieldName: 'trip_id' })
   tripId!: string;
@@ -30,7 +38,11 @@ export class StopTime {
   @Property({ fieldName: 'drop_off_type', nullable: true })
   dropOffType?: number;
 
-  @Property({ type: 'decimal', fieldName: 'shape_dist_traveled', nullable: true })
+  @Property({
+    type: 'decimal',
+    fieldName: 'shape_dist_traveled',
+    nullable: true,
+  })
   shapeDistTraveled?: number;
 
   @Property({ fieldName: 'timepoint', nullable: true })

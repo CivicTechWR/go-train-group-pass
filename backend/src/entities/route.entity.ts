@@ -1,4 +1,10 @@
-import { Entity, PrimaryKey, Property, OneToMany, Collection } from '@mikro-orm/core';
+import {
+  Entity,
+  PrimaryKey,
+  Property,
+  OneToMany,
+  Collection,
+} from '@mikro-orm/core';
 import { Trip } from './trip.entitity';
 
 @Entity({ tableName: 'routes' })
@@ -30,6 +36,6 @@ export class Route {
   @Property({ fieldName: 'route_text_color', nullable: true })
   routeTextColor?: string;
 
-  @OneToMany(() => Trip, trip => trip.route)
+  @OneToMany(() => Trip, (trip) => trip.route)
   trips = new Collection<Trip>(this);
 }

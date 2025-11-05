@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { SupabaseService } from './supabase.service';
 import { UsersService } from './users.service';
 
@@ -28,16 +32,17 @@ export class AuthService {
     const { email, password, fullName, phoneNumber } = signUpDto;
 
     // Create user in Supabase Auth
-    const { data: authData, error: authError } = await this.supabaseService.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          phone_number: phoneNumber,
+    const { data: authData, error: authError } =
+      await this.supabaseService.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            phone_number: phoneNumber,
+          },
         },
-      },
-    });
+      });
 
     if (authError) {
       throw new BadRequestException(authError.message);
@@ -68,10 +73,11 @@ export class AuthService {
     const { email, password } = signInDto;
 
     // Authenticate with Supabase
-    const { data: authData, error: authError } = await this.supabaseService.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { data: authData, error: authError } =
+      await this.supabaseService.auth.signInWithPassword({
+        email,
+        password,
+      });
 
     if (authError) {
       throw new UnauthorizedException(authError.message);
@@ -116,7 +122,10 @@ export class AuthService {
    * Get user from access token
    */
   async getUserFromToken(accessToken: string) {
-    const { data: { user: authUser }, error } = await this.supabaseService.auth.getUser(accessToken);
+    const {
+      data: { user: authUser },
+      error,
+    } = await this.supabaseService.auth.getUser(accessToken);
 
     if (error || !authUser) {
       throw new UnauthorizedException('Invalid or expired token');
@@ -152,9 +161,12 @@ export class AuthService {
    * Request password reset email
    */
   async requestPasswordReset(email: string) {
-    const { error } = await this.supabaseService.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/reset-password`,
-    });
+    const { error } = await this.supabaseService.auth.resetPasswordForEmail(
+      email,
+      {
+        redirectTo: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/reset-password`,
+      },
+    );
 
     if (error) {
       throw new BadRequestException(error.message);
@@ -168,7 +180,10 @@ export class AuthService {
    */
   async updatePassword(accessToken: string, newPassword: string) {
     // First verify the token
-    const { data: { user: authUser }, error: userError } = await this.supabaseService.auth.getUser(accessToken);
+    const {
+      data: { user: authUser },
+      error: userError,
+    } = await this.supabaseService.auth.getUser(accessToken);
 
     if (userError || !authUser) {
       throw new UnauthorizedException('Invalid or expired token');
