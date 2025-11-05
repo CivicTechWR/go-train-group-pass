@@ -1,98 +1,337 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Go Train Group Pass - Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend API for the Go Train Group Pass application, built with NestJS, MikroORM, and Supabase for authentication.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Tech Stack
 
-## Description
+- **Framework**: NestJS + Fastify
+- **Database**: PostgreSQL with MikroORM
+- **Authentication**: Supabase Auth
+- **Testing**: Vitest
+- **Language**: TypeScript
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Prerequisites
 
-## Project setup
+Before you begin, ensure you have the following installed:
+
+- **Node.js** (v18 or higher)
+- **npm** (v9 or higher)
+- **Supabase CLI** (for local development)
+- **Docker** (required for local Supabase)
+
+## Getting Started
+
+### 1. Clone the Repository
 
 ```bash
-$ npm install
+git clone https://github.com/CivicTechWR/go-train-group-pass.git
+cd go-train-group-pass/backend
 ```
 
-## Compile and run the project
+### 2. Install Dependencies
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Run tests
+### 3. Set Up Environment Variables
+
+Create a `.env` file in the backend directory:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cp .env.example .env
 ```
+
+Edit `.env` with your configuration:
+
+```env
+# Supabase Configuration (local development)
+SUPABASE_URL=http://127.0.0.1:54321
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
+
+# Database Configuration
+DATABASE_URL=postgresql://postgres:postgres@localhost:54322/postgres
+
+# Application Configuration
+PORT=3000
+FRONTEND_URL=http://localhost:3000
+```
+
+> **Note**: The keys above are default local development keys from Supabase. For production, use keys from your Supabase project dashboard.
+
+### 4. Start Supabase (Local Development)
+
+```bash
+# From the project root directory
+cd ..
+supabase start
+```
+
+This will start local Supabase services including PostgreSQL. Note the connection details displayed.
+
+### 5. Run Database Migrations
+
+```bash
+# Back in the backend directory
+cd backend
+npm run migrate:up
+```
+
+This creates the necessary database tables (users, routes, stops, etc.).
+
+### 6. Start the Development Server
+
+```bash
+npm run start:dev
+```
+
+The API will be available at `http://localhost:3000`.
+
+## Available Scripts
+
+### Development
+
+```bash
+# Start development server with hot reload
+npm run start:dev
+
+# Start production build
+npm run start:prod
+
+# Build the project
+npm run build
+```
+
+### Testing
+
+```bash
+# Run unit tests
+npm run test
+
+# Run e2e tests
+npm run test:e2e
+
+# Run tests with coverage
+npm run test:cov
+
+# Run tests in watch mode
+npm run test:watch
+```
+
+### Database
+
+```bash
+# Create a new migration
+npm run migrate:create
+
+# Run pending migrations
+npm run migrate:up
+
+# Rollback last migration
+npm run migrate:down
+
+# Check current migration status
+npm run migrate:pending
+```
+
+### Code Quality
+
+```bash
+# Lint code
+npm run lint
+
+# Format code
+npm run format
+```
+
+## Project Structure
+
+```
+backend/
+├── src/
+│   ├── auth/              # Authentication module
+│   │   ├── auth.controller.ts
+│   │   ├── auth.service.ts
+│   │   ├── auth.guard.ts
+│   │   ├── supabase.service.ts
+│   │   └── users.service.ts
+│   ├── entities/          # Database entities
+│   │   ├── user.entity.ts
+│   │   ├── route.entity.ts
+│   │   ├── stop.entity.ts
+│   │   └── ...
+│   ├── modules/           # Feature modules
+│   │   └── orm.module.ts
+│   ├── database/          # Database migrations
+│   │   └── migrations/
+│   ├── app.module.ts      # Root module
+│   └── main.ts            # Application entry point
+├── test/                  # E2E tests
+├── .env                   # Environment variables (not in git)
+├── .env.example           # Example environment config
+├── mikro-orm.config.ts    # ORM configuration
+├── vitest.config.ts       # Test configuration
+└── package.json
+```
+
+## Authentication
+
+This application uses Supabase for authentication with JWT tokens. See [AUTH_SETUP.md](./AUTH_SETUP.md) for detailed information about:
+
+- Authentication architecture
+- API endpoints
+- Using the AuthGuard
+- Testing the auth system
+- Security best practices
+
+### Quick Example
+
+```typescript
+// Protect a route
+@Controller('protected')
+export class ProtectedController {
+  @Get()
+  @UseGuards(AuthGuard)
+  async getData(@Request() req) {
+    const user = req.user; // User attached by AuthGuard
+    return { data: 'sensitive info', userId: user.id };
+  }
+}
+```
+
+## API Documentation
+
+### Base URL
+
+```
+http://localhost:3000
+```
+
+### Main Endpoints
+
+- `POST /auth/signup` - Create new user account
+- `POST /auth/signin` - Sign in existing user
+- `POST /auth/signout` - Sign out current user
+- `GET /auth/me` - Get current user info
+- `POST /auth/refresh` - Refresh access token
+- `POST /auth/password/reset-request` - Request password reset
+- `POST /auth/password/update` - Update password
+
+For complete API documentation, see [AUTH_SETUP.md](./AUTH_SETUP.md).
+
+## Testing
+
+### Running Tests
+
+The project uses Vitest for testing. Note that there are currently some compatibility issues between Vitest and NestJS's testing utilities that are being addressed.
+
+```bash
+# Run all tests
+npm run test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run with coverage
+npm run test:cov
+```
+
+### Known Issues
+
+Tests are experiencing dependency injection issues with Vitest. If you encounter test failures related to undefined dependencies, consider:
+
+1. Using Jest instead of Vitest (more compatible with NestJS)
+2. Installing `@vitest/jest-compat` for better Jest compatibility
+3. Manually instantiating classes in tests instead of using `Test.createTestingModule()`
 
 ## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### Environment Variables for Production
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Update your `.env` with production values:
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+```env
+# Production Supabase (get from Supabase dashboard)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-production-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-production-service-role-key
+
+# Production Database
+DATABASE_URL=postgresql://user:password@host:port/database
+
+# Production Config
+PORT=3000
+FRONTEND_URL=https://your-frontend-domain.com
+NODE_ENV=production
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Build and Run
 
-## Resources
+```bash
+# Build the application
+npm run build
 
-Check out a few resources that may come in handy when working with NestJS:
+# Run in production mode
+npm run start:prod
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Troubleshooting
 
-## Support
+### Cannot connect to database
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+# Check if Supabase is running
+supabase status
 
-## Stay in touch
+# Check database connection
+psql postgresql://postgres:postgres@localhost:54322/postgres
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Port already in use
+
+```bash
+# Change PORT in .env file
+PORT=3001
+```
+
+### Migration errors
+
+```bash
+# Reset database (WARNING: deletes all data)
+npm run migrate:down
+npm run migrate:up
+```
+
+### Authentication errors
+
+- Verify `SUPABASE_URL` and keys in `.env`
+- Ensure Supabase is running: `supabase status`
+- Check that migrations have run successfully
+
+## Contributing
+
+1. Create a feature branch
+2. Make your changes
+3. Write/update tests
+4. Ensure code passes linting: `npm run lint`
+5. Format code: `npm run format`  
+6. Submit a pull request
+
+## Additional Documentation
+
+- [AUTH_SETUP.md](./AUTH_SETUP.md) - Detailed authentication documentation
+- [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) - Supabase setup guide
+- [NestJS Documentation](https://docs.nestjs.com)
+- [MikroORM Documentation](https://mikro-orm.io)
+- [Supabase Documentation](https://supabase.com/docs)
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+MIT License - see LICENSE file for details
+
+## Support
+
+For questions or issues:
+- Open an issue on GitHub
+- Contact the CivicTech WR team
