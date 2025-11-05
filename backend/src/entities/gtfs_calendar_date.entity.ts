@@ -1,4 +1,4 @@
-import { Entity, PrimaryKey, Property, Index, ManyToOne } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, Index } from '@mikro-orm/core';
 
 @Entity()
 @Index({ name: 'idx_calendar_dates_date', properties: ['date'] })
