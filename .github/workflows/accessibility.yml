@@ -9,6 +9,10 @@ jobs:
   axe:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      matrix:
+        workspace: [backend]
+        # Add 'frontend' to the array when frontend directory is created
     env:
       NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
       NEXT_PUBLIC_SUPABASE_ANON_KEY: public-anon-key
@@ -25,14 +29,18 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: ${{ matrix.workspace }}/package-lock.json
 
       - name: Install dependencies
+        working-directory: ${{ matrix.workspace }}
         run: npm ci
 
       - name: Install Playwright browsers
+        working-directory: ${{ matrix.workspace }}
         run: npx playwright install --with-deps chromium
 
       - name: Run axe accessibility audit
+        working-directory: ${{ matrix.workspace }}
         env:
           CI: true
         run: npm run test:a11y
