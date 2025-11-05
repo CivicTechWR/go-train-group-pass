@@ -8,10 +8,10 @@ import {
 import { Stop, Trip } from '.';
 
 @Entity()
-@Index({ name: 'idx_stop_times_stop', properties: ['stopId'] })
+@Index({ name: 'idx_stop_times_stop', properties: ['stop'] })
 @Index({
   name: 'idx_stop_times_stop_departure',
-  properties: ['stopId', 'departureTime'],
+  properties: ['stop', 'departureTime'],
 })
 export class StopTime {
   @PrimaryKey()
@@ -19,9 +19,6 @@ export class StopTime {
 
   @PrimaryKey()
   stopSequence!: number;
-
-  @Property()
-  stopId!: string;
 
   @Property()
   arrivalTime!: string; // Keep as string for times like "25:30:00"
@@ -47,9 +44,9 @@ export class StopTime {
   @Property({ nullable: true })
   timepoint?: number;
 
-  @ManyToOne(() => Trip)
-  trip!: Trip;
-
   @ManyToOne(() => Stop)
   stop!: Stop;
+
+  @ManyToOne(() => Trip)
+  trip!: Trip;
 }

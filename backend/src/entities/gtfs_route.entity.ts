@@ -2,18 +2,17 @@ import {
   Entity,
   PrimaryKey,
   Property,
+  ManyToOne,
   OneToMany,
   Collection,
 } from '@mikro-orm/core';
 import { Trip } from './gtfs_trip.entitity';
+import { Agency } from './gtfs_agency.entity';
 
 @Entity()
 export class Route {
   @PrimaryKey()
-  id!: string;
-
-  @Property({ nullable: true })
-  agencyId?: string;
+  routeId!: string;
 
   @Property()
   routeShortName!: string;
@@ -35,6 +34,9 @@ export class Route {
 
   @Property({ nullable: true })
   routeTextColor?: string;
+
+  @ManyToOne(() => Agency, { nullable: true })
+  agency?: Agency;
 
   @OneToMany(() => Trip, (trip: Trip) => trip.route)
   trips = new Collection<Trip>(this);
