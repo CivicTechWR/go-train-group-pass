@@ -1,8 +1,8 @@
 {
   "namespaces": [
-    "public"
+    "go-train-group-pass"
   ],
-  "name": "public",
+  "name": "go-train-group-pass",
   "tables": [
     {
       "columns": {
@@ -68,126 +68,12 @@
         }
       },
       "name": "agency",
-      "schema": "public",
+      "schema": "go-train-group-pass",
       "indexes": [
         {
           "keyName": "agency_pkey",
           "columnNames": [
             "agency_id"
-          ],
-          "composite": false,
-          "constraint": true,
-          "primary": true,
-          "unique": true
-        }
-      ],
-      "checks": [],
-      "foreignKeys": {},
-      "nativeEnums": {}
-    },
-    {
-      "columns": {
-        "service_id": {
-          "name": "service_id",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "monday": {
-          "name": "monday",
-          "type": "boolean",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "boolean"
-        },
-        "tuesday": {
-          "name": "tuesday",
-          "type": "boolean",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "boolean"
-        },
-        "wednesday": {
-          "name": "wednesday",
-          "type": "boolean",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "boolean"
-        },
-        "thursday": {
-          "name": "thursday",
-          "type": "boolean",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "boolean"
-        },
-        "friday": {
-          "name": "friday",
-          "type": "boolean",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "boolean"
-        },
-        "saturday": {
-          "name": "saturday",
-          "type": "boolean",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "boolean"
-        },
-        "sunday": {
-          "name": "sunday",
-          "type": "boolean",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "boolean"
-        },
-        "start_date": {
-          "name": "start_date",
-          "type": "date",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 0,
-          "mappedType": "date"
-        },
-        "end_date": {
-          "name": "end_date",
-          "type": "date",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 0,
-          "mappedType": "date"
-        }
-      },
-      "name": "calendar",
-      "schema": "public",
-      "indexes": [
-        {
-          "keyName": "calendar_pkey",
-          "columnNames": [
-            "service_id"
           ],
           "composite": false,
           "constraint": true,
@@ -231,8 +117,8 @@
           "mappedType": "integer"
         }
       },
-      "name": "calendar_dates",
-      "schema": "public",
+      "name": "gtfscalendar_date",
+      "schema": "go-train-group-pass",
       "indexes": [
         {
           "keyName": "idx_calendar_dates_date",
@@ -245,7 +131,7 @@
           "unique": false
         },
         {
-          "keyName": "calendar_dates_pkey",
+          "keyName": "gtfscalendar_date_pkey",
           "columnNames": [
             "service_id",
             "date"
@@ -269,16 +155,6 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "agency_id": {
-          "name": "agency_id",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
           "length": 255,
           "mappedType": "string"
         },
@@ -350,13 +226,23 @@
           "nullable": true,
           "length": 255,
           "mappedType": "string"
+        },
+        "agency_agency_id": {
+          "name": "agency_agency_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
         }
       },
-      "name": "routes",
-      "schema": "public",
+      "name": "route",
+      "schema": "go-train-group-pass",
       "indexes": [
         {
-          "keyName": "routes_pkey",
+          "keyName": "route_pkey",
           "columnNames": [
             "route_id"
           ],
@@ -367,7 +253,21 @@
         }
       ],
       "checks": [],
-      "foreignKeys": {},
+      "foreignKeys": {
+        "route_agency_agency_id_foreign": {
+          "constraintName": "route_agency_agency_id_foreign",
+          "columnNames": [
+            "agency_agency_id"
+          ],
+          "localTableName": "go-train-group-pass.route",
+          "referencedColumnNames": [
+            "agency_id"
+          ],
+          "referencedTableName": "go-train-group-pass.agency",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        }
+      },
       "nativeEnums": {}
     },
     {
@@ -473,11 +373,11 @@
           "mappedType": "integer"
         }
       },
-      "name": "stops",
-      "schema": "public",
+      "name": "stop",
+      "schema": "go-train-group-pass",
       "indexes": [
         {
-          "keyName": "stops_pkey",
+          "keyName": "stop_pkey",
           "columnNames": [
             "stop_id"
           ],
@@ -503,8 +403,8 @@
           "length": 255,
           "mappedType": "string"
         },
-        "route_id": {
-          "name": "route_id",
+        "calendar_date_service_id": {
+          "name": "calendar_date_service_id",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
@@ -513,15 +413,15 @@
           "length": 255,
           "mappedType": "string"
         },
-        "service_id": {
-          "name": "service_id",
-          "type": "varchar(255)",
+        "calendar_date_date": {
+          "name": "calendar_date_date",
+          "type": "date",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
           "length": 255,
-          "mappedType": "string"
+          "mappedType": "date"
         },
         "trip_headsign": {
           "name": "trip_headsign",
@@ -601,15 +501,16 @@
           "mappedType": "string"
         }
       },
-      "name": "trips",
-      "schema": "public",
+      "name": "trip",
+      "schema": "go-train-group-pass",
       "indexes": [
         {
-          "keyName": "idx_trips_service",
+          "keyName": "idx_trips_calendar_date",
           "columnNames": [
-            "service_id"
+            "calendar_date_service_id",
+            "calendar_date_date"
           ],
-          "composite": false,
+          "composite": true,
           "constraint": false,
           "primary": false,
           "unique": false
@@ -617,7 +518,7 @@
         {
           "keyName": "idx_trips_route",
           "columnNames": [
-            "route_id"
+            "route_route_id"
           ],
           "composite": false,
           "constraint": false,
@@ -625,7 +526,7 @@
           "unique": false
         },
         {
-          "keyName": "trips_pkey",
+          "keyName": "trip_pkey",
           "columnNames": [
             "trip_id"
           ],
@@ -637,16 +538,30 @@
       ],
       "checks": [],
       "foreignKeys": {
-        "trips_route_route_id_foreign": {
-          "constraintName": "trips_route_route_id_foreign",
+        "trip_calendar_date_service_id_calendar_date_date_foreign": {
+          "constraintName": "trip_calendar_date_service_id_calendar_date_date_foreign",
+          "columnNames": [
+            "calendar_date_service_id",
+            "calendar_date_date"
+          ],
+          "localTableName": "go-train-group-pass.trip",
+          "referencedColumnNames": [
+            "service_id",
+            "date"
+          ],
+          "referencedTableName": "go-train-group-pass.gtfscalendar_date",
+          "updateRule": "cascade"
+        },
+        "trip_route_route_id_foreign": {
+          "constraintName": "trip_route_route_id_foreign",
           "columnNames": [
             "route_route_id"
           ],
-          "localTableName": "public.trips",
+          "localTableName": "go-train-group-pass.trip",
           "referencedColumnNames": [
             "route_id"
           ],
-          "referencedTableName": "public.routes",
+          "referencedTableName": "go-train-group-pass.route",
           "updateRule": "cascade"
         }
       },
@@ -672,16 +587,6 @@
           "primary": false,
           "nullable": false,
           "mappedType": "integer"
-        },
-        "stop_id": {
-          "name": "stop_id",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
         },
         "arrival_time": {
           "name": "arrival_time",
@@ -751,16 +656,6 @@
           "nullable": true,
           "mappedType": "integer"
         },
-        "trip_trip_id": {
-          "name": "trip_trip_id",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
-        },
         "stop_stop_id": {
           "name": "stop_stop_id",
           "type": "varchar(255)",
@@ -770,15 +665,25 @@
           "nullable": false,
           "length": 255,
           "mappedType": "string"
+        },
+        "trip_trip_id": {
+          "name": "trip_trip_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
         }
       },
-      "name": "stop_times",
-      "schema": "public",
+      "name": "stop_time",
+      "schema": "go-train-group-pass",
       "indexes": [
         {
           "keyName": "idx_stop_times_stop_departure",
           "columnNames": [
-            "stop_id",
+            "stop_stop_id",
             "departure_time"
           ],
           "composite": true,
@@ -789,7 +694,7 @@
         {
           "keyName": "idx_stop_times_stop",
           "columnNames": [
-            "stop_id"
+            "stop_stop_id"
           ],
           "composite": false,
           "constraint": false,
@@ -797,7 +702,7 @@
           "unique": false
         },
         {
-          "keyName": "stop_times_pkey",
+          "keyName": "stop_time_pkey",
           "columnNames": [
             "trip_id",
             "stop_sequence"
@@ -810,28 +715,28 @@
       ],
       "checks": [],
       "foreignKeys": {
-        "stop_times_trip_trip_id_foreign": {
-          "constraintName": "stop_times_trip_trip_id_foreign",
-          "columnNames": [
-            "trip_trip_id"
-          ],
-          "localTableName": "public.stop_times",
-          "referencedColumnNames": [
-            "trip_id"
-          ],
-          "referencedTableName": "public.trips",
-          "updateRule": "cascade"
-        },
-        "stop_times_stop_stop_id_foreign": {
-          "constraintName": "stop_times_stop_stop_id_foreign",
+        "stop_time_stop_stop_id_foreign": {
+          "constraintName": "stop_time_stop_stop_id_foreign",
           "columnNames": [
             "stop_stop_id"
           ],
-          "localTableName": "public.stop_times",
+          "localTableName": "go-train-group-pass.stop_time",
           "referencedColumnNames": [
             "stop_id"
           ],
-          "referencedTableName": "public.stops",
+          "referencedTableName": "go-train-group-pass.stop",
+          "updateRule": "cascade"
+        },
+        "stop_time_trip_trip_id_foreign": {
+          "constraintName": "stop_time_trip_trip_id_foreign",
+          "columnNames": [
+            "trip_trip_id"
+          ],
+          "localTableName": "go-train-group-pass.stop_time",
+          "referencedColumnNames": [
+            "trip_id"
+          ],
+          "referencedTableName": "go-train-group-pass.trip",
           "updateRule": "cascade"
         }
       },
@@ -940,7 +845,7 @@
         }
       },
       "name": "users",
-      "schema": "public",
+      "schema": "go-train-group-pass",
       "indexes": [
         {
           "columnNames": [
