@@ -7,9 +7,16 @@ import {
   HttpCode,
   HttpStatus,
   UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import type { SignUpDto, SignInDto } from './auth.service';
+import {
+  SignUpDtoSchema,
+  SignInDtoSchema,
+  PasswordResetRequestSchema,
+  PasswordUpdateSchema,
+  RefreshTokenSchema,
+} from './auth.schemas';
 
 @Controller('auth')
 export class AuthController {
@@ -17,21 +24,28 @@ export class AuthController {
 
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
-  async signUp(@Body() signUpDto: SignUpDto) {
-    return this.authService.signUp(signUpDto);
+  async signUp(@Body() body: unknown) {
+    const parseResult = SignUpDtoSchema.safeParse(body);
+    if (!parseResult.success) {
+      throw new BadRequestException(parseResult.error.issues);
+    }
+    return this.authService.signUp(parseResult.data);
   }
 
   @Post('signin')
   @HttpCode(HttpStatus.OK)
-  async signIn(@Body() signInDto: SignInDto) {
-    return this.authService.signIn(signInDto);
+  async signIn(@Body() body: unknown) {
+    const parseResult = SignInDtoSchema.safeParse(body);
+    if (!parseResult.success) {
+      throw new BadRequestException(parseResult.error.issues);
+    }
+    return this.authService.signIn(parseResult.data);
   }
 
   @Post('signout')
   @HttpCode(HttpStatus.OK)
-  async signOut(@Headers('authorization') authorization?: string) {
-    const token = this.extractToken(authorization);
-    return this.authService.signOut(token);
+  async signOut() {
+    return this.authService.signOut();
   }
 
   @Get('me')
@@ -42,33 +56,36 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refreshToken(@Body('refreshToken') refreshToken: string) {
-    if (!refreshToken) {
-      throw new UnauthorizedException('Refresh token is required');
+  async refreshToken(@Body() body: unknown) {
+    const parseResult = RefreshTokenSchema.safeParse(body);
+    if (!parseResult.success) {
+      throw new BadRequestException(parseResult.error.issues);
     }
-    return this.authService.refreshToken(refreshToken);
+    return this.authService.refreshToken(parseResult.data.refreshToken);
   }
 
   @Post('password/reset-request')
   @HttpCode(HttpStatus.OK)
-  async requestPasswordReset(@Body('email') email: string) {
-    if (!email) {
-      throw new UnauthorizedException('Email is required');
+  async requestPasswordReset(@Body() body: unknown) {
+    const parseResult = PasswordResetRequestSchema.safeParse(body);
+    if (!parseResult.success) {
+      throw new BadRequestException(parseResult.error.issues);
     }
-    return this.authService.requestPasswordReset(email);
+    return this.authService.requestPasswordReset(parseResult.data.email);
   }
 
   @Post('password/update')
   @HttpCode(HttpStatus.OK)
   async updatePassword(
     @Headers('authorization') authorization: string | undefined,
-    @Body('newPassword') newPassword: string,
+    @Body() body: unknown,
   ) {
     const token = this.extractToken(authorization);
-    if (!newPassword) {
-      throw new UnauthorizedException('New password is required');
+    const parseResult = PasswordUpdateSchema.safeParse(body);
+    if (!parseResult.success) {
+      throw new BadRequestException(parseResult.error.issues);
     }
-    return this.authService.updatePassword(token, newPassword);
+    return this.authService.updatePassword(token, parseResult.data.newPassword);
   }
 
   private extractToken(authorization?: string): string {

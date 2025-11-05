@@ -5,18 +5,7 @@ import {
 } from '@nestjs/common';
 import { SupabaseService } from './supabase.service';
 import { UsersService } from './users.service';
-
-export interface SignUpDto {
-  email: string;
-  password: string;
-  fullName?: string;
-  phoneNumber?: string;
-}
-
-export interface SignInDto {
-  email: string;
-  password: string;
-}
+import { SignUpDto, SignInDto, parseUserMetadata } from './auth.schemas';
 
 @Injectable()
 export class AuthService {
@@ -87,12 +76,15 @@ export class AuthService {
       throw new UnauthorizedException('Authentication failed');
     }
 
+    // Safely parse user metadata using Zod
+    const userMetadata = parseUserMetadata(authData.user.user_metadata);
+
     // Find or create user in our database
     const user = await this.usersService.findOrCreate({
       email: authData.user.email!,
       authUserId: authData.user.id,
-      fullName: authData.user.user_metadata?.full_name,
-      phoneNumber: authData.user.user_metadata?.phone_number,
+      fullName: userMetadata.full_name,
+      phoneNumber: userMetadata.phone_number,
     });
 
     // Update last sign in time
@@ -107,8 +99,7 @@ export class AuthService {
   /**
    * Sign out the current user
    */
-  async signOut(accessToken: string) {
-    // Set the session for the Supabase client
+  async signOut() {
     const { error } = await this.supabaseService.auth.signOut();
 
     if (error) {

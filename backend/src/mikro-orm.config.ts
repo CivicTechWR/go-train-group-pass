@@ -4,6 +4,7 @@ import { Migrator } from '@mikro-orm/migrations';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 
 const logger = new Logger('MikroORM');
+const logFn = (message: string) => logger.log(message);
 
 export default defineConfig({
   // Use Supabase connection string or individual connection parameters
@@ -16,7 +17,7 @@ export default defineConfig({
   extensions: [Migrator],
   highlighter: new SqlHighlighter(),
   debug: process.env.NODE_ENV !== 'production',
-  logger: logger.log.bind(logger),
+  logger: logFn,
   migrations: {
     path: './src/database/migrations',
     tableName: 'mikro_orm_migrations',

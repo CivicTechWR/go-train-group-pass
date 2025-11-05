@@ -8,6 +8,10 @@ import { FastifyRequest } from 'fastify';
 import { SupabaseService } from './supabase.service';
 import { UsersService } from './users.service';
 
+interface RequestWithUser extends FastifyRequest {
+  user?: ReturnType<UsersService['formatUserResponse']>;
+}
+
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
@@ -16,7 +20,7 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<FastifyRequest>();
+    const request = context.switchToHttp().getRequest<RequestWithUser>();
     const authorization = request.headers.authorization;
 
     if (!authorization) {
@@ -49,9 +53,9 @@ export class AuthGuard implements CanActivate {
       }
 
       // Attach formatted user data to request for use in controllers
-      (request as any).user = this.usersService.formatUserResponse(user);
+      request.user = this.usersService.formatUserResponse(user);
       return true;
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Invalid or expired token');
     }
   }
