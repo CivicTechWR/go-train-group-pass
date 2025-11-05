@@ -7,7 +7,7 @@ const logger = new Logger('MikroORM');
 const logFn = (message: string) => logger.log(message);
 
 export default defineConfig({
-  // Use Supabase connection string or individual connection parameters
+  schema: 'go-train-group-pass',
   clientUrl: process.env.DATABASE_URL,
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '54322'),
