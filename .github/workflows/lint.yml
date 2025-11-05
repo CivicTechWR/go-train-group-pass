@@ -8,6 +8,10 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        workspace: [backend]
+        # Add 'frontend' to the array when frontend directory is created
     env:
       NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
       NEXT_PUBLIC_SUPABASE_ANON_KEY: public-anon-key
@@ -24,15 +28,20 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: ${{ matrix.workspace }}/package-lock.json
 
       - name: Install dependencies
+        working-directory: ${{ matrix.workspace }}
         run: npm ci
 
       - name: Run ESLint
+        working-directory: ${{ matrix.workspace }}
         run: npm run lint
 
       - name: Type check
+        working-directory: ${{ matrix.workspace }}
         run: npm run type-check
 
       - name: Verify formatting
+        working-directory: ${{ matrix.workspace }}
         run: npm run format:check
