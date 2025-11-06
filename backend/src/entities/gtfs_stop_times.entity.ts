@@ -6,6 +6,7 @@ import {
   Index,
 } from '@mikro-orm/core';
 import { GTFSStop, GTFSTrip } from '.';
+import { GTFSTimeType } from '../database/types/GTFSTimeType';
 
 @Entity({ tableName: 'gtfs_stop_times' })
 @Index({ name: 'idx_stop_times_stop', properties: ['stop'] })
@@ -21,10 +22,10 @@ export class GTFSStopTime {
   stopSequence!: number;
 
   @Property()
-  arrivalTime!: string; // Keep as string for times like "25:30:00"
+  arrivalTime!: GTFSTimeType;
 
   @Property()
-  departureTime!: string;
+  departureTime!: GTFSTimeType;
 
   @Property({ nullable: true })
   stopHeadsign?: string;
