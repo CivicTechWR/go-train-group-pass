@@ -68,7 +68,7 @@ cd ..
 supabase start
 ```
 
-This will start local Supabase services including PostgreSQL. Note the connection details displayed.
+This starts local Supabase services. See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for detailed configuration options and troubleshooting.
 
 ### 5. Run Database Migrations
 
