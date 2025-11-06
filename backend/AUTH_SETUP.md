@@ -24,7 +24,7 @@ The backend uses **Supabase Auth** for user authentication combined with **Fasti
    - Generates JWT tokens
    - Handles password reset flows
 
-2. **Application Database** (`public.users` table)
+2. **Application Database** (`go_train_group_pass.users` table)
    - Managed by your application
    - Stores application-specific user data (profile info, preferences, etc.)
    - Links to Supabase auth via `authUserId` field
@@ -277,9 +277,9 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:54322/postgres
 For local Supabase, use these default keys:
 
 ```env
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY_HERE
 
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
+SUPABASE_SERVICE_ROLE_KEY=YOUR_SUPABASE_SERVICE_ROLE_KEY_HERE
 ```
 
 ### Production Keys
