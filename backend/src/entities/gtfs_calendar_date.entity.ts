@@ -1,8 +1,9 @@
 import { Entity, PrimaryKey, Property, Index } from '@mikro-orm/core';
+import { BaseEntity } from './base';
 
 @Entity({ tableName: 'gtfs_calendar_dates' })
 @Index({ name: 'idx_calendar_dates_date', properties: ['date'] })
-export class GTFSCalendarDate {
+export class GTFSCalendarDate extends BaseEntity {
   @PrimaryKey()
   serviceId!: string;
 
