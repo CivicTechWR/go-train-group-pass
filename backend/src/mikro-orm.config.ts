@@ -2,6 +2,8 @@ import { Logger } from '@nestjs/common';
 import { defineConfig } from '@mikro-orm/postgresql';
 import { Migrator } from '@mikro-orm/migrations';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env' });
 
 const logger = new Logger('MikroORM');
 const logFn = (message: string) => logger.log(message);
