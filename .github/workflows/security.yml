@@ -23,6 +23,7 @@ jobs:
           redact: true
         env:
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   npm-audit:
     runs-on: ubuntu-latest
