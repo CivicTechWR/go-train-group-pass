@@ -5,12 +5,12 @@ import {
   OneToMany,
   Collection,
 } from '@mikro-orm/core';
-import { StopTime } from '.';
+import { GTFSStopTime } from '.';
 
-@Entity()
-export class Stop {
+@Entity({ tableName: 'gtfs_stops' })
+export class GTFSStop {
   @PrimaryKey()
-  stopId!: string;
+  id!: string;
 
   @Property()
   stopName!: string;
@@ -39,6 +39,6 @@ export class Stop {
   @Property({ nullable: true })
   wheelchairBoarding?: number;
 
-  @OneToMany(() => StopTime, (stopTime: StopTime) => stopTime.stop)
-  stopTimes = new Collection<StopTime>(this);
+  @OneToMany(() => GTFSStopTime, (stopTime: GTFSStopTime) => stopTime.stop)
+  stopTimes = new Collection<GTFSStopTime>(this);
 }
