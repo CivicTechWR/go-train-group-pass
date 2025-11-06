@@ -6,13 +6,13 @@ import {
   OneToMany,
   Collection,
 } from '@mikro-orm/core';
-import { Trip } from './gtfs_trip.entitity';
+import { GTFSTrip } from './gtfs_trip.entitity';
 import { Agency } from './gtfs_agency.entity';
 
-@Entity()
-export class Route {
+@Entity({ tableName: 'gtfs_routes' })
+export class GTFSRoute {
   @PrimaryKey()
-  routeId!: string;
+  id!: string;
 
   @Property()
   routeShortName!: string;
@@ -38,6 +38,6 @@ export class Route {
   @ManyToOne(() => Agency, { nullable: true })
   agency?: Agency;
 
-  @OneToMany(() => Trip, (trip: Trip) => trip.route)
-  trips = new Collection<Trip>(this);
+  @OneToMany(() => GTFSTrip, (trip: GTFSTrip) => trip.route)
+  trips = new Collection<GTFSTrip>(this);
 }

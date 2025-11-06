@@ -3,7 +3,7 @@ import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
 @Entity()
 export class Agency {
   @PrimaryKey()
-  agencyId!: string;
+  id!: string;
 
   @Property()
   agencyName!: string;
