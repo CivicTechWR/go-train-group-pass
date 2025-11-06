@@ -5,15 +5,15 @@ import {
   ManyToOne,
   Index,
 } from '@mikro-orm/core';
-import { Stop, Trip } from '.';
+import { GTFSStop, GTFSTrip } from '.';
 
-@Entity()
+@Entity({ tableName: 'gtfs_stop_times' })
 @Index({ name: 'idx_stop_times_stop', properties: ['stop'] })
 @Index({
   name: 'idx_stop_times_stop_departure',
   properties: ['stop', 'departureTime'],
 })
-export class StopTime {
+export class GTFSStopTime {
   @PrimaryKey()
   tripId!: string;
 
@@ -44,9 +44,9 @@ export class StopTime {
   @Property({ nullable: true })
   timepoint?: number;
 
-  @ManyToOne(() => Stop)
-  stop!: Stop;
+  @ManyToOne(() => GTFSStop)
+  stop!: GTFSStop;
 
-  @ManyToOne(() => Trip)
-  trip!: Trip;
+  @ManyToOne(() => GTFSTrip)
+  trip!: GTFSTrip;
 }

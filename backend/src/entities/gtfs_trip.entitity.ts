@@ -7,13 +7,13 @@ import {
   Collection,
   Index,
 } from '@mikro-orm/core';
-import { GTFSCalendarDate, StopTime } from '.';
-import { Route } from './gtfs_route.entity';
+import { GTFSCalendarDate, GTFSStopTime } from '.';
+import { GTFSRoute } from './gtfs_route.entity';
 
-@Entity()
+@Entity({ tableName: 'gtfs_trips' })
 @Index({ name: 'idx_trips_route', properties: ['route'] })
 @Index({ name: 'idx_trips_calendar_date', properties: ['calendarDate'] })
-export class Trip {
+export class GTFSTrip {
   @PrimaryKey()
   tripId!: string;
 
@@ -41,9 +41,9 @@ export class Trip {
   @Property({ nullable: true })
   bikesAllowed?: number;
 
-  @ManyToOne(() => Route)
-  route!: Route;
+  @ManyToOne(() => GTFSRoute)
+  route!: GTFSRoute;
 
-  @OneToMany(() => StopTime, (stopTime) => stopTime.trip)
-  stopTimes = new Collection<StopTime>(this);
+  @OneToMany(() => GTFSStopTime, (stopTime) => stopTime.trip)
+  stopTimes = new Collection<GTFSStopTime>(this);
 }
