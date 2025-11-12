@@ -247,24 +247,80 @@ Tests are experiencing dependency injection issues with Vitest. If you encounter
 
 ## Deployment
 
-### Environment Variables for Production
+### Managed Supabase (Production / Hosted Instance)
 
-Update your `.env` with production values:
+Use this when running against Supabase's hosted (official) infrastructure instead of local Supabase.
 
-```env
-# Production Supabase (get from Supabase dashboard)
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=your-production-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-production-service-role-key
+1. Create Supabase account and organization:
+   - Go to https://supabase.com
+   - Create a free tier account and an organization.
 
-# Production Database
-DATABASE_URL=postgresql://user:password@host:port/database
+2. Create a new Supabase project:
+   - Select your organization and region.
+   - Set an initial database password (you can reset it after).
 
-# Production Config
-PORT=3000
-FRONTEND_URL=https://your-frontend-domain.com
-NODE_ENV=production
-```
+3. Get Supabase API values:
+   - Go to: Settings → API
+   - Capture:
+     - `SUPABASE_URL`
+     - `SUPABASE_ANON_KEY`
+     - `SUPABASE_SERVICE_ROLE_KEY` (server-side only, keep secret)
+
+4. Reset and capture the database password:
+   - Go to: Settings → Database → Reset Database Password
+   - Use this as `DB_PASSWORD`.
+
+5. Get database connection parameters via the session pooler:
+   - In the project dashboard, click "Connect".
+   - Choose:
+     - Type: `PSQL`
+     - Source: `Primary database`
+     - Method: `Session pooler`
+   - Click "View parameters" and map:
+     - `host` → `DB_HOST`
+     - `port` → `DB_PORT`
+     - `user` → `DB_USER`
+     - `database` → `DB_NAME`
+   - Additionally configure:
+     - `POOL_MODE=session`
+
+6. Configure your `.env` for managed Supabase (example):
+
+   ```env
+   # Supabase API
+   SUPABASE_URL=https://your-project-ref.supabase.co
+   SUPABASE_ANON_KEY=your-production-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=your-production-service-role-key
+
+   # Managed Supabase database (session pooler)
+   DB_HOST=aws-0-xxx.pooler.supabase.com
+   DB_PORT=6543
+   DB_USER=postgres.your-project-ref
+   DB_PASSWORD=your-db-password
+   DB_NAME=postgres
+   POOL_MODE=session
+
+   # MikroORM / application DB URL using pooler
+   DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require&pool_mode=${POOL_MODE}
+
+   # Application Config
+   PORT=3000
+   FRONTEND_URL=https://your-frontend-domain.com
+   NODE_ENV=production
+   ```
+
+7. Run migrations against the managed database:
+
+   ```bash
+   npm run migrate:up
+   ```
+
+8. Build and run in production mode:
+
+   ```bash
+   npm run build
+   npm run start:prod
+   ```
 
 ### Build and Run
 
