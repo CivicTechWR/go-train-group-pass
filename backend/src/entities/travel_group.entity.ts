@@ -17,7 +17,6 @@ import {
 } from '.';
 import { TravelGroupStatus } from './travelGroupEnum';
 
-
 @Entity()
 export class TravelGroup {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })

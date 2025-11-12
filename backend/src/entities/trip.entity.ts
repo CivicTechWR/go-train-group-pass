@@ -1,4 +1,4 @@
-import { Entity, Property, PrimaryKey } from '@mikro-orm/core';
+import { Entity, Property } from '@mikro-orm/core';
 
 @Entity({
   expression: `
@@ -25,7 +25,6 @@ import { Entity, Property, PrimaryKey } from '@mikro-orm/core';
   `,
 })
 export class Trip {
-
   @Property()
   gtfsTripId!: string;
 

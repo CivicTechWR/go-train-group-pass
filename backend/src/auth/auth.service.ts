@@ -12,7 +12,7 @@ export class AuthService {
   constructor(
     private readonly supabaseService: SupabaseService,
     private readonly usersService: UsersService,
-  ) { }
+  ) {}
 
   /**
    * Sign up a new user using Supabase Auth and create a user record in our database
@@ -154,7 +154,6 @@ export class AuthService {
 
     return { message: 'Password reset email sent' };
   }
-
 
   async updatePassword(accessToken: string, newPassword: string) {
     // First verify the token
