@@ -2,10 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { User } from '../entities/user.entity';
 
-export interface CreateUserDto {
+export interface CreateUserDto extends Partial<User> {
   email: string;
   authUserId: string;
-  fullName?: string;
+  name: string;
   phoneNumber?: string;
 }
 
@@ -25,7 +25,7 @@ export class UsersService {
    * This is used during sign-in when a user exists in Supabase but not in our DB
    */
   async findOrCreate(createUserDto: CreateUserDto): Promise<User> {
-    const { authUserId, email, fullName, phoneNumber } = createUserDto;
+    const { authUserId, email, name, phoneNumber } = createUserDto;
 
     let user = await this.findByAuthUserId(authUserId);
 
@@ -33,9 +33,8 @@ export class UsersService {
       user = this.em.create(User, {
         email,
         authUserId,
-        fullName,
+        name,
         phoneNumber,
-        isActive: false,
       });
       await this.em.persistAndFlush(user);
     }
@@ -47,15 +46,14 @@ export class UsersService {
    * Create a new user in the database
    */
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const { email, authUserId, fullName, phoneNumber } = createUserDto;
+    const { email, authUserId, name, phoneNumber } = createUserDto;
 
     const user = this.em.create(User, {
       email,
-      fullName,
+      name,
       phoneNumber,
       authUserId,
       lastSignInAt: new Date(),
-      isActive: false,
     });
 
     await this.em.persistAndFlush(user);
@@ -91,10 +89,8 @@ export class UsersService {
     return {
       id: user.id,
       email: user.email,
-      fullName: user.fullName,
+      name: user.name,
       phoneNumber: user.phoneNumber,
-      avatarUrl: user.avatarUrl,
-      isActive: user.isActive,
       createdAt: user.createdAt,
       lastSignInAt: user.lastSignInAt,
     };
