@@ -20,7 +20,7 @@ Ensure you have the following installed:
 
 ```bash
 # From the project root
-cd /Users/jess/civic_tech/go-train-group-pass
+cd go-train-group-pass
 
 # Start Supabase (this will start Docker containers)
 supabase start
@@ -64,9 +64,9 @@ cd backend
 npm install
 
 # Run migrations to set up the database schema
-npm run migration:up
+npm run migrate:up
 
-# Optional: Run seeders to populate initial data
+# Optional: Run seeders to populate initial data (not implemented yet)
 npm run seed
 ```
 
@@ -78,41 +78,76 @@ npm run start:dev
 
 The NestJS backend should now connect to your local Supabase database!
 
-## Production Setup (Hosted Supabase)
+## Production Setup (Hosted Supabase / Managed Instance)
 
-### 1. Create a Supabase Project
+Use this when deploying against Supabase's official hosted infrastructure.
 
-1. Go to [supabase.com](https://supabase.com)
-2. Create a new project
-3. Note your project's connection details
+### 1. Create Supabase account, org, and project
 
-### 2. Get Connection String
+1. Go to [supabase.com](https://supabase.com) and sign in.
+2. Create a free tier account and an organization (if you don't have one).
+3. Create a new project:
+   - Select your organization and region.
+   - Set an initial database password (you can reset it later).
 
-From your Supabase project dashboard:
-1. Go to **Settings** → **Database**
-2. Find the **Connection string** section
-3. Use the **Connection pooling** string for better performance
+### 2. Get Supabase API values
 
-Example format:
-```
-postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres
-```
+From your project:
 
-### 3. Configure Production Environment
+- Go to **Settings → API**.
+- Capture:
+  - `SUPABASE_URL`
+  - `SUPABASE_ANON_KEY`
+  - `SUPABASE_SERVICE_ROLE_KEY` (keep this secret, backend-only).
 
-Update your production `.env` with the hosted connection string:
+### 3. Reset and capture DB password
+
+- Go to **Settings → Database → Reset Database Password**.
+- Use the new value as `DB_PASSWORD`.
+
+### 4. Get database connection parameters (session pooler)
+
+1. From the project dashboard, click the **Connect** button.
+2. Choose:
+   - Type: `PSQL`
+   - Source: `Primary database`
+   - Method: `Session pooler`
+3. Click **View parameters** and map:
+   - `host` → `DB_HOST`
+   - `port` → `DB_PORT`
+   - `user` → `DB_USER`
+   - `database` → `DB_NAME`
+4. Additionally set:
+   - `POOL_MODE=session`
+
+### 5. Configure `.env` for hosted Supabase
+
+Example configuration:
 
 ```env
-DATABASE_URL=postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres
+# Supabase API
+SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_ANON_KEY=your-production-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-production-service-role-key
+
+# Managed Supabase database (session pooler)
+DB_HOST=aws-0-xxx.pooler.supabase.com
+DB_PORT=6543
+DB_USER=postgres.your-project-ref
+DB_PASSWORD=your-db-password
+DB_NAME=postgres
+POOL_MODE=session
+
+# Application DB URL (MikroORM)
+DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require&pool_mode=${POOL_MODE}
+
 NODE_ENV=production
 ```
 
-### 4. Run Migrations
-
-Run migrations against your hosted database:
+### 6. Run migrations against hosted Supabase
 
 ```bash
-npm run migration:up
+npm run migrate:up
 ```
 
 ## Useful Commands
