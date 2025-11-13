@@ -77,20 +77,24 @@ Follow the guide for the area you plan to work on:
 
 ## Project Structure
 
-- Back-end service lives in [`backend/`](backend/) with NestJS modules, MikroORM configs, and Vitest suites.
-- Infrastructure configuration is collected in [`supabase/`](supabase/).
-- CI/CD automations sit in [`.github/workflows/`](.github/workflows/).
-- UX, documentation, and product planning assets reside externally in [Notion](https://www.notion.so/Technical-Design-Document-WIP-2a1e01ee4c0080a391bfcd52b067f9a9#2a1e01ee4c00805b9432d69102af7a43) and [Figma](https://www.figma.com/board/5AhW638DdlgCooNjtEZnEG/Metrolinx-Group-Pass?node-id=0-1&t=e1jtwAZg5bLGRAGI-1).
-
-For a breakdown of directories, rely on [`backend/README.md#project-structure`](backend/README.md#project-structure) to avoid duplicating the source of truth.
+- **`backend/`** — NestJS application modules, MikroORM entities, and Vitest suites. See [`backend/README.md#project-structure`](backend/README.md#project-structure) for file-level detail.
+- **`supabase/`** — Local Supabase configuration (CLI, database, auth) that mirrors hosted infrastructure.
+- **`.github/workflows/`** — Automation pipelines for linting, accessibility, and security checks that gate pull requests.
+- **UX & product specs** — Living documents in [Notion](https://www.notion.so/Technical-Design-Document-WIP-2a1e01ee4c0080a391bfcd52b067f9a9#2a1e01ee4c00805b9432d69102af7a43) and [Figma](https://www.figma.com/board/5AhW638DdlgCooNjtEZnEG/Metrolinx-Group-Pass?node-id=0-1&t=e1jtwAZg5bLGRAGI-1) capture workflows and visual design decisions that have not yet landed in this repo.
 
 ## Key Features
 
+**User-facing foundations (current scope):**
+
 - Supabase-authenticated REST API for rider sign-up, authentication, and session management ([`backend/AUTH_SETUP.md`](backend/AUTH_SETUP.md)).
-- GTFS data ingestion and exposure via MikroORM entities for agencies, routes, stops, trips, and service calendars (`backend/src/entities`).
+- GTFS-backed itinerary modeling (agencies, routes, stops, trips, service calendars) to support the `pre-planning → post-board` journey.
+
+**Developer platform:**
+
 - Continuous integration pipelines covering linting, accessibility smoke tests, and security scans (see badges above).
 - Local-first workflow powered by Supabase CLI to mirror production infrastructure (`backend/SUPABASE_SETUP.md`).
-- Product foundations aligned to the technical design document, including itinerary concepts (trip + return), steward/passenger roles, and notification hooks for each journey stage.
+
+Upcoming feature work, including richer steward tooling and front-end experiences, is tracked in the [Technical Design Document](https://www.notion.so/Technical-Design-Document-WIP-2a1e01ee4c0080a391bfcd52b067f9a9).
 
 ## Development Workflow
 
@@ -102,6 +106,7 @@ For a breakdown of directories, rely on [`backend/README.md#project-structure`](
 
 - Style and linting rules are defined in `backend/.eslintrc.json` and enforced through `npm run lint` (see [`backend/README.md#code-quality`](backend/README.md#code-quality)).
 - Formatting relies on Prettier; use `npm run format` / `npm run format:check`.
+- All pull requests must pass the GitHub workflows (lint, accessibility, security) before merging.
 - Domain-driven patterns and DTO validation details live in the corresponding backend documentation sections to reduce duplication.
 
 ## Testing
