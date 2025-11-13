@@ -11,6 +11,21 @@ Go Train Group Pass is a civic-tech collaboration that streamlines the purchase 
 - [Technical Design Document (Notion, WIP)](https://www.notion.so/Technical-Design-Document-WIP-2a1e01ee4c0080a391bfcd52b067f9a9#2a1e01ee4c00805b9432d69102af7a43)
 - [Product and UX boards (Figma)](https://www.figma.com/board/5AhW638DdlgCooNjtEZnEG/Metrolinx-Group-Pass?node-id=0-1&t=e1jtwAZg5bLGRAGI-1)
 
+### Product Principles
+
+- **Support stewards, not replace them:** The app augments the existing steward-led process and does not referee peer-to-peer payments.
+- **Time-sensitive coordination:** Push notifications and real-time status cues are core to keeping the group aligned in the minutes leading up to boarding and while on the train.
+- **Clarity over chat scrollback:** Interfaces focus on surfacing the current itinerary state rather than relying on ad-hoc messaging threads.
+
+### Rider Journey Stages
+
+The system models the real-world coordination stages outlined in the design document:
+
+1. **Pre-planning:** Riders signal interest in an outbound/return itinerary and nominate potential stewards.
+2. **Pre-board:** Final group formation happens ~5 minutes before departure as stewards purchase and share pass details.
+3. **On board:** Riders may be seated apart; quick regrouping and proof-of-purchase handling (e.g., for fare inspections) is essential.
+4. **Post board:** Stewards reconcile payments (e-transfers today) and capture participation outcomes for the return leg.
+
 ```mermaid
 flowchart LR
     subgraph Riders
@@ -75,6 +90,7 @@ For a breakdown of directories, rely on [`backend/README.md#project-structure`](
 - GTFS data ingestion and exposure via MikroORM entities for agencies, routes, stops, trips, and service calendars (`backend/src/entities`).
 - Continuous integration pipelines covering linting, accessibility smoke tests, and security scans (see badges above).
 - Local-first workflow powered by Supabase CLI to mirror production infrastructure (`backend/SUPABASE_SETUP.md`).
+- Product foundations aligned to the technical design document, including itinerary concepts (trip + return), steward/passenger roles, and notification hooks for each journey stage.
 
 ## Development Workflow
 
