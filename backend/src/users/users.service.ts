@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/postgresql';
 import { User } from '../entities/user.entity';
+import { UsersRepository } from './users.repository';
 
 export interface CreateUserDto extends Partial<User> {
   email: string;
@@ -11,13 +11,13 @@ export interface CreateUserDto extends Partial<User> {
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly em: EntityManager) {}
+  constructor(private readonly usersRepository: UsersRepository) {}
 
   /**
    * Find a user by their Supabase auth user ID
    */
   async findByAuthUserId(authUserId: string): Promise<User | null> {
-    return this.em.findOne(User, { authUserId });
+    return this.usersRepository.findByAuthUserId(authUserId);
   }
 
   /**
@@ -30,13 +30,13 @@ export class UsersService {
     let user = await this.findByAuthUserId(authUserId);
 
     if (!user) {
-      user = this.em.create(User, {
+      user = this.usersRepository.create({
         email,
         authUserId,
         name,
         phoneNumber,
       });
-      await this.em.persistAndFlush(user);
+      await this.usersRepository.getEntityManager().persistAndFlush(user);
     }
 
     return user;
@@ -48,7 +48,7 @@ export class UsersService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     const { email, authUserId, name, phoneNumber } = createUserDto;
 
-    const user = this.em.create(User, {
+    const user = this.usersRepository.create({
       email,
       name,
       phoneNumber,
@@ -56,7 +56,7 @@ export class UsersService {
       lastSignInAt: new Date(),
     });
 
-    await this.em.persistAndFlush(user);
+    await this.usersRepository.getEntityManager().persistAndFlush(user);
 
     return user;
   }
@@ -65,21 +65,21 @@ export class UsersService {
    * Update the last sign-in timestamp for a user
    */
   async updateLastSignIn(userId: string): Promise<void> {
-    const user = await this.em.findOne(User, { id: userId });
+    const user = await this.usersRepository.findById(userId);
 
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
     user.lastSignInAt = new Date();
-    await this.em.flush();
+    await this.usersRepository.getEntityManager().flush();
   }
 
   /**
    * Get user details by ID
    */
   async findById(id: string): Promise<User | null> {
-    return this.em.findOne(User, { id });
+    return this.usersRepository.findById(id);
   }
 
   /**
