@@ -84,17 +84,19 @@ Follow the guide for the area you plan to work on:
 
 ## Key Features
 
-**User-facing foundations (current scope):**
+### Current Capabilities
 
-- Supabase-authenticated REST API for rider sign-up, authentication, and session management ([`backend/AUTH_SETUP.md`](backend/AUTH_SETUP.md)).
-- GTFS-backed itinerary modeling (agencies, routes, stops, trips, service calendars) to support the `pre-planning → post-board` journey.
+- Account creation and authentication so riders and stewards can sign in securely.
+- Itinerary and schedule data modeled from GO Transit GTFS feeds to anchor trip planning conversations.
+- Steward-centric flows in the backend (sign-up, session management, upcoming itinerary endpoints) that support the `pre-planning → post-board` journey.
 
-**Developer platform:**
+### In Flight
 
-- Continuous integration pipelines covering linting, accessibility smoke tests, and security scans (see badges above).
-- Local-first workflow powered by Supabase CLI to mirror production infrastructure (`backend/SUPABASE_SETUP.md`).
+- Guided UI flows for each journey stage with context-aware push notifications.
+- Steward workspace to share proof-of-purchase, confirm rider check-ins, and track reimbursements.
+- Rider-facing status views including a lightweight schedule viewer and reminders for boarding and regrouping moments.
 
-Upcoming feature work, including richer steward tooling and front-end experiences, is tracked in the [Technical Design Document](https://www.notion.so/Technical-Design-Document-WIP-2a1e01ee4c0080a391bfcd52b067f9a9).
+Refer to the [Technical Design Document](https://www.notion.so/Technical-Design-Document-WIP-2a1e01ee4c0080a391bfcd52b067f9a9) for the full backlog and target experience.
 
 ## Development Workflow
 
