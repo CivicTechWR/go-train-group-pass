@@ -2,7 +2,7 @@ name: Security Audit
 
 on:
   schedule:
-    - cron: '0 9 * * 1'
+    - cron: "0 9 * * 1"
   push:
     branches: [main]
   pull_request:
@@ -24,7 +24,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   npm-audit:
     runs-on: ubuntu-latest
@@ -36,9 +35,9 @@ jobs:
       NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
       NEXT_PUBLIC_SUPABASE_ANON_KEY: public-anon-key
       SUPABASE_SERVICE_ROLE_KEY: service-role-key
-      ENABLE_ADMIN_APIS: 'false'
+      ENABLE_ADMIN_APIS: "false"
       ADMIN_API_TOKEN: dummy-token
-      NEXT_PUBLIC_ENABLE_DEMO_PAGE: 'false'
+      NEXT_PUBLIC_ENABLE_DEMO_PAGE: "false"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
