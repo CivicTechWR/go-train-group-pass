@@ -11,10 +11,9 @@ export type GTFSTimeString = string & { readonly __brand: 'GtfsTimeString' };
 
 /**
  * A simple regex to validate the HH:MM:SS format.
- * This allows the hours part (HH) to be two or more digits
- * (e.g., "25", "48", "100").
+ * (e.g., "25", "48").
  */
-const gtfsTimeRegex = /^\d{2,}:\d{2}:\d{2}$/;
+const gtfsTimeRegex = /^\d{2}:\d{2}:\d{2}$/;
 
 /**
  * This checks if the value is a string and matches the
