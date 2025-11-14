@@ -45,5 +45,5 @@ export default defineConfig({
       'information_schema',
       'pg_catalog',
     ],
-  }
+  },
 });
