@@ -4,8 +4,8 @@ We welcome contributions from volunteers of all experience levels. This guide co
 
 ## Community & Meetings
 
-- **Weekly meetup:** Wednesdays from 6-8pm at Builders Club (165 King St W); remote participation is coordinated through our Luma event listing (placeholder: add current Luma link).
-- **RSVP & calendar:** Keep an eye on [our Meetup page](https://www.meetup.com/civictechwr/) for session topics, schedule changes, and reminders.
+- **Weekly meetup:** Wednesdays from 6-8pm at Builders Club (165 King St W).
+- **RSVP & calendar:** Keep an eye on [our Meetup page](https://www.meetup.com/civictechwr/) or the Luma listing (placeholder: add current Luma link) for session topics, schedule changes, and reminders.
 - **Hybrid participation:** If you cannot attend in person, drop a note in Slack so we can arrange dial-in details when available.
 
 ## Communication Channels
