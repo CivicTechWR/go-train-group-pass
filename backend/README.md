@@ -39,7 +39,7 @@ npm install
 Create a `.env` file in the backend directory:
 
 ```bash
-cp ../.env.example .env
+cp .env.example .env
 ```
 
 Edit `.env` with your configuration:
