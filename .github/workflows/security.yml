@@ -9,139 +9,163 @@ on:
 
 jobs:
   gitleaks:
+    name: Scan for Leaked Secrets
     runs-on: ubuntu-latest
     env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
-      GITLEAKS_LEAK_COUNT: '0'
-      GITLEAKS_HAD_ERROR: 'false'
+      RESPONSE_GUIDE_URL: https://github.com/CivicTechWR/.github/blob/main/docs/gitleaks-response.md
+      GITLEAKS_VERSION: v8.24.3
     steps:
-      - name: Checkout repository
+      - name: Check out code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Scan for committed secrets
-        id: gitleaks
-        if: ${{ env.GITLEAKS_LICENSE != '' }}
-        uses: gitleaks/gitleaks-action@v2
-        continue-on-error: true
-        with:
-          log-level: warn
-          redact: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_LICENSE: ${{ env.GITLEAKS_LICENSE }}
-          GITLEAKS_ENABLE_SUMMARY: 'false'
+      - name: Install Gitleaks CLI
+        run: |
+          VERSION_NUMBER="${GITLEAKS_VERSION#v}"
+          ARCHIVE="gitleaks_${VERSION_NUMBER}_linux_x64.tar.gz"
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/${GITLEAKS_VERSION}/${ARCHIVE}" -o gitleaks.tar.gz
+          tar -xzf gitleaks.tar.gz gitleaks
+          sudo install -m 0755 gitleaks /usr/local/bin/gitleaks
+          rm -f gitleaks.tar.gz gitleaks
 
-      - name: Publish secret scan summary
-        if: always()
-        id: gitleaks_summary
+      - name: Run Gitleaks (redacted)
+        id: gitleaks
+        continue-on-error: true
+        run: |
+          if [ -z "${GITLEAKS_LICENSE:-}" ]; then
+            echo "::notice::Skipping Gitleaks scan because no license is available."
+            exit 0
+          fi
+
+          gitleaks detect \
+            --source . \
+            --no-banner \
+            --redact \
+            --report-format json \
+            --report-path gitleaks-report.json
+
+      - name: Summarize findings
+        id: summarize
+        run: |
+          if [ -z "${GITLEAKS_LICENSE:-}" ]; then
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "count=0" >> "$GITHUB_OUTPUT"
+            echo "skipped=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ ! -f gitleaks-report.json ]; then
+            echo "[]" > gitleaks-report.json
+          fi
+
+          count=$(jq 'length' gitleaks-report.json 2>/dev/null || echo 0)
+
+          if [ "$count" -gt 0 ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "count=$count" >> "$GITHUB_OUTPUT"
+            echo "skipped=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Gitleaks detected ${count} potential secret(s)."
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "count=0" >> "$GITHUB_OUTPUT"
+            echo "skipped=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Gitleaks found no potential secrets."
+          fi
+
+      - name: Note scan issues
+        if: ${{ steps.gitleaks.outcome == 'failure' && steps.summarize.outputs.skipped != 'true' && steps.summarize.outputs.found != 'true' }}
+        run: |
+          echo "::warning::Gitleaks scan ended with an error before producing findings. Review the action logs."
+
+      - name: Add pull request comment
+        if: ${{ steps.summarize.outputs.found == 'true' && github.event_name == 'pull_request' }}
         uses: actions/github-script@v7
         env:
-          GITLEAKS_OUTCOME: ${{ steps.gitleaks.outcome || 'skipped' }}
+          LEAK_COUNT: ${{ steps.summarize.outputs.count }}
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const {summary, setOutput, warning, exportVariable} = core;
+            const path = 'gitleaks-report.json';
+            const responseGuide = process.env.RESPONSE_GUIDE_URL;
 
-            const serverUrl = process.env.GITHUB_SERVER_URL || 'https://github.com';
-            const repoName = process.env.GITHUB_REPOSITORY;
-            const runUrl = `${serverUrl}/${repoName}/actions/runs/${process.env.GITHUB_RUN_ID}`;
-
-            let repoUrl = `${serverUrl}/${repoName}`;
-            if (context.eventName === 'pull_request') {
-              const headRepoUrl = context.payload?.pull_request?.head?.repo?.html_url;
-              if (headRepoUrl) {
-                repoUrl = headRepoUrl;
-              }
+            const findings = JSON.parse(fs.readFileSync(path, 'utf8'));
+            if (!Array.isArray(findings) || findings.length === 0) {
+              return;
             }
 
-            let leakCount = 0;
-            let results = [];
-            if (fs.existsSync('results.sarif')) {
-              try {
-                const sarif = JSON.parse(fs.readFileSync('results.sarif', 'utf8'));
-                results = (sarif?.runs || []).flatMap(run => run.results || []);
-                leakCount = results.length;
-              } catch (error) {
-                warning(`Unable to parse results.sarif: ${error.message}`);
-              }
-            }
+            const lines = findings.slice(0, 10).map((finding) => {
+              const file = finding.file ? `\`${finding.file}\`` : 'unknown file';
+              const line = finding.startLine ? ` (line ${finding.startLine})` : '';
+              const rule = finding.ruleId || finding.rule || 'potential secret';
+              return `- ${file}${line} — ${rule}`;
+            }).join('\n');
 
-            const outcome = process.env.GITLEAKS_OUTCOME || 'success';
-            const licenseProvided = Boolean(process.env.GITLEAKS_LICENSE);
-            const hadError = outcome === 'failure' && leakCount === 0;
+            const remainder = findings.length > 10
+              ? `\n\n…and ${findings.length - 10} more finding${findings.length - 10 === 1 ? '' : 's'} in the attached report.`
+              : '';
 
-            summary.addHeading('Secret Scan');
+            const body = [
+              `@CivicTechWR/organizers Gitleaks flagged **${process.env.LEAK_COUNT}** potential secret${findings.length === 1 ? '' : 's'} in this pull request.`,
+              '',
+              `Please review the [Gitleaks response guide](${responseGuide}) for next steps.`,
+              '',
+              lines,
+              remainder,
+              '',
+              '_Secret values are redacted by the scanner. Follow the guide before merging._',
+            ].filter(Boolean).join('\n');
 
-            if (leakCount > 0) {
-              summary.addRaw(`Detected ${leakCount} potential secret${leakCount === 1 ? '' : 's'} ⚠️`, true);
-              const header = [
-                {data: 'Rule', header: true},
-                {data: 'Commit', header: true},
-                {data: 'Secret', header: true},
-                {data: 'File', header: true},
-                {data: 'Line', header: true},
-              ];
-              const rows = results.map(result => {
-                const commitSha = result?.partialFingerprints?.commitSha;
-                const shortSha = commitSha ? commitSha.substring(0, 7) : '—';
-                const commitUrl = commitSha ? `${repoUrl}/commit/${commitSha}` : null;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
 
-                const location = result?.locations?.[0]?.physicalLocation;
-                const filePath = location?.artifactLocation?.uri;
-                const line = location?.region?.startLine;
-                const secretUrl = commitSha && filePath && line
-                  ? `${repoUrl}/blob/${commitSha}/${filePath}#L${line}`
-                  : null;
-                const fileUrl = commitSha && filePath
-                  ? `${repoUrl}/blob/${commitSha}/${filePath}`
-                  : null;
-
-                return [
-                  result?.ruleId || '—',
-                  commitUrl ? `<a href="${commitUrl}">${shortSha}</a>` : shortSha,
-                  secretUrl ? `<a href="${secretUrl}">View Secret</a>` : '—',
-                  filePath && fileUrl ? `<a href="${fileUrl}">${filePath}</a>` : (filePath || '—'),
-                  line ? line.toString() : '—',
-                ];
-              });
-              summary.addTable([header, ...rows]);
-            } else if (hadError) {
-              summary.addRaw('GitLeaks failed before producing a report ❌', true);
-            } else if (!licenseProvided) {
-              summary.addRaw('Secret scan skipped because no GitLeaks license is available in this context.', true);
-            } else if (outcome === 'skipped') {
-              summary.addRaw('Secret scan skipped.', true);
-            } else {
-              summary.addRaw('No leaks detected ✅', true);
-            }
-
-            summary.addSeparator();
-            summary.addLink('View workflow run', runUrl);
-            await summary.write();
-
-            setOutput('leak_count', leakCount.toString());
-            setOutput('had_error', hadError ? 'true' : 'false');
-            exportVariable('GITLEAKS_LEAK_COUNT', leakCount.toString());
-            exportVariable('GITLEAKS_HAD_ERROR', hadError ? 'true' : 'false');
-
-      - name: Upload GitLeaks SARIF
-        if: ${{ env.GITLEAKS_LEAK_COUNT != '0' }}
-        uses: github/codeql-action/upload-sarif@v3
+      - name: Upload redacted report
+        if: ${{ steps.summarize.outputs.found == 'true' }}
+        uses: actions/upload-artifact@v4
         with:
-          sarif_file: results.sarif
+          name: gitleaks-report
+          path: gitleaks-report.json
+          retention-days: 7
 
-      - name: Fail when GitLeaks errors
-        if: ${{ env.GITLEAKS_HAD_ERROR == 'true' }}
+      - name: Record scan summary
+        if: ${{ always() }}
+        env:
+          LEAK_COUNT: ${{ steps.summarize.outputs.count }}
+          HAS_FINDINGS: ${{ steps.summarize.outputs.found }}
+          SKIPPED: ${{ steps.summarize.outputs.skipped }}
         run: |
-          echo "GitLeaks exited with an error. Review the logs above."
-          exit 1
+          {
+            echo "## Gitleaks Findings"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Fail when GitLeaks finds secrets
-        if: ${{ env.GITLEAKS_LEAK_COUNT != '0' }}
+          if [ "$SKIPPED" = "true" ]; then
+            {
+              echo "Scan skipped because a Gitleaks license is not available in this workflow context."
+            } >> "$GITHUB_STEP_SUMMARY"
+          elif [ "$HAS_FINDINGS" = "true" ]; then
+            {
+              echo "Potential secrets detected: $LEAK_COUNT"
+              echo "Report: gitleaks-report.json (uploaded as artifact when available)"
+              echo "Guide: $RESPONSE_GUIDE_URL"
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo "No potential secrets detected."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Fail when findings detected
+        if: ${{ steps.summarize.outputs.found == 'true' }}
         run: |
-          echo "GitLeaks detected potential secrets. See the job summary for details."
+          echo "Gitleaks detected potential secrets. See the findings above."
           exit 1
 
   npm-audit:
