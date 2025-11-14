@@ -21,12 +21,12 @@ Go Train Group Pass is a civic-tech collaboration that streamlines the purchase 
 
 ### Rider Journey Stages
 
-The system models the real-world coordination stages outlined in the design document:
+The product vision spans four coordination stages captured in the Notion design brief. The current MVP focuses on the in-progress phases while the bookend steps remain in discovery:
 
-1. **Pre-planning:** Riders signal interest in an outbound/return itinerary and nominate potential stewards.
-2. **Pre-board:** Final group formation happens ~5 minutes before departure as stewards purchase and share pass details.
-3. **On board:** Riders may be seated apart; quick regrouping and proof-of-purchase handling (e.g., for fare inspections) is essential.
-4. **Post board:** Stewards reconcile payments (e-transfers today) and capture participation outcomes for the return leg.
+1. **Pre-board (MVP):** Final group formation happens minutes before departure as stewards purchase and share pass details.
+2. **On board (MVP):** Riders may be seated apart; quick regrouping and proof-of-purchase handling (e.g., fare inspections) is essential.
+3. **Pre-planning (Future):** Riders signal interest in outbound or return itineraries and nominate potential stewards.
+4. **Post board (Future):** Stewards reconcile payments and capture participation outcomes for the return leg.
 
 ```mermaid
 flowchart LR
@@ -56,6 +56,7 @@ flowchart LR
 - **Backend:** NestJS 11 (Fastify adapter), TypeScript, MikroORM (PostgreSQL)
 - **Authentication:** Supabase Auth (JWT session tokens)
 - **Data Source:** GO Transit GTFS feeds mapped into Supabase PostgreSQL 17
+- **Frontend (planned):** Next.js + React web client (currently in discovery; implementation will land in a dedicated frontend workspace)
 - **Tooling:** ESLint, Prettier, Vitest, SWC, ts-node
 - **Automation:** GitHub Actions for linting, accessibility audits, and security scans
 
@@ -90,7 +91,7 @@ Follow the guide for the area you plan to work on:
 
 - Account creation and authentication so riders and stewards can sign in securely.
 - Itinerary and schedule data modeled from GO Transit GTFS feeds to anchor trip planning conversations.
-- Steward-centric flows in the backend (sign-up, session management, upcoming itinerary endpoints) that support the `pre-planning → post-board` journey.
+- Steward-centric flows in the backend (sign-up, session management, upcoming itinerary endpoints) that support day-of coordination (`pre-board` and `on-board` stages).
 
 ### In Flight
 
