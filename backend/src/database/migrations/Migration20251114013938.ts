@@ -1,6 +1,6 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20251106042208 extends Migration {
+export class Migration20251114013938 extends Migration {
 
   override async up(): Promise<void> {
     this.addSql(`create schema if not exists "go-train-group-pass";`);
@@ -17,7 +17,7 @@ export class Migration20251106042208 extends Migration {
     this.addSql(`create index "idx_trips_calendar_date" on "go-train-group-pass"."gtfs_trips" ("calendar_date_service_id", "calendar_date_date");`);
     this.addSql(`create index "idx_trips_route" on "go-train-group-pass"."gtfs_trips" ("route_id");`);
 
-    this.addSql(`create table "go-train-group-pass"."gtfs_stop_times" ("id" varchar(255) not null, "stop_sequence" int not null, "arrival_time" varchar(255) not null, "departure_time" varchar(255) not null, "stop_headsign" varchar(255) null, "pickup_type" int null, "drop_off_type" int null, "shape_dist_traveled" numeric(10,0) null, "timepoint" int null, "stop_id" varchar(255) not null, "trip_id" varchar(255) not null, constraint "gtfs_stop_times_pkey" primary key ("id", "stop_sequence"));`);
+    this.addSql(`create table "go-train-group-pass"."gtfs_stop_times" ("id" varchar(255) not null, "stop_sequence" int not null, "arrival_time" varchar(8) not null, "departure_time" varchar(8) not null, "stop_headsign" varchar(255) null, "pickup_type" int null, "drop_off_type" int null, "shape_dist_traveled" numeric(10,0) null, "timepoint" int null, "stop_id" varchar(255) not null, "trip_id" varchar(255) not null, constraint "gtfs_stop_times_pkey" primary key ("id", "stop_sequence"));`);
     this.addSql(`create index "idx_stop_times_stop_departure" on "go-train-group-pass"."gtfs_stop_times" ("stop_id", "departure_time");`);
     this.addSql(`create index "idx_stop_times_stop" on "go-train-group-pass"."gtfs_stop_times" ("stop_id");`);
 

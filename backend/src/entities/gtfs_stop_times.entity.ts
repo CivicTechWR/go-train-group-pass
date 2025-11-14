@@ -21,10 +21,10 @@ export class GTFSStopTime {
   @PrimaryKey()
   stopSequence!: number;
 
-  @Property()
+  @Property({type: GTFSTimeType})
   arrivalTime!: GTFSTimeType;
 
-  @Property()
+  @Property({type: GTFSTimeType})
   departureTime!: GTFSTimeType;
 
   @Property({ nullable: true })
