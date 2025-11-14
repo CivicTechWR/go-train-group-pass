@@ -43,15 +43,14 @@ jobs:
           script: |
             const fs = require('fs');
             const {summary, setOutput, warning, exportVariable} = core;
-            const ghContext = github.context;
 
             const serverUrl = process.env.GITHUB_SERVER_URL || 'https://github.com';
             const repoName = process.env.GITHUB_REPOSITORY;
             const runUrl = `${serverUrl}/${repoName}/actions/runs/${process.env.GITHUB_RUN_ID}`;
 
             let repoUrl = `${serverUrl}/${repoName}`;
-            if (ghContext.eventName === 'pull_request') {
-              const headRepoUrl = ghContext.payload?.pull_request?.head?.repo?.html_url;
+            if (context.eventName === 'pull_request') {
+              const headRepoUrl = context.payload?.pull_request?.head?.repo?.html_url;
               if (headRepoUrl) {
                 repoUrl = headRepoUrl;
               }
