@@ -1,0 +1,189 @@
+name: Reusable Gitleaks Scan
+
+on:
+  workflow_call:
+    inputs:
+      gitleaks_version:
+        type: string
+        required: false
+        default: v8.24.3
+      response_guide_url:
+        type: string
+        required: false
+        default: https://github.com/CivicTechWR/.github/blob/main/docs/gitleaks-response.md
+      block_on_findings:
+        type: boolean
+        required: false
+        default: false
+    secrets:
+      gitleaks_license:
+        required: false
+
+permissions:
+  actions: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  scan:
+    name: Scan for Leaked Secrets
+    runs-on: ubuntu-latest
+    env:
+      RESPONSE_GUIDE_URL: ${{ inputs.response_guide_url }}
+      GITLEAKS_VERSION: ${{ inputs.gitleaks_version }}
+      GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE || secrets.gitleaks_license || '' }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Gitleaks CLI
+        run: |
+          VERSION_NUMBER="${GITLEAKS_VERSION#v}"
+          ARCHIVE="gitleaks_${VERSION_NUMBER}_linux_x64.tar.gz"
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/${GITLEAKS_VERSION}/${ARCHIVE}" -o gitleaks.tar.gz
+          tar -xzf gitleaks.tar.gz gitleaks
+          sudo install -m 0755 gitleaks /usr/local/bin/gitleaks
+          rm -f gitleaks.tar.gz gitleaks
+
+      - name: Run Gitleaks (redacted)
+        id: gitleaks
+        continue-on-error: true
+        env:
+          GITLEAKS_LICENSE: ${{ env.GITLEAKS_LICENSE }}
+        run: |
+          if [ -z "${GITLEAKS_LICENSE:-}" ]; then
+            echo "::notice::Skipping Gitleaks scan because no license is available in this workflow context."
+            exit 0
+          fi
+
+          gitleaks detect \
+            --source . \
+            --no-banner \
+            --redact \
+            --report-format json \
+            --report-path gitleaks-report.json
+
+      - name: Summarize findings
+        id: summarize
+        run: |
+          if [ -z "${GITLEAKS_LICENSE:-}" ]; then
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "count=0" >> "$GITHUB_OUTPUT"
+            echo "skipped=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ ! -f gitleaks-report.json ]; then
+            echo "[]" > gitleaks-report.json
+          fi
+
+          count=$(jq 'length' gitleaks-report.json 2>/dev/null || echo 0)
+
+          if [ "$count" -gt 0 ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "count=$count" >> "$GITHUB_OUTPUT"
+            echo "skipped=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Gitleaks detected ${count} potential secret(s)."
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "count=0" >> "$GITHUB_OUTPUT"
+            echo "skipped=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Gitleaks found no potential secrets."
+          fi
+
+      - name: Note scan issues
+        if: ${{ steps.gitleaks.outcome == 'failure' && steps.summarize.outputs.skipped != 'true' && steps.summarize.outputs.found != 'true' }}
+        run: |
+          echo "::warning::Gitleaks scan ended with an error before producing findings. Review the action logs."
+
+      - name: Add pull request comment
+        if: ${{ steps.summarize.outputs.found == 'true' && github.event_name == 'pull_request' }}
+        uses: actions/github-script@v7
+        env:
+          LEAK_COUNT: ${{ steps.summarize.outputs.count }}
+          RESPONSE_GUIDE_URL: ${{ env.RESPONSE_GUIDE_URL }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const path = 'gitleaks-report.json';
+            const responseGuide = process.env.RESPONSE_GUIDE_URL;
+
+            const findings = JSON.parse(fs.readFileSync(path, 'utf8'));
+            if (!Array.isArray(findings) || findings.length === 0) {
+              return;
+            }
+
+            const lines = findings.slice(0, 10).map((finding) => {
+              const file = finding.file ? `\`${finding.file}\`` : 'unknown file';
+              const line = finding.startLine ? ` (line ${finding.startLine})` : '';
+              const rule = finding.ruleId || finding.rule || 'potential secret';
+              return `- ${file}${line} — ${rule}`;
+            }).join('\n');
+
+            const remainder = findings.length > 10
+              ? `\n\n…and ${findings.length - 10} more finding${findings.length - 10 === 1 ? '' : 's'} in the attached report.`
+              : '';
+
+            const body = [
+              `@CivicTechWR/organizers Gitleaks flagged **${process.env.LEAK_COUNT}** potential secret${findings.length === 1 ? '' : 's'} in this pull request.`,
+              '',
+              `Please review the [Gitleaks response guide](${responseGuide}) for next steps.`,
+              '',
+              lines,
+              remainder,
+              '',
+              '_Secret values are redacted by the scanner. Follow the guide before merging._',
+            ].filter(Boolean).join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+      - name: Upload redacted report
+        if: ${{ steps.summarize.outputs.found == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-report
+          path: gitleaks-report.json
+          retention-days: 7
+
+      - name: Record scan summary
+        if: ${{ always() }}
+        env:
+          LEAK_COUNT: ${{ steps.summarize.outputs.count }}
+          HAS_FINDINGS: ${{ steps.summarize.outputs.found }}
+          SKIPPED: ${{ steps.summarize.outputs.skipped }}
+          RESPONSE_GUIDE_URL: ${{ env.RESPONSE_GUIDE_URL }}
+        run: |
+          {
+            echo "## Gitleaks Findings"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$SKIPPED" = "true" ]; then
+            {
+              echo "Scan skipped because a Gitleaks license is not available in this workflow context."
+            } >> "$GITHUB_STEP_SUMMARY"
+          elif [ "$HAS_FINDINGS" = "true" ]; then
+            {
+              echo "Potential secrets detected: $LEAK_COUNT"
+              echo "Report: gitleaks-report.json (uploaded as artifact when available)"
+              echo "Guide: $RESPONSE_GUIDE_URL"
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo "No potential secrets detected."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Fail when findings detected
+        if: ${{ steps.summarize.outputs.found == 'true' && inputs.block_on_findings }}
+        run: |
+          echo "Gitleaks detected potential secrets. See the findings above."
+          exit 1
