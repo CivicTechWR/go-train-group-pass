@@ -4,6 +4,8 @@
 [![Accessibility Audit](https://github.com/CivicTechWR/go-train-group-pass/actions/workflows/accessibility.yml/badge.svg)](https://github.com/CivicTechWR/go-train-group-pass/actions/workflows/accessibility.yml)
 [![Security Audit](https://github.com/CivicTechWR/go-train-group-pass/actions/workflows/security.yml/badge.svg)](https://github.com/CivicTechWR/go-train-group-pass/actions/workflows/security.yml)
 
+Interested in helping out? Start with [`CONTRIBUTING.md`](CONTRIBUTING.md) for meetup details, setup steps, and collaboration norms.
+
 ## Product Overview
 
 Go Train Group Pass is a civic-tech collaboration that streamlines the purchase and coordination of GO Transit group passes. The platform exposes authenticated APIs, GTFS-powered data services, and admin tools that downstream web or mobile clients use to help riders plan trips, manage eligibility, and share passes across a group.
