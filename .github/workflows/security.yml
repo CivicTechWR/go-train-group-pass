@@ -9,21 +9,11 @@ on:
 
 jobs:
   gitleaks:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Scan for committed secrets
-        uses: gitleaks/gitleaks-action@v2
-        with:
-          log-level: warn
-          redact: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+    uses: ./.github/workflows/reusable-gitleaks.yml
+    with:
+      block_on_findings: true
+    secrets:
+      gitleaks_license: ${{ secrets.GITLEAKS_LICENSE }}
 
   npm-audit:
     runs-on: ubuntu-latest
