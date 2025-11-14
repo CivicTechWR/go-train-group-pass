@@ -10,6 +10,10 @@ on:
 jobs:
   gitleaks:
     runs-on: ubuntu-latest
+    env:
+      GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+      GITLEAKS_LEAK_COUNT: '0'
+      GITLEAKS_HAD_ERROR: 'false'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -17,14 +21,129 @@ jobs:
           fetch-depth: 0
 
       - name: Scan for committed secrets
+        id: gitleaks
+        if: ${{ env.GITLEAKS_LICENSE != '' }}
         uses: gitleaks/gitleaks-action@v2
+        continue-on-error: true
         with:
           log-level: warn
           redact: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ env.GITLEAKS_LICENSE }}
+          GITLEAKS_ENABLE_SUMMARY: 'false'
+
+      - name: Publish secret scan summary
+        if: always()
+        id: gitleaks_summary
+        uses: actions/github-script@v7
+        env:
+          GITLEAKS_OUTCOME: ${{ steps.gitleaks.outcome || 'skipped' }}
+        with:
+          script: |
+            const fs = require('fs');
+            const {summary, setOutput, warning, exportVariable} = core;
+            const context = github.context;
+
+            const serverUrl = process.env.GITHUB_SERVER_URL || 'https://github.com';
+            const repoName = process.env.GITHUB_REPOSITORY;
+            const runUrl = `${serverUrl}/${repoName}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+
+            let repoUrl = `${serverUrl}/${repoName}`;
+            if (context.eventName === 'pull_request') {
+              const headRepoUrl = context.payload?.pull_request?.head?.repo?.html_url;
+              if (headRepoUrl) {
+                repoUrl = headRepoUrl;
+              }
+            }
+
+            let leakCount = 0;
+            let results = [];
+            if (fs.existsSync('results.sarif')) {
+              try {
+                const sarif = JSON.parse(fs.readFileSync('results.sarif', 'utf8'));
+                results = (sarif?.runs || []).flatMap(run => run.results || []);
+                leakCount = results.length;
+              } catch (error) {
+                warning(`Unable to parse results.sarif: ${error.message}`);
+              }
+            }
+
+            const outcome = process.env.GITLEAKS_OUTCOME || 'success';
+            const licenseProvided = Boolean(process.env.GITLEAKS_LICENSE);
+            const hadError = outcome === 'failure' && leakCount === 0;
+
+            summary.addHeading('Secret Scan');
+
+            if (leakCount > 0) {
+              summary.addRaw(`Detected ${leakCount} potential secret${leakCount === 1 ? '' : 's'} ⚠️`, true);
+              const header = [
+                {data: 'Rule', header: true},
+                {data: 'Commit', header: true},
+                {data: 'Secret', header: true},
+                {data: 'File', header: true},
+                {data: 'Line', header: true},
+              ];
+              const rows = results.map(result => {
+                const commitSha = result?.partialFingerprints?.commitSha;
+                const shortSha = commitSha ? commitSha.substring(0, 7) : '—';
+                const commitUrl = commitSha ? `${repoUrl}/commit/${commitSha}` : null;
+
+                const location = result?.locations?.[0]?.physicalLocation;
+                const filePath = location?.artifactLocation?.uri;
+                const line = location?.region?.startLine;
+                const secretUrl = commitSha && filePath && line
+                  ? `${repoUrl}/blob/${commitSha}/${filePath}#L${line}`
+                  : null;
+                const fileUrl = commitSha && filePath
+                  ? `${repoUrl}/blob/${commitSha}/${filePath}`
+                  : null;
+
+                return [
+                  result?.ruleId || '—',
+                  commitUrl ? `<a href="${commitUrl}">${shortSha}</a>` : shortSha,
+                  secretUrl ? `<a href="${secretUrl}">View Secret</a>` : '—',
+                  filePath && fileUrl ? `<a href="${fileUrl}">${filePath}</a>` : (filePath || '—'),
+                  line ? line.toString() : '—',
+                ];
+              });
+              summary.addTable([header, ...rows]);
+            } else if (hadError) {
+              summary.addRaw('GitLeaks failed before producing a report ❌', true);
+            } else if (!licenseProvided) {
+              summary.addRaw('Secret scan skipped because no GitLeaks license is available in this context.', true);
+            } else if (outcome === 'skipped') {
+              summary.addRaw('Secret scan skipped.', true);
+            } else {
+              summary.addRaw('No leaks detected ✅', true);
+            }
+
+            summary.addSeparator();
+            summary.addLink('View workflow run', runUrl);
+            await summary.write();
+
+            setOutput('leak_count', leakCount.toString());
+            setOutput('had_error', hadError ? 'true' : 'false');
+            exportVariable('GITLEAKS_LEAK_COUNT', leakCount.toString());
+            exportVariable('GITLEAKS_HAD_ERROR', hadError ? 'true' : 'false');
+
+      - name: Upload GitLeaks SARIF
+        if: ${{ env.GITLEAKS_LEAK_COUNT != '0' }}
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+
+      - name: Fail when GitLeaks errors
+        if: ${{ env.GITLEAKS_HAD_ERROR == 'true' }}
+        run: |
+          echo "GitLeaks exited with an error. Review the logs above."
+          exit 1
+
+      - name: Fail when GitLeaks finds secrets
+        if: ${{ env.GITLEAKS_LEAK_COUNT != '0' }}
+        run: |
+          echo "GitLeaks detected potential secrets. See the job summary for details."
+          exit 1
 
   npm-audit:
     runs-on: ubuntu-latest
