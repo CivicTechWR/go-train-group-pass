@@ -371,7 +371,7 @@ npm run migrate:up
 2. Make your changes
 3. Write/update tests
 4. Ensure code passes linting: `npm run lint`
-5. Format code: `npm run format`  
+5. Format code: `npm run format`
 6. Submit a pull request
 
 ## Additional Documentation
@@ -389,5 +389,6 @@ MIT License - see LICENSE file for details
 ## Support
 
 For questions or issues:
+
 - Open an issue on GitHub
 - Contact the CivicTech WR team
