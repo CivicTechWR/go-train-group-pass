@@ -12,6 +12,11 @@ export default function SignInPage() {
           Sign up
         </Link>
       </p>
+      <p className='mt-2 text-center text-sm'>
+        <Link href='/forgot-password' className='text-emerald-600 hover:underline'>
+          Forgot your password?
+        </Link>
+      </p>
     </>
   );
 }
