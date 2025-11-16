@@ -33,4 +33,17 @@ export default defineConfig({
   metadataCache: {
     enabled: true,
   },
+  schemaGenerator: {
+    ignoreSchema: [
+      'auth',
+      'storage',
+      'realtime',
+      '_realtime',
+      'net',
+      'supabase_functions',
+      'vault',
+      'information_schema',
+      'pg_catalog',
+    ],
+  },
 });

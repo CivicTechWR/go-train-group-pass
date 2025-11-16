@@ -20,7 +20,10 @@ export class AuthService {
   async signUp(signUpDto: SignUpDto) {
     const { email, password, fullName, phoneNumber } = signUpDto;
 
-    // Create user in Supabase Auth
+    if (!fullName) {
+      throw new BadRequestException('Full name is required');
+    }
+
     const { data: authData, error: authError } =
       await this.supabaseService.auth.signUp({
         email,
@@ -40,12 +43,11 @@ export class AuthService {
     if (!authData.user) {
       throw new BadRequestException('Failed to create user');
     }
-
     // Create user in our database
     const user = await this.usersService.create({
       email,
       authUserId: authData.user.id,
-      fullName,
+      name: fullName,
       phoneNumber,
     });
 
@@ -55,9 +57,6 @@ export class AuthService {
     };
   }
 
-  /**
-   * Sign in an existing user
-   */
   async signIn(signInDto: SignInDto) {
     const { email, password } = signInDto;
 
@@ -76,14 +75,13 @@ export class AuthService {
       throw new UnauthorizedException('Authentication failed');
     }
 
-    // Safely parse user metadata using Zod
     const userMetadata = parseUserMetadata(authData.user.user_metadata);
 
     // Find or create user in our database
     const user = await this.usersService.findOrCreate({
       email: authData.user.email!,
       authUserId: authData.user.id,
-      fullName: userMetadata.full_name,
+      name: userMetadata.full_name,
       phoneNumber: userMetadata.phone_number,
     });
 
@@ -96,9 +94,6 @@ export class AuthService {
     };
   }
 
-  /**
-   * Sign out the current user
-   */
   async signOut() {
     const { error } = await this.supabaseService.auth.signOut();
 
@@ -109,9 +104,6 @@ export class AuthService {
     return { message: 'Signed out successfully' };
   }
 
-  /**
-   * Get user from access token
-   */
   async getUserFromToken(accessToken: string) {
     const {
       data: { user: authUser },
@@ -148,14 +140,11 @@ export class AuthService {
     };
   }
 
-  /**
-   * Request password reset email
-   */
   async requestPasswordReset(email: string) {
     const { error } = await this.supabaseService.auth.resetPasswordForEmail(
       email,
       {
-        redirectTo: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/reset-password`,
+        redirectTo: `${process.env.FRONTEND_URL}/auth/reset-password`,
       },
     );
 
@@ -166,9 +155,6 @@ export class AuthService {
     return { message: 'Password reset email sent' };
   }
 
-  /**
-   * Update user password
-   */
   async updatePassword(accessToken: string, newPassword: string) {
     // First verify the token
     const {
