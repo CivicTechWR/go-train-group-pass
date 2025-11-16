@@ -1,13 +1,13 @@
+import Link from 'next/link';
+
 export default function Home() {
   return (
-    <div className='min-h-screen bg-linear-to-br from-emerald-100 via-green-100 to-teal-100 font-sans'>
+    <div>
       <main className='container mx-auto px-6 py-16 max-w-5xl'>
         {/* Title */}
         <div className='text-center mb-16'>
-          <h1 className='text-5xl font-bold text-gray-900 mb-4'>
-            Plan Your Group Trip
-          </h1>
-          <p className='text-xl text-gray-700'>
+          <h1 className='text-5xl font-bold mb-4'>Plan Your Group Trip</h1>
+          <p className='text-xl'>
             Connect with fellow commuters and save together
           </p>
         </div>
@@ -47,11 +47,13 @@ export default function Home() {
           </div>
         </div>
 
-        {/* CTA */}
-        <div className='text-center'>
-          <button className='bg-emerald-600 text-white font-semibold py-4 px-8 rounded-lg text-lg cursor-pointer'>
+        <div className='flex justify-center'>
+          <Link
+            href='/protected'
+            className='bg-emerald-600 text-white font-semibold py-4 px-8 rounded-lg text-lg'
+          >
             Get Started
-          </button>
+          </Link>
         </div>
       </main>
     </div>
