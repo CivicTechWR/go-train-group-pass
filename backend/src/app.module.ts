@@ -4,9 +4,10 @@ import { AppService } from './app.service';
 import { AppConfigModule } from './modules/config.module';
 import { OrmModule } from './modules/orm.module';
 import { AuthModule } from './auth/auth.module';
+import { GtfsModule } from './gtfs/gtfs.module';
 
 @Module({
-  imports: [AppConfigModule, OrmModule, AuthModule],
+  imports: [AppConfigModule, OrmModule, AuthModule, GtfsModule],
   controllers: [AppController],
   providers: [AppService],
 })
