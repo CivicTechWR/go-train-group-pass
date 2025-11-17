@@ -3,6 +3,15 @@ import { Migration } from '@mikro-orm/migrations';
 export class Migration20251114024240 extends Migration {
   override async up(): Promise<void> {
     this.addSql(`create schema if not exists "go-train-group-pass";`);
+
+    this.addSql(
+      `CREATE DOMAIN "go-train-group-pass".gtfs_time AS varchar(8)
+       CHECK (
+          -- Enforces HH:MM:SS format where HH can be > 23
+          VALUE ~ '^[0-9]+:[0-5][0-9]:[0-5][0-9]$'
+       );`,
+    );
+
     this.addSql(
       `create table "go-train-group-pass"."agency" ("id" varchar(255) not null, "created_at" timestamptz not null, "updated_at" timestamptz not null, "agency_name" varchar(255) not null, "agency_url" varchar(255) not null, "agency_timezone" varchar(255) not null, "agency_lang" varchar(255) null, "agency_phone" varchar(255) null, constraint "agency_pkey" primary key ("id"));`,
     );
@@ -32,9 +41,12 @@ export class Migration20251114024240 extends Migration {
       `create index "idx_trips_route" on "go-train-group-pass"."gtfs_trips" ("route_id");`,
     );
 
+    // --- MODIFIED GTFS_STOP_TIMES TABLE ---
     this.addSql(
-      `create table "go-train-group-pass"."gtfs_stop_times" ("id" varchar(255) not null, "stop_sequence" int not null, "created_at" timestamptz not null, "updated_at" timestamptz not null, "arrival_time" varchar(8) not null, "departure_time" varchar(8) not null, "stop_headsign" varchar(255) null, "pickup_type" int null, "drop_off_type" int null, "shape_dist_traveled" numeric(10,0) null, "timepoint" int null, "stop_id" varchar(255) not null, "trip_id" varchar(255) not null, constraint "gtfs_stop_times_pkey" primary key ("id", "stop_sequence"));`,
+      `create table "go-train-group-pass"."gtfs_stop_times" ("id" varchar(255) not null, "stop_sequence" int not null, "created_at" timestamptz not null, "updated_at" timestamptz not null, "arrival_time" "go-train-group-pass".gtfs_time not null, "departure_time" "go-train-group-pass".gtfs_time not null, "stop_headsign" varchar(255) null, "pickup_type" int null, "drop_off_type" int null, "shape_dist_traveled" numeric(10,0) null, "timepoint" int null, "stop_id" varchar(255) not null, "trip_id" varchar(255) not null, constraint "gtfs_stop_times_pkey" primary key ("id", "stop_sequence"));`,
     );
+    // --- END ---
+
     this.addSql(
       `create index "idx_stop_times_stop_departure" on "go-train-group-pass"."gtfs_stop_times" ("stop_id", "departure_time");`,
     );
