@@ -100,6 +100,7 @@ Responsibilities:
 
 - Services should depend on repositories and other services, not on HTTP or framework-specific request objects.
 - Throw appropriate exceptions (e.g. NestJS HTTP exceptions) where relevant to signal invalid states or constraints.
+- Can use nest js tooling https://docs.nestjs.com/recipes/crud-generator
 
 ---
 
@@ -129,7 +130,8 @@ Responsibilities:
 - Keep controllers thin.
 - Do not implement business logic or data access directly in controllers.
 - Delegate to services for all meaningful operations.
-
+- Can use nest js tooling https://docs.nestjs.com/recipes/crud-generator
+- 
 ---
 
 ## 5. How the Layers Work Together
@@ -273,3 +275,7 @@ When in doubt:
 2. Express data access in a repository.
 3. Implement behavior in a service.
 4. Expose it via a controller when needed.
+
+---
+## Other Resources
+https://docs.nestjs.com/recipes/crud-generator
