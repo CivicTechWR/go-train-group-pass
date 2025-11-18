@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { ScheduleModule } from '@nestjs/schedule';
+
 import { GtfsService } from './gtfs.service';
 
 @Module({
-  imports: [ScheduleModule.forRoot()],
+  imports: [],
   providers: [GtfsService],
   exports: [GtfsService],
 })
