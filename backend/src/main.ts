@@ -1,4 +1,6 @@
 import { NestFactory } from '@nestjs/core';
+import { ZodValidationPipe } from 'nestjs-zod';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import {
   FastifyAdapter,
@@ -11,6 +13,18 @@ async function bootstrap() {
     new FastifyAdapter(),
     { cors: true },
   );
+  app.useGlobalPipes(new ZodValidationPipe());
+
+  if (process.env.NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('Go Train Group Pass API')
+      .setDescription('The Go Train Group Pass API description')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, document);
+  }
   await app.listen(process.env.PORT ?? 3000);
 }
 
