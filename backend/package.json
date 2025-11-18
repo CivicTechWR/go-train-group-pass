@@ -45,7 +45,7 @@
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
     "@mikro-orm/cli": "^6.5.9",
-    "@nestjs/cli": "^11.0.0",
+    "@nestjs/cli": "^11.0.10",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.1.8",
     "@swc/core": "^1.14.0",
@@ -68,5 +68,9 @@
     "typescript-eslint": "^8.20.0",
     "unplugin-swc": "^1.5.8",
     "vitest": "^4.0.6"
+  },
+  "overrides": {
+    "glob": "^11.0.4",
+    "tmp": "^0.3.0"
   }
 }
