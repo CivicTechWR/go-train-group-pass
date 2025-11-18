@@ -138,12 +138,23 @@ npm run migrate:pending
 ### Code Quality
 
 ```bash
-# Lint code
+# Lint code (auto-fixes issues)
 npm run lint
+
+# Check linting without fixing
+npm run lint:check
 
 # Format code
 npm run format
+
+# Check formatting without fixing
+npm run format:check
+
+# Run all code quality checks (format:check && lint:check && type-check)
+npm run check
 ```
+
+**Pre-commit Hook**: Before every commit, Git automatically runs `npm run check` via the `.husky/pre-commit` hook (configured with `git config core.hooksPath .husky`). Commits fail if checks don't pass.
 
 ## Project Structure
 
@@ -366,13 +377,13 @@ npm run migrate:up
 - Check that migrations have run successfully
 
 ## Contributing
-
-1. Create a feature branch
+1. Create a feature branch (`git checkout -b feature/my-feature`)
 2. Make your changes
-3. Write/update tests
-4. Ensure code passes linting: `npm run lint`
-5. Format code: `npm run format`
-6. Submit a pull request
+3. **Pre-commit checks run automatically**: `npm run check` (format, lint, type-check) via `.husky/pre-commit`. Fix any failures.
+4. Write/update tests
+5. Commit: `git add . && git commit -m "feat: description"` (hook ensures quality)
+6. Push: `git push origin feature/my-feature`
+7. Submit a pull request
 
 ## Additional Documentation
 
