@@ -6,7 +6,7 @@ import {
   OneToMany,
   Collection,
 } from '@mikro-orm/core';
-import { GTFSTrip } from './gtfs_trip.entitity';
+import { GTFSTrip } from './gtfs_trip.entity';
 import { Agency } from './gtfs_agency.entity';
 import { BaseEntity } from './base';
 

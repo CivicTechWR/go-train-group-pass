@@ -22,10 +22,10 @@ export class GTFSStopTime extends BaseEntity {
   @PrimaryKey()
   stopSequence!: number;
 
-  @Property({type: GTFSTimeType})
+  @Property({ type: GTFSTimeType })
   arrivalTime!: GTFSTimeType;
 
-  @Property({type: GTFSTimeType})
+  @Property({ type: GTFSTimeType })
   departureTime!: GTFSTimeType;
 
   @Property({ nullable: true })
