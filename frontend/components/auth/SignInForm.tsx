@@ -1,98 +1,84 @@
-'use client';
-
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/contexts/AuthContext';
-import { SignInSchema } from '@/lib/types';
-import { useRouter } from 'next/navigation';
-import { FormEvent, useState } from 'react';
+import { SignInInput, SignInSchema } from '@/lib/types';
+import { Field, Button, FieldGroup, FieldLabel, FieldSet, Input, FieldError } from '../ui';
+import { Loader2 } from "lucide-react";
+
 
 export function SignInForm() {
-  const router = useRouter();
   const { signIn } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setErrors({});
-    setSubmitError(null);
+  const {
+    control,
+    handleSubmit,
+    setError,
+    formState: { isSubmitting, isValid, errors },
+  } = useForm<SignInInput>({
+    resolver: zodResolver(SignInSchema),
+    mode: "onChange",
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-    // Validate with zod
-    const validationResult = SignInSchema.safeParse({ email, password });
-    if (!validationResult.success) {
-      const fieldErrors: Record<string, string> = {};
-      validationResult.error.issues.forEach(issue => {
-        const path = issue.path[0] as string;
-        fieldErrors[path] = issue.message;
-      });
-      setErrors(fieldErrors);
-      return;
-    }
-
-    setIsLoading(true);
+  const onSubmit = async (data: SignInInput) => {
     try {
-      await signIn(validationResult.data);
-      router.push('/protected');
+      await signIn(data);
     } catch (error) {
-      setSubmitError(
-        error instanceof Error ? error.message : 'Failed to sign in'
-      );
-    } finally {
-      setIsLoading(false);
+      setError("root", {
+        type: "manual",
+        message: error instanceof Error ? error.message : "Sign in failed. Please try again.",
+      });
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className='space-y-4'>
-      {submitError && (
-        <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded'>
-          {submitError}
-        </div>
-      )}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <FieldSet>
+        <FieldGroup>
+          <Controller name="email"
+           control={control}
+           render={({ field, fieldState }) => (
 
-      <div>
-        <label htmlFor='email' className='block text-sm font-medium mb-1'>
-          Email
-        </label>
-        <input
-          id='email'
-          type='email'
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          className='w-full px-3 py-2 border rounded-md'
-          required
-        />
-        {errors.email && (
-          <p className='mt-1 text-sm text-red-600'>{errors.email}</p>
-        )}
-      </div>
-
-      <div>
-        <label htmlFor='password' className='block text-sm font-medium mb-1'>
-          Password
-        </label>
-        <input
-          id='password'
-          type='password'
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          className='w-full px-3 py-2 border rounded-md'
-          required
-        />
-        {errors.password && (
-          <p className='mt-1 text-sm text-red-600'>{errors.password}</p>
-        )}
-      </div>
-
-      <button
-        type='submit'
-        disabled={isLoading}
-        className='w-full bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed'
-      >
-        {isLoading ? 'Signing in...' : 'Sign In'}
-      </button>
+             <Field data-invalid={fieldState.invalid}>
+               <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+               <Input {...field}
+                 id="email"
+                 type="text"
+                 aria-invalid={fieldState.invalid}
+                 placeholder="janedoe@example.com" />
+               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+             </Field>
+           )} />
+          <Controller name="password"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                <Input {...field}
+                  id="password"
+                  type="password"
+                  aria-invalid={fieldState.invalid}
+                  placeholder="••••••••" />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>)}
+          />
+          <Button type="submit" disabled={!isValid || isSubmitting} className="w-full">
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Signing in...
+              </>
+            ) : (
+              "Sign in"
+            )}
+          </Button>
+          {errors.root && <FieldError errors={[errors.root]} />}
+        </FieldGroup>
+      </FieldSet>
     </form>
+
   );
 }
