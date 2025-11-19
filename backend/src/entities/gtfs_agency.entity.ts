@@ -1,7 +1,8 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import { BaseEntity } from './base';
 
 @Entity()
-export class Agency {
+export class Agency extends BaseEntity {
   @PrimaryKey()
   id!: string;
 

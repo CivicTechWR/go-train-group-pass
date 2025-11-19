@@ -9,11 +9,12 @@ import {
 } from '@mikro-orm/core';
 import { GTFSCalendarDate, GTFSStopTime } from '.';
 import { GTFSRoute } from './gtfs_route.entity';
+import { BaseEntity } from './base';
 
 @Entity({ tableName: 'gtfs_trips' })
 @Index({ name: 'idx_trips_route', properties: ['route'] })
 @Index({ name: 'idx_trips_calendar_date', properties: ['calendarDate'] })
-export class GTFSTrip {
+export class GTFSTrip extends BaseEntity {
   @PrimaryKey()
   id!: string;
 

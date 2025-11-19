@@ -6,7 +6,9 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
 
 const logger = new Logger('MikroORM');
-const logFn = (message: string) => logger.log(message);
+const logFn = (message: string) => {
+  logger.log(message);
+};
 
 export default defineConfig({
   schema: 'go-train-group-pass',
@@ -32,5 +34,18 @@ export default defineConfig({
   entitiesTs: ['./src/**/*.entity.ts'],
   metadataCache: {
     enabled: true,
+  },
+  schemaGenerator: {
+    ignoreSchema: [
+      'auth',
+      'storage',
+      'realtime',
+      '_realtime',
+      'net',
+      'supabase_functions',
+      'vault',
+      'information_schema',
+      'pg_catalog',
+    ],
   },
 });
