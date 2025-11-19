@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/unbound-method, @typescript-eslint/no-unsafe-assignment */
 import { Test, TestingModule } from '@nestjs/testing';
 import { GtfsService } from './gtfs.service';
+import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import JSZip from 'jszip';
 import { Logger } from '@nestjs/common';
@@ -11,12 +11,23 @@ vi.mock('axios');
 // Mock JSZip
 vi.mock('jszip');
 
+const mockedAxios = axios as unknown as { get: Mock };
+const mockedJSZip = JSZip as unknown as { loadAsync: Mock };
+
 describe('GtfsService', () => {
   let service: GtfsService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [GtfsService],
+      providers: [
+        GtfsService,
+        {
+          provide: ConfigService,
+          useValue: {
+            get: vi.fn().mockReturnValue('https://mock-url'),
+          },
+        },
+      ],
     }).compile();
 
     service = module.get<GtfsService>(GtfsService);
@@ -40,7 +51,7 @@ describe('GtfsService', () => {
     it('should download and extract files successfully (200)', async () => {
       // Mock axios response
       const mockData = Buffer.from('mock-zip-data');
-      (axios.get as Mock).mockResolvedValue({
+      mockedAxios.get.mockResolvedValue({
         status: 200,
         data: mockData,
         headers: {
@@ -50,7 +61,7 @@ describe('GtfsService', () => {
       });
 
       // Mock JSZip
-      const mockZipFiles = {
+      const mockZipFiles: Record<string, unknown> = {
         'agency.txt': {
           dir: false,
           async: vi.fn().mockResolvedValue('agency_data'),
@@ -65,12 +76,12 @@ describe('GtfsService', () => {
       const mockLoadAsync = vi.fn().mockResolvedValue({
         files: mockZipFiles,
       });
-      (JSZip.loadAsync as Mock).mockImplementation(mockLoadAsync);
+      mockedJSZip.loadAsync.mockImplementation(mockLoadAsync);
 
       const result = await service.downloadGtfs();
 
-      expect(axios.get).toHaveBeenCalledTimes(1);
-      expect(JSZip.loadAsync).toHaveBeenCalledWith(mockData);
+      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+      expect(mockedJSZip.loadAsync).toHaveBeenCalledWith(mockData);
       expect(result).toEqual({
         'agency.txt': 'agency_data',
         'stops.txt': 'stops_data',
@@ -85,12 +96,12 @@ describe('GtfsService', () => {
 
     it('should handle 304 Not Modified', async () => {
       // 1. Run successful download to set initial state
-      (axios.get as Mock).mockResolvedValueOnce({
+      mockedAxios.get.mockResolvedValueOnce({
         status: 200,
         data: Buffer.from('zip'),
         headers: { etag: 'v1' },
       });
-      (JSZip.loadAsync as Mock).mockResolvedValueOnce({
+      mockedJSZip.loadAsync.mockResolvedValueOnce({
         files: {
           'test.txt': {
             dir: false,
@@ -101,7 +112,7 @@ describe('GtfsService', () => {
       await service.downloadGtfs();
 
       // 2. Run 304 download
-      (axios.get as Mock).mockResolvedValueOnce({
+      mockedAxios.get.mockResolvedValueOnce({
         status: 304,
         headers: {},
       });
@@ -109,12 +120,12 @@ describe('GtfsService', () => {
       const result = await service.downloadGtfs();
 
       // Should have sent headers
-      expect(axios.get).toHaveBeenLastCalledWith(
+      expect(mockedAxios.get).toHaveBeenLastCalledWith(
         expect.any(String),
         expect.objectContaining({
-          headers: expect.objectContaining({
+          headers: {
             'If-None-Match': 'v1',
-          }),
+          },
         }),
       );
 
@@ -123,7 +134,7 @@ describe('GtfsService', () => {
     });
 
     it('should handle errors gracefully', async () => {
-      (axios.get as Mock).mockRejectedValue(new Error('Network error'));
+      mockedAxios.get.mockRejectedValue(new Error('Network error'));
 
       const result = await service.downloadGtfs();
       expect(result).toBeNull();
@@ -136,7 +147,7 @@ describe('GtfsService', () => {
         resolvePromise = r;
       });
 
-      (axios.get as Mock).mockReturnValue(pendingPromise);
+      mockedAxios.get.mockReturnValue(pendingPromise);
 
       const promise1 = service.downloadGtfs();
       const promise2 = service.downloadGtfs();
@@ -146,7 +157,7 @@ describe('GtfsService', () => {
 
       // Resolve the first one to clean up
       resolvePromise!({ status: 200, data: Buffer.from(''), headers: {} });
-      (JSZip.loadAsync as Mock).mockResolvedValue({ files: {} });
+      mockedJSZip.loadAsync.mockResolvedValue({ files: {} });
 
       await promise1;
     });

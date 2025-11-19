@@ -1,4 +1,5 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Cron } from '@nestjs/schedule';
 import axios, { AxiosResponse } from 'axios';
 import JSZip from 'jszip';
@@ -20,11 +21,15 @@ export class GtfsService implements OnModuleInit {
     responseType: 'arraybuffer' as const,
     timeout: 30_000,
     headers: {},
-    // you can add maxContentLength / maxBodyLength if needed
   };
 
-  private gtfsUrl =
-    'https://assets.metrolinx.com/raw/upload/Documents/Metrolinx/Open%20Data/GO-GTFS.zip';
+  private gtfsUrl: string;
+
+  constructor(private readonly configService: ConfigService) {
+    this.gtfsUrl =
+      this.configService.get<string>('GTFS_URL') ||
+      'https://assets.metrolinx.com/raw/upload/Documents/Metrolinx/Open%20Data/GO-GTFS.zip';
+  }
 
   async downloadGtfs(): Promise<GtfsFiles | null> {
     if (this.isDownloading) {
