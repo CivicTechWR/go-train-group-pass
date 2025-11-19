@@ -162,38 +162,4 @@ describe('GtfsService', () => {
       await promise1;
     });
   });
-
-  describe('onModuleInit', () => {
-    it('should call downloadGtfs on init', async () => {
-      const downloadSpy = vi
-        .spyOn(service, 'downloadGtfs')
-        .mockResolvedValue({});
-      await service.onModuleInit();
-      expect(downloadSpy).toHaveBeenCalled();
-    });
-
-    it('should catch errors during init', async () => {
-      const downloadSpy = vi
-        .spyOn(service, 'downloadGtfs')
-        .mockRejectedValue(new Error('Init fail'));
-      const errorSpy = vi.spyOn(Logger.prototype, 'error');
-
-      await service.onModuleInit();
-      expect(downloadSpy).toHaveBeenCalled();
-      expect(errorSpy).toHaveBeenCalledWith(
-        'Initial GTFS load failed',
-        expect.any(Error),
-      );
-    });
-  });
-
-  describe('handleCron', () => {
-    it('should call downloadGtfs', async () => {
-      const downloadSpy = vi
-        .spyOn(service, 'downloadGtfs')
-        .mockResolvedValue({});
-      await service.handleCron();
-      expect(downloadSpy).toHaveBeenCalled();
-    });
-  });
 });

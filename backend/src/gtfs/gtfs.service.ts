@@ -1,6 +1,5 @@
-import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Cron } from '@nestjs/schedule';
 import axios, { AxiosResponse } from 'axios';
 import JSZip from 'jszip';
 
@@ -9,7 +8,7 @@ interface GtfsFiles {
 }
 
 @Injectable()
-export class GtfsService implements OnModuleInit {
+export class GtfsService {
   private readonly logger = new Logger(GtfsService.name);
   private latestGtfsFiles: GtfsFiles = {};
   private isDownloading = false;
@@ -99,21 +98,5 @@ export class GtfsService implements OnModuleInit {
   // Return a defensive shallow copy to avoid external mutation
   getLatestGtfsFiles(): GtfsFiles {
     return { ...this.latestGtfsFiles };
-  }
-
-  async onModuleInit() {
-    try {
-      await this.downloadGtfs();
-    } catch (err) {
-      // downloadGtfs already catches and logs; this is defensive
-      this.logger.error('Initial GTFS load failed', err);
-    }
-  }
-
-  // run at minute 0 every 6 hours: 00:00, 06:00, 12:00, 18:00
-  @Cron('0 */6 * * *')
-  async handleCron() {
-    // Don't await if you want the cron to fire non-blocking; here we await to ensure lock behavior:
-    await this.downloadGtfs();
   }
 }
