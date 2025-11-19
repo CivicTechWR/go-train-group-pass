@@ -1,40 +1,25 @@
-import { Entity, OptionalProps, PrimaryKey, Property } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+
+import { randomUUID } from 'crypto';
+import { BaseEntity } from './base';
 
 @Entity({ tableName: 'users' })
-export class User {
-  [OptionalProps]?: 'createdAt' | 'updatedAt';
-
+export class User extends BaseEntity {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
-  id!: string;
+  id: string = randomUUID();
 
-  @Property({ unique: true })
-  email!: string;
+  @Property({ type: 'string', length: 255 })
+  name: string;
 
-  @Property({ nullable: true })
-  fullName?: string;
+  @Property({ type: 'string', length: 255, unique: true })
+  email: string;
 
-  @Property({ nullable: true })
+  @Property({ type: 'string', length: 20, nullable: true })
   phoneNumber?: string;
-
-  @Property({ nullable: true })
-  avatarUrl?: string;
-
-  @Property({ type: 'timestamp', onCreate: () => new Date() })
-  createdAt: Date = new Date();
-
-  @Property({
-    type: 'timestamp',
-    onCreate: () => new Date(),
-    onUpdate: () => new Date(),
-  })
-  updatedAt: Date = new Date();
-
-  @Property({ nullable: true, type: 'timestamp' })
-  lastSignInAt?: Date;
-
-  @Property({ onCreate: () => true })
-  isActive: boolean = true;
 
   @Property({ unique: true, type: 'uuid' })
   authUserId!: string;
+
+  @Property({ nullable: true, type: 'timestamp', onCreate: () => new Date() })
+  lastSignInAt?: Date;
 }
