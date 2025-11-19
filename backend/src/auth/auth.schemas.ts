@@ -15,7 +15,7 @@ export type UserMetadata = z.infer<typeof UserMetadataSchema>;
  * Schema for sign up data
  */
 export const SignUpDtoSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.email('Invalid email address'),
   password: z
     .string()
     .min(8, 'Password must be at least 8 characters')
@@ -33,7 +33,7 @@ export type SignUpDto = z.infer<typeof SignUpDtoSchema>;
  * Schema for sign in data
  */
 export const SignInDtoSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.email('Invalid email address'),
   password: z.string().min(1, 'Password is required'),
 });
 
@@ -43,7 +43,7 @@ export type SignInDto = z.infer<typeof SignInDtoSchema>;
  * Schema for password reset request
  */
 export const PasswordResetRequestSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.email('Invalid email address'),
 });
 
 export type PasswordResetRequest = z.infer<typeof PasswordResetRequestSchema>;

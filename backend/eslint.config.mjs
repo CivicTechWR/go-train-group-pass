@@ -10,7 +10,7 @@ export default tseslint.config(
     ignores: ['eslint.config.mjs', 'src/types/supabase.ts', 'src/database/migrations/**'],
   },
   eslint.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
+  ...tseslint.configs.strictTypeChecked,
   eslintPluginPrettierRecommended,
   {
     languageOptions: {
@@ -28,6 +28,7 @@ export default tseslint.config(
   {
     rules: {
       "prettier/prettier": ["error", { endOfLine: "auto" }],
+      "@typescript-eslint/no-extraneous-class": "off",
     },
   },
   eslintNestJs.configs.flatRecommended 
