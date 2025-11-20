@@ -6,9 +6,10 @@ import {
   Collection,
 } from '@mikro-orm/core';
 import { GTFSStopTime } from '.';
+import { BaseEntity } from './base';
 
 @Entity({ tableName: 'gtfs_stops' })
-export class GTFSStop {
+export class GTFSStop extends BaseEntity {
   @PrimaryKey()
   id!: string;
 

@@ -10,6 +10,7 @@ import {
   GTFSStopTime,
   GTFSCalendarDate,
 } from '../entities';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import {
       GTFSStopTime,
       GTFSCalendarDate,
     ]),
+    ConfigModule,
   ],
   providers: [GtfsService],
   exports: [GtfsService],
