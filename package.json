@@ -1,0 +1,15 @@
+{
+    "name": "go-train-group-pass-monorepo",
+    "private": true,
+    "workspaces": [
+        "backend",
+        "packages/*"
+    ],
+    "scripts": {
+        "prepare": "husky"
+    },
+    "devDependencies": {
+        "husky": "^9.1.7",
+        "prettier": "^3.6.2"
+    }
+}

@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { SupabaseService } from './supabase.service';
 import { UsersService } from '../users/users.service';
-import { SignUpDto, SignInDto, parseUserMetadata } from './auth.schemas';
+import { SignUp, SignIn, parseUserMetadata } from '@go-train-group-pass/shared';
 
 @Injectable()
 export class AuthService {
@@ -17,7 +17,7 @@ export class AuthService {
   /**
    * Sign up a new user using Supabase Auth and create a user record in our database
    */
-  async signUp(signUpDto: SignUpDto) {
+  async signUp(signUpDto: SignUp) {
     const { email, password, fullName, phoneNumber } = signUpDto;
 
     if (!fullName) {
@@ -57,7 +57,7 @@ export class AuthService {
     };
   }
 
-  async signIn(signInDto: SignInDto) {
+  async signIn(signInDto: SignIn) {
     const { email, password } = signInDto;
 
     // Authenticate with Supabase
