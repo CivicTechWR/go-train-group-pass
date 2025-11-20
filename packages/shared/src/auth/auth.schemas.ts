@@ -27,7 +27,7 @@ export const SignUpDtoSchema = z.object({
     .optional(),
 });
 
-export type SignUpDto = z.infer<typeof SignUpDtoSchema>;
+export type SignUp = z.infer<typeof SignUpDtoSchema>;
 
 /**
  * Schema for sign in data
@@ -37,7 +37,7 @@ export const SignInDtoSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
-export type SignInDto = z.infer<typeof SignInDtoSchema>;
+export type SignIn = z.infer<typeof SignInDtoSchema>;
 
 /**
  * Schema for password reset request
