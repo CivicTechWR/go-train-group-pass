@@ -28,20 +28,16 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: ${{ matrix.workspace }}/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        working-directory: ${{ matrix.workspace }}
         run: npm ci
 
       - name: Run ESLint
-        working-directory: ${{ matrix.workspace }}
-        run: npm run lint
+        run: npm run lint --workspace=${{ matrix.workspace }}
 
       - name: Type check
-        working-directory: ${{ matrix.workspace }}
-        run: npm run type-check
+        run: npm run type-check --workspace=${{ matrix.workspace }}
 
       - name: Verify formatting
-        working-directory: ${{ matrix.workspace }}
-        run: npm run format:check
+        run: npm run format:check --workspace=${{ matrix.workspace }}
