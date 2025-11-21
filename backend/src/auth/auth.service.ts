@@ -1,11 +1,11 @@
 import {
-  BadRequestException,
   Injectable,
   UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
-import { SignInDto, SignUpDto, parseUserMetadata } from './auth.schemas';
 import { SupabaseService } from './supabase.service';
+import { UsersService } from '../users/users.service';
+import { SignUpDto, SignInDto, parseUserMetadata } from './auth.schemas';
 
 @Injectable()
 export class AuthService {

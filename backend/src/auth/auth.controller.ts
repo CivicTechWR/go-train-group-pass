@@ -1,27 +1,27 @@
 import {
-  Body,
   Controller,
+  Post,
   Get,
+  Body,
   Headers,
   HttpCode,
   HttpStatus,
-  Post,
   UnauthorizedException,
 } from '@nestjs/common';
 import {
-  ApiBearerAuth,
+  ApiTags,
   ApiOperation,
   ApiResponse,
-  ApiTags,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import {
-  PasswordResetDto,
+  SignUpDto,
+  SignInDto,
+  RefreshTokenDto,
   PasswordResetRequestDto,
   PasswordUpdateDto,
-  RefreshTokenDto,
-  SignInDto,
-  SignUpDto,
+  PasswordResetDto,
 } from './dto/auth.dto';
 
 @ApiTags('Auth')
