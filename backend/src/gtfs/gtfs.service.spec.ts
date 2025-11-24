@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GtfsService } from './gtfs.service';
 import { ConfigService } from '@nestjs/config';
+import { EntityManager } from '@mikro-orm/core';
 import axios from 'axios';
 import JSZip from 'jszip';
 import { Logger } from '@nestjs/common';
@@ -16,8 +17,27 @@ const mockedJSZip = JSZip as unknown as { loadAsync: Mock };
 
 describe('GtfsService', () => {
   let service: GtfsService;
+  let mockEntityManager: {
+    persistAndFlush: Mock;
+    removeAndFlush: Mock;
+    findOne: Mock;
+    find: Mock;
+    flush: Mock;
+    nativeDelete: Mock;
+    create: Mock;
+  };
 
   beforeEach(async () => {
+    mockEntityManager = {
+      persistAndFlush: vi.fn(),
+      removeAndFlush: vi.fn(),
+      findOne: vi.fn(),
+      find: vi.fn(),
+      flush: vi.fn(),
+      nativeDelete: vi.fn(),
+      create: vi.fn((_, data) => data), // Return the data as-is for simplicity
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GtfsService,
@@ -26,6 +46,10 @@ describe('GtfsService', () => {
           useValue: {
             get: vi.fn().mockReturnValue('https://mock-url'),
           },
+        },
+        {
+          provide: EntityManager,
+          useValue: mockEntityManager,
         },
       ],
     }).compile();
@@ -68,7 +92,7 @@ describe('GtfsService', () => {
         },
         'stops.txt': {
           dir: false,
-          async: vi.fn().mockResolvedValue('stops_data'),
+          async: vi.fn().mockResolvedValue('stop_data'),
         },
         'folder/': { dir: true },
       };
@@ -84,13 +108,13 @@ describe('GtfsService', () => {
       expect(mockedJSZip.loadAsync).toHaveBeenCalledWith(mockData);
       expect(result).toEqual({
         'agency.txt': 'agency_data',
-        'stops.txt': 'stops_data',
+        'stops.txt': 'stop_data',
       });
 
       // Verify state update
       expect(service.getLatestGtfsFiles()).toEqual({
         'agency.txt': 'agency_data',
-        'stops.txt': 'stops_data',
+        'stops.txt': 'stop_data',
       });
     });
 
@@ -160,6 +184,183 @@ describe('GtfsService', () => {
       mockedJSZip.loadAsync.mockResolvedValue({ files: {} });
 
       await promise1;
+    });
+  });
+
+  describe('downloadAndImportToDatabase', () => {
+    it('should parse CSV files and persist entities correctly', async () => {
+      // Mock axios response
+      const mockData = Buffer.from('mock-zip-data');
+      mockedAxios.get.mockResolvedValue({
+        status: 200,
+        data: mockData,
+        headers: {
+          etag: 'v1',
+          'last-modified': 'Mon, 01 Jan 2024 00:00:00 GMT',
+        },
+      });
+
+      // Mock JSZip with realistic GTFS CSV data
+      const mockZipFiles: Record<string, unknown> = {
+        'agency.txt': {
+          dir: false,
+          async: vi
+            .fn()
+            .mockResolvedValue(
+              'agency_id,agency_name,agency_url,agency_timezone,agency_lang,agency_phone\nGO,GO Transit,https://www.gotransit.com,America/Toronto,en,1.888.438.6646',
+            ),
+        },
+        'stops.txt': {
+          dir: false,
+          async: vi
+            .fn()
+            .mockResolvedValue(
+              'stop_id,stop_name,stop_lat,stop_lon,location_type,parent_station\nWR,West Harbour GO,43.266775,-79.866222,0,\nBD,Burlington GO,43.3397,-79.7877,0,',
+            ),
+        },
+        'routes.txt': {
+          dir: false,
+          async: vi
+            .fn()
+            .mockResolvedValue(
+              'route_id,agency_id,route_short_name,route_long_name,route_type,route_color,route_text_color\n08251125-ST,GO,ST,Stouffville,2,794500,FFFFFF',
+            ),
+        },
+        'calendar_dates.txt': {
+          dir: false,
+          async: vi
+            .fn()
+            .mockResolvedValue(
+              'service_id,date,exception_type\n20251121,20251121,1',
+            ),
+        },
+        'trips.txt': {
+          dir: false,
+          async: vi
+            .fn()
+            .mockResolvedValue(
+              'route_id,service_id,trip_id,trip_headsign,trip_short_name,direction_id,block_id,shape_id,wheelchair_accessible,bikes_allowed,route_variant\n08251125-61,20251110,20251110-61-61440,61 - Union Station,,1,eggoG012,414493,1,1,61',
+            ),
+        },
+        'stop_times.txt': {
+          dir: false,
+          async: vi
+            .fn()
+            .mockResolvedValue(
+              'trip_id,arrival_time,departure_time,stop_id,stop_sequence,pickup_type,drop_off_type,stop_headsign\n20251110-61-61440,14:30:00,14:30:00,02300,22,0,0,',
+            ),
+        },
+      };
+
+      mockedJSZip.loadAsync.mockResolvedValue({
+        files: mockZipFiles,
+      });
+
+      // Execute the import
+      await service.downloadAndImportToDatabase();
+
+      // Verify nativeDelete was called to clear old data
+      expect(mockEntityManager.nativeDelete).toHaveBeenCalledTimes(6);
+
+      // Verify create was called with correctly parsed CSV data
+      expect(mockEntityManager.create).toHaveBeenCalled();
+
+      // Check agency parsing - should have converted CSV columns to entity properties
+      const agencyCalls = mockEntityManager.create.mock.calls.filter(
+        (call) => call[1]?.agencyName !== undefined,
+      );
+      expect(agencyCalls.length).toBeGreaterThan(0);
+      expect(agencyCalls[0][1]).toMatchObject({
+        id: 'GO',
+        agencyName: 'GO Transit',
+        agencyUrl: 'https://www.gotransit.com',
+        agencyTimezone: 'America/Toronto',
+        agencyLang: 'en',
+        agencyPhone: '1.888.438.6646',
+      });
+
+      // Check stops parsing - should have 2 stops
+      const stopCalls = mockEntityManager.create.mock.calls.filter(
+        (call) => call[1]?.stopName !== undefined,
+      );
+      expect(stopCalls.length).toBe(2);
+      expect(stopCalls[0][1]).toMatchObject({
+        id: 'WR',
+        stopName: 'West Harbour GO',
+        stopLat: 43.266775,
+        stopLon: -79.866222,
+      });
+
+      // Check routes parsing - should have 1 route
+      const routeCalls = mockEntityManager.create.mock.calls.filter(
+        (call) => call[1]?.routeShortName !== undefined,
+      );
+      expect(routeCalls.length).toBe(1);
+      expect(routeCalls[0][1]).toMatchObject({
+        id: '08251125-ST',
+        routeShortName: 'ST',
+        routeLongName: 'Stouffville',
+        routeDesc: undefined,
+        routeType: 2,
+        routeUrl: undefined,
+        routeColor: '794500',
+        routeTextColor: 'FFFFFF',
+        agency: undefined,
+      });
+
+      // Check calendar dates parsing - should have 1 calendar date
+      const calendarCalls = mockEntityManager.create.mock.calls.filter(
+        (call) =>
+          call[1]?.serviceId !== undefined &&
+          call[1]?.date !== undefined &&
+          call[1]?.exceptionType !== undefined,
+      );
+      expect(calendarCalls.length).toBe(1);
+      expect(calendarCalls[0][1]).toMatchObject({
+        serviceId: '20251121',
+        date: new Date('2025-11-21T05:00:00.000Z'),
+        exceptionType: 1,
+      });
+
+      // Check trips parsing - should have 1 trip
+      const tripCalls = mockEntityManager.create.mock.calls.filter(
+        (call) => call[1]?.tripHeadsign !== undefined,
+      );
+      expect(tripCalls.length).toBe(1);
+      expect(tripCalls[0][1]).toMatchObject({
+        id: '20251110-61-61440',
+        calendarDate: undefined,
+        tripHeadsign: '61 - Union Station',
+        tripShortName: undefined,
+        directionId: 1,
+        blockId: 'eggoG012',
+        shapeId: '414493',
+        wheelchairAccessible: 1,
+        bikesAllowed: 1,
+        route: undefined,
+      });
+
+      // Check stop times parsing - should have 1 stop
+      const stopTimesCalls = mockEntityManager.create.mock.calls.filter(
+        (call) => call[1]?.stopSequence !== undefined,
+      );
+      expect(stopTimesCalls.length).toBe(1);
+      expect(stopTimesCalls[0][1]).toMatchObject({
+        id: '20251110-61-61440',
+        stopSequence: 22,
+        arrivalTime: '14:30:00',
+        departureTime: '14:30:00',
+        stopHeadsign: undefined,
+        pickupType: 0,
+        dropOffType: 0,
+        shapeDistTraveled: undefined,
+        timepoint: undefined,
+        stop: undefined,
+        trip: undefined,
+      });
+
+      // Verify persistAndFlush was called for each batch
+      expect(mockEntityManager.persistAndFlush).toHaveBeenCalled();
     });
   });
 });
