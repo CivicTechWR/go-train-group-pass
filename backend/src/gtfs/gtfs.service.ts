@@ -10,6 +10,7 @@ import {
   GTFSStopTime,
   GTFSCalendarDate,
 } from '../entities';
+import { EntityManager } from '@mikro-orm/postgresql';
 
 interface GtfsFiles {
   [filename: string]: string;
