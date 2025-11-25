@@ -184,4 +184,26 @@ export class AuthService {
 
     return { message: 'Password updated successfully' };
   }
+
+  async resetPassword(recoveryToken: string, newPassword: string) {
+    const {
+      data: { user: authUser },
+      error: userError,
+    } = await this.supabaseService.auth.getUser(recoveryToken);
+
+    if (userError || !authUser) {
+      throw new UnauthorizedException('Invalid or expired recovery token');
+    }
+
+    const { error } = await this.supabaseService.auth.admin.updateUserById(
+      authUser.id,
+      { password: newPassword },
+    );
+
+    if (error) {
+      throw new BadRequestException(error.message);
+    }
+
+    return { message: 'Password reset successfully' };
+  }
 }
