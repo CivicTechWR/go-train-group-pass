@@ -5,6 +5,7 @@ import {
   RefreshTokenSchema,
   PasswordResetRequestSchema,
   PasswordUpdateSchema,
+  PasswordResetSchema,
 } from '../auth.schemas';
 
 export class SignUpDto extends createZodDto(SignUpDtoSchema) {}
@@ -18,3 +19,5 @@ export class PasswordResetRequestDto extends createZodDto(
 ) {}
 
 export class PasswordUpdateDto extends createZodDto(PasswordUpdateSchema) {}
+
+export class PasswordResetDto extends createZodDto(PasswordResetSchema) {}
