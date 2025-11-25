@@ -10,13 +10,18 @@ import {
 import { GTFSCalendarDate, GTFSStopTime } from '.';
 import { GTFSRoute } from './gtfs_route.entity';
 import { BaseEntity } from './base';
+import { randomUUID } from 'crypto';
+import { GTFSFeedInfo } from './gtfs_feed_info.entity';
 
 @Entity({ tableName: 'gtfs_trips' })
 @Index({ name: 'idx_trips_route', properties: ['route'] })
 @Index({ name: 'idx_trips_calendar_date', properties: ['calendarDate'] })
 export class GTFSTrip extends BaseEntity {
-  @PrimaryKey()
-  id!: string;
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id: string = randomUUID();
+
+  @Property()
+  trip_id!: string;
 
   @ManyToOne(() => GTFSCalendarDate)
   calendarDate!: GTFSCalendarDate;
@@ -47,4 +52,7 @@ export class GTFSTrip extends BaseEntity {
 
   @OneToMany(() => GTFSStopTime, (stopTime) => stopTime.trip)
   stopTimes = new Collection<GTFSStopTime>(this);
+
+  @ManyToOne(() => GTFSFeedInfo)
+  GTFSFeedInfo!: GTFSFeedInfo;
 }

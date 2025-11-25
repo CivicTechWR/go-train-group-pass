@@ -5,6 +5,7 @@ This guide explains how to set up and use Supabase with the NestJS backend.
 ## Overview
 
 The backend is configured to work with Supabase PostgreSQL database using MikroORM as the ORM. You can use either:
+
 - **Local Supabase** for development (recommended)
 - **Hosted Supabase** for production
 
@@ -13,6 +14,7 @@ The backend is configured to work with Supabase PostgreSQL database using MikroO
 ### 1. Prerequisites
 
 Ensure you have the following installed:
+
 - [Supabase CLI](https://supabase.com/docs/guides/cli/getting-started)
 - Docker Desktop (required for local Supabase)
 
@@ -27,6 +29,7 @@ supabase start
 ```
 
 This will start the local Supabase stack on these ports (as configured in `supabase/config.toml`):
+
 - **PostgreSQL Database**: `localhost:54322`
 - **Studio (Web UI)**: `http://localhost:54323`
 - **API**: `http://localhost:54321`
@@ -38,7 +41,7 @@ Create a `.env` file in the backend directory:
 
 ```bash
 cd backend
-cp ../.env.example .env
+cp .env.example .env
 ```
 
 For local development, the default values should work:
@@ -203,6 +206,7 @@ You can access the database using:
 ### MikroORM Configuration
 
 The MikroORM configuration (`backend/src/mikro-orm.config.ts`) supports:
+
 - Environment-based connection parameters
 - Automatic migration management
 - Entity discovery
@@ -211,6 +215,7 @@ The MikroORM configuration (`backend/src/mikro-orm.config.ts`) supports:
 ### Supabase Configuration
 
 The Supabase configuration (`supabase/config.toml`) defines:
+
 - Local port mappings (avoid conflicts)
 - Database version (PostgreSQL 17)
 - API settings
@@ -222,6 +227,7 @@ The Supabase configuration (`supabase/config.toml`) defines:
 ### Port Conflicts
 
 If you get port conflict errors, check if other services are using:
+
 - `54321` (API)
 - `54322` (Database)
 - `54323` (Studio)
@@ -231,11 +237,13 @@ You can modify these in `supabase/config.toml` if needed.
 ### Connection Issues
 
 1. **Verify Supabase is running**:
+
    ```bash
    supabase status
    ```
 
 2. **Check Docker containers**:
+
    ```bash
    docker ps
    ```
@@ -248,6 +256,7 @@ You can modify these in `supabase/config.toml` if needed.
 ### Migration Issues
 
 If migrations fail:
+
 1. Check that Supabase is running
 2. Verify environment variables are correct
 3. Check migration files in `backend/src/database/migrations/`

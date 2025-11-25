@@ -7,6 +7,9 @@ import {
 } from '@mikro-orm/core';
 import { GTFSStop, GTFSTrip } from '.';
 import { BaseEntity } from './base';
+import { GTFSTimeType } from '../database/types/GTFSTimeType';
+import { randomUUID } from 'crypto';
+import { GTFSFeedInfo } from './gtfs_feed_info.entity';
 
 @Entity({ tableName: 'gtfs_stop_times' })
 @Index({ name: 'idx_stop_times_stop', properties: ['stop'] })
@@ -15,17 +18,20 @@ import { BaseEntity } from './base';
   properties: ['stop', 'departureTime'],
 })
 export class GTFSStopTime extends BaseEntity {
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id: string = randomUUID();
+
   @PrimaryKey()
-  id!: string;
+  stop_time_id!: string;
 
   @PrimaryKey()
   stopSequence!: number;
 
-  @Property()
-  arrivalTime!: string; // Keep as string for times like "25:30:00"
+  @Property({ type: GTFSTimeType })
+  arrivalTime!: GTFSTimeType;
 
-  @Property()
-  departureTime!: string;
+  @Property({ type: GTFSTimeType })
+  departureTime!: GTFSTimeType;
 
   @Property({ nullable: true })
   stopHeadsign?: string;
@@ -50,4 +56,7 @@ export class GTFSStopTime extends BaseEntity {
 
   @ManyToOne(() => GTFSTrip)
   trip!: GTFSTrip;
+
+  @ManyToOne(() => GTFSFeedInfo)
+  GTFSFeedInfo!: GTFSFeedInfo;
 }
