@@ -73,10 +73,6 @@ export class AuthService {
       );
     }
 
-    if (!authData.user) {
-      throw new UnauthorizedException('Authentication failed');
-    }
-
     const userMetadata = parseUserMetadata(authData.user.user_metadata);
 
     if (!authData.user.email) {
