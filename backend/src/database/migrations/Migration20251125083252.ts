@@ -1,6 +1,6 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20251114024823 extends Migration {
+export class Migration20251125083252 extends Migration {
 
   override async up(): Promise<void> {
     this.addSql(`create table "go-train-group-pass"."travel_group" ("id" uuid not null default gen_random_uuid(), "group_number" int not null, "finalized_at" timestamptz null, "status" text check ("status" in ('forming', 'finalized', 'departed', 'completed')) not null default 'forming', "created_at" timestamptz not null, "updated_at" timestamptz not null, "steward_id" uuid not null, constraint "travel_group_pkey" primary key ("id"));`);
