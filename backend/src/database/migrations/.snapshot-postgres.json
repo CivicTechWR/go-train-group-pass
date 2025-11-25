@@ -16,16 +16,6 @@
           "default": "gen_random_uuid()",
           "mappedType": "uuid"
         },
-        "agency_id": {
-          "name": "agency_id",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamptz",
@@ -45,6 +35,16 @@
           "nullable": false,
           "length": 6,
           "mappedType": "datetime"
+        },
+        "agency_id": {
+          "name": "agency_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
         },
         "agency_name": {
           "name": "agency_name",
@@ -218,26 +218,6 @@
           "default": "gen_random_uuid()",
           "mappedType": "uuid"
         },
-        "service_id": {
-          "name": "service_id",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "date": {
-          "name": "date",
-          "type": "date",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 0,
-          "mappedType": "date"
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamptz",
@@ -257,6 +237,26 @@
           "nullable": false,
           "length": 6,
           "mappedType": "datetime"
+        },
+        "service_id": {
+          "name": "service_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 0,
+          "mappedType": "date"
         },
         "exception_type": {
           "name": "exception_type",
@@ -505,16 +505,6 @@
           "default": "gen_random_uuid()",
           "mappedType": "uuid"
         },
-        "stopid": {
-          "name": "stopid",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamptz",
@@ -534,6 +524,16 @@
           "nullable": false,
           "length": 6,
           "mappedType": "datetime"
+        },
+        "stopid": {
+          "name": "stopid",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
         },
         "stop_name": {
           "name": "stop_name",
@@ -677,6 +677,26 @@
           "nullable": false,
           "default": "gen_random_uuid()",
           "mappedType": "uuid"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
         },
         "trip_id": {
           "name": "trip_id",
@@ -925,21 +945,23 @@
         },
         "arrival_time": {
           "name": "arrival_time",
-          "type": "GTFSTimeType",
+          "type": "varchar(8)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "mappedType": "unknown"
+          "length": 8,
+          "mappedType": "string"
         },
         "departure_time": {
           "name": "departure_time",
-          "type": "GTFSTimeType",
+          "type": "varchar(8)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "mappedType": "unknown"
+          "length": 8,
+          "mappedType": "string"
         },
         "stop_headsign": {
           "name": "stop_headsign",
