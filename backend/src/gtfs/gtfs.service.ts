@@ -10,7 +10,8 @@ import {
   GTFSStopTime,
   GTFSCalendarDate,
 } from '../entities';
-import { EntityManager } from '@mikro-orm/postgresql';
+import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
+import { InjectRepository } from '@mikro-orm/nestjs';
 
 interface GtfsFiles {
   [filename: string]: string;
@@ -35,6 +36,18 @@ export class GtfsService {
 
   constructor(
     private readonly em: EntityManager,
+    @InjectRepository(Agency)
+    private readonly agencyRepository: EntityRepository<Agency>,
+    @InjectRepository(GTFSRoute)
+    private readonly routeRepository: EntityRepository<GTFSRoute>,
+    @InjectRepository(GTFSStop)
+    private readonly stopRepository: EntityRepository<GTFSStop>,
+    @InjectRepository(GTFSTrip)
+    private readonly tripRepository: EntityRepository<GTFSTrip>,
+    @InjectRepository(GTFSStopTime)
+    private readonly stopTimeRepository: EntityRepository<GTFSStopTime>,
+    @InjectRepository(GTFSCalendarDate)
+    private readonly calendarDateRepository: EntityRepository<GTFSCalendarDate>,
     private readonly configService?: ConfigService,
   ) {
     this.gtfsUrl =
@@ -120,43 +133,6 @@ export class GtfsService {
     return { ...this.latestGtfsFiles };
   }
 
-  /**
-   * Download GTFS data and import it into the database
-   */
-  async downloadAndImportToDatabase(): Promise<void> {
-    this.logger.log('Starting GTFS download and database import...');
-
-    // 1. Download the files
-    const files = await this.downloadGtfs();
-    if (!files) {
-      throw new Error('Failed to download GTFS files');
-    }
-
-    // 2. Parse CSV files into objects
-    const parsedData = {
-      agencies: this.parseCSV(files['agency.txt']),
-      calendarDates: this.parseCSV(files['calendar_dates.txt']),
-      routes: this.parseCSV(files['routes.txt']),
-      stops: this.parseCSV(files['stops.txt']),
-      trips: this.parseCSV(files['trips.txt']),
-      stopTimes: this.parseCSV(files['stop_times.txt']),
-    };
-
-    // 3. Clear old data
-    this.logger.log('Clearing existing GTFS data from database...');
-    await this.clearGTFSData();
-
-    // 4. Import into database
-    this.logger.log('Importing GTFS data into database...');
-    await this.importAgencies(parsedData.agencies);
-    await this.importCalendarDates(parsedData.calendarDates);
-    await this.importRoutes(parsedData.routes);
-    await this.importStops(parsedData.stops);
-    await this.importTrips(parsedData.trips);
-    await this.importStopTimes(parsedData.stopTimes);
-
-    this.logger.log('GTFS import to database completed successfully!');
-  }
 
   /**
    * Parse CSV string into array of objects
@@ -212,18 +188,6 @@ export class GtfsService {
   }
 
   /**
-   * Clear all GTFS data from database
-   */
-  private async clearGTFSData(): Promise<void> {
-    await this.em.nativeDelete(GTFSStopTime, {});
-    await this.em.nativeDelete(GTFSTrip, {});
-    await this.em.nativeDelete(GTFSStop, {});
-    await this.em.nativeDelete(GTFSRoute, {});
-    await this.em.nativeDelete(GTFSCalendarDate, {});
-    await this.em.nativeDelete(Agency, {});
-  }
-
-  /**
    * Import agencies into database
    */
   private async importAgencies(agencies: any[]): Promise<void> {
@@ -235,7 +199,7 @@ export class GtfsService {
     for (let i = 0; i < agencies.length; i += batchSize) {
       const batch = agencies.slice(i, i + batchSize);
       const entities = batch.map((row) =>
-        this.em.create(Agency, {
+        this.agencyRepository.create({
           id: row.agency_id,
           agencyName: row.agency_name,
           agencyUrl: row.agency_url,
@@ -266,7 +230,7 @@ export class GtfsService {
         const day = parseInt(dateStr.substring(6, 8));
         const date = new Date(year, month, day);
 
-        return this.em.create(GTFSCalendarDate, {
+        return this.calendarDateRepository.create({
           serviceId: row.service_id,
           date: date,
           exceptionType: parseInt(row.exception_type),
@@ -290,10 +254,10 @@ export class GtfsService {
       const entities = await Promise.all(
         batch.map(async (row) => {
           const agency = row.agency_id
-            ? await this.em.findOne(Agency, { id: row.agency_id })
+            ? await this.agencyRepository.findOne({ id: row.agency_id })
             : null;
 
-          return this.em.create(GTFSRoute, {
+          return this.routeRepository.create({
             id: row.route_id,
             routeShortName: row.route_short_name,
             routeLongName: row.route_long_name,
@@ -322,7 +286,7 @@ export class GtfsService {
     for (let i = 0; i < stops.length; i += batchSize) {
       const batch = stops.slice(i, i + batchSize);
       const entities = batch.map((row) =>
-        this.em.create(GTFSStop, {
+        this.stopRepository.create({
           id: row.stop_id,
           stopName: row.stop_name,
           stopDesc: row.stop_desc,
@@ -356,12 +320,12 @@ export class GtfsService {
       const batch = trips.slice(i, i + batchSize);
       const entities = await Promise.all(
         batch.map(async (row) => {
-          const route = await this.em.findOne(GTFSRoute, { id: row.route_id });
-          const calendarDate = await this.em.findOne(GTFSCalendarDate, {
+          const route = await this.routeRepository.findOne({ id: row.route_id });
+          const calendarDate = await this.calendarDateRepository.findOne({
             serviceId: row.service_id,
           });
 
-          return this.em.create(GTFSTrip, {
+          return this.tripRepository.create({
             id: row.trip_id,
             calendarDate: calendarDate!,
             tripHeadsign: row.trip_headsign,
@@ -398,10 +362,10 @@ export class GtfsService {
       const batch = stopTimes.slice(i, i + batchSize);
       const entities = await Promise.all(
         batch.map(async (row) => {
-          const trip = await this.em.findOne(GTFSTrip, { id: row.trip_id });
-          const stop = await this.em.findOne(GTFSStop, { id: row.stop_id });
+          const trip = await this.tripRepository.findOne({ id: row.trip_id });
+          const stop = await this.stopRepository.findOne({ id: row.stop_id });
 
-          return this.em.create(GTFSStopTime, {
+          return this.stopTimeRepository.create({
             id: row.trip_id,
             stopSequence: parseInt(row.stop_sequence),
             arrivalTime: row.arrival_time,
