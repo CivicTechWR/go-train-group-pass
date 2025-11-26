@@ -195,6 +195,7 @@ export class GtfsService {
 
     this.logger.log(`Importing ${agencies.length} agencies...`);
     const batchSize = 100;
+    const agencyRepo = this.em.getRepository(Agency);
 
     for (let i = 0; i < agencies.length; i += batchSize) {
       const batch = agencies.slice(i, i + batchSize);
@@ -220,6 +221,7 @@ export class GtfsService {
 
     this.logger.log(`Importing ${calendarDates.length} calendar dates...`);
     const batchSize = 500;
+    const calendarDateRepo = this.em.getRepository(GTFSCalendarDate);
 
     for (let i = 0; i < calendarDates.length; i += batchSize) {
       const batch = calendarDates.slice(i, i + batchSize);
@@ -248,6 +250,8 @@ export class GtfsService {
 
     this.logger.log(`Importing ${routes.length} routes...`);
     const batchSize = 100;
+    const routeRepo = this.em.getRepository(GTFSRoute);
+    const agencyRepo = this.em.getRepository(Agency);
 
     for (let i = 0; i < routes.length; i += batchSize) {
       const batch = routes.slice(i, i + batchSize);
@@ -282,6 +286,7 @@ export class GtfsService {
 
     this.logger.log(`Importing ${stops.length} stops...`);
     const batchSize = 500;
+    const stopRepo = this.em.getRepository(GTFSStop);
 
     for (let i = 0; i < stops.length; i += batchSize) {
       const batch = stops.slice(i, i + batchSize);
@@ -315,6 +320,9 @@ export class GtfsService {
 
     this.logger.log(`Importing ${trips.length} trips...`);
     const batchSize = 500;
+    const tripRepo = this.em.getRepository(GTFSTrip);
+    const routeRepo = this.em.getRepository(GTFSRoute);
+    const calendarDateRepo = this.em.getRepository(GTFSCalendarDate);
 
     for (let i = 0; i < trips.length; i += batchSize) {
       const batch = trips.slice(i, i + batchSize);
@@ -357,6 +365,9 @@ export class GtfsService {
 
     this.logger.log(`Importing ${stopTimes.length} stop times...`);
     const batchSize = 1000;
+    const stopTimeRepo = this.em.getRepository(GTFSStopTime);
+    const tripRepo = this.em.getRepository(GTFSTrip);
+    const stopRepo = this.em.getRepository(GTFSStop);
 
     for (let i = 0; i < stopTimes.length; i += batchSize) {
       const batch = stopTimes.slice(i, i + batchSize);

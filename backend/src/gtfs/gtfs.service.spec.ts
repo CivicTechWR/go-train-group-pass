@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GtfsService } from './gtfs.service';
 import { ConfigService } from '@nestjs/config';
-import { EntityManager } from '@mikro-orm/core';
+import { EntityManager } from '@mikro-orm/postgresql';
 import axios from 'axios';
 import JSZip from 'jszip';
 import { Logger } from '@nestjs/common';
@@ -17,7 +17,7 @@ const mockedJSZip = JSZip as unknown as { loadAsync: Mock };
 
 describe('GtfsService', () => {
   let service: GtfsService;
-  let mockEntityManager: {
+  let mockRepository: {
     persistAndFlush: Mock;
     removeAndFlush: Mock;
     findOne: Mock;
@@ -26,8 +26,28 @@ describe('GtfsService', () => {
     nativeDelete: Mock;
     create: Mock;
   };
+  let mockEntityManager: {
+    persistAndFlush: Mock;
+    removeAndFlush: Mock;
+    findOne: Mock;
+    find: Mock;
+    flush: Mock;
+    nativeDelete: Mock;
+    create: Mock;
+    getRepository: Mock;
+  };
 
   beforeEach(async () => {
+    mockRepository = {
+      persistAndFlush: vi.fn(),
+      removeAndFlush: vi.fn(),
+      findOne: vi.fn(),
+      find: vi.fn(),
+      flush: vi.fn(),
+      nativeDelete: vi.fn(),
+      create: vi.fn((data) => data), // Return the data as-is for simplicity
+    };
+
     mockEntityManager = {
       persistAndFlush: vi.fn(),
       removeAndFlush: vi.fn(),
@@ -36,6 +56,7 @@ describe('GtfsService', () => {
       flush: vi.fn(),
       nativeDelete: vi.fn(),
       create: vi.fn((_, data) => data), // Return the data as-is for simplicity
+      getRepository: vi.fn(() => mockRepository), // Return mock repository for any entity
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -259,18 +280,21 @@ describe('GtfsService', () => {
       // Execute the import
       await service.downloadAndImportToDatabase();
 
-      // Verify nativeDelete was called to clear old data
-      expect(mockEntityManager.nativeDelete).toHaveBeenCalledTimes(6);
+      // Verify getRepository was called for each entity type
+      expect(mockEntityManager.getRepository).toHaveBeenCalled();
 
-      // Verify create was called with correctly parsed CSV data
-      expect(mockEntityManager.create).toHaveBeenCalled();
+      // Verify nativeDelete was called to clear old data (via repository)
+      expect(mockRepository.nativeDelete).toHaveBeenCalledTimes(6);
+
+      // Verify create was called with correctly parsed CSV data (via repository)
+      expect(mockRepository.create).toHaveBeenCalled();
 
       // Check agency parsing - should have converted CSV columns to entity properties
-      const agencyCalls = mockEntityManager.create.mock.calls.filter(
-        (call) => call[1]?.agencyName !== undefined,
+      const agencyCalls = mockRepository.create.mock.calls.filter(
+        (call) => call[0]?.agencyName !== undefined,
       );
       expect(agencyCalls.length).toBeGreaterThan(0);
-      expect(agencyCalls[0][1]).toMatchObject({
+      expect(agencyCalls[0][0]).toMatchObject({
         id: 'GO',
         agencyName: 'GO Transit',
         agencyUrl: 'https://www.gotransit.com',
@@ -280,11 +304,11 @@ describe('GtfsService', () => {
       });
 
       // Check stops parsing - should have 2 stops
-      const stopCalls = mockEntityManager.create.mock.calls.filter(
-        (call) => call[1]?.stopName !== undefined,
+      const stopCalls = mockRepository.create.mock.calls.filter(
+        (call) => call[0]?.stopName !== undefined,
       );
       expect(stopCalls.length).toBe(2);
-      expect(stopCalls[0][1]).toMatchObject({
+      expect(stopCalls[0][0]).toMatchObject({
         id: 'WR',
         stopName: 'West Harbour GO',
         stopLat: 43.266775,
@@ -292,11 +316,11 @@ describe('GtfsService', () => {
       });
 
       // Check routes parsing - should have 1 route
-      const routeCalls = mockEntityManager.create.mock.calls.filter(
-        (call) => call[1]?.routeShortName !== undefined,
+      const routeCalls = mockRepository.create.mock.calls.filter(
+        (call) => call[0]?.routeShortName !== undefined,
       );
       expect(routeCalls.length).toBe(1);
-      expect(routeCalls[0][1]).toMatchObject({
+      expect(routeCalls[0][0]).toMatchObject({
         id: '08251125-ST',
         routeShortName: 'ST',
         routeLongName: 'Stouffville',
@@ -309,25 +333,25 @@ describe('GtfsService', () => {
       });
 
       // Check calendar dates parsing - should have 1 calendar date
-      const calendarCalls = mockEntityManager.create.mock.calls.filter(
+      const calendarCalls = mockRepository.create.mock.calls.filter(
         (call) =>
-          call[1]?.serviceId !== undefined &&
-          call[1]?.date !== undefined &&
-          call[1]?.exceptionType !== undefined,
+          call[0]?.serviceId !== undefined &&
+          call[0]?.date !== undefined &&
+          call[0]?.exceptionType !== undefined,
       );
       expect(calendarCalls.length).toBe(1);
-      expect(calendarCalls[0][1]).toMatchObject({
+      expect(calendarCalls[0][0]).toMatchObject({
         serviceId: '20251121',
         date: new Date('2025-11-21T05:00:00.000Z'),
         exceptionType: 1,
       });
 
       // Check trips parsing - should have 1 trip
-      const tripCalls = mockEntityManager.create.mock.calls.filter(
-        (call) => call[1]?.tripHeadsign !== undefined,
+      const tripCalls = mockRepository.create.mock.calls.filter(
+        (call) => call[0]?.tripHeadsign !== undefined,
       );
       expect(tripCalls.length).toBe(1);
-      expect(tripCalls[0][1]).toMatchObject({
+      expect(tripCalls[0][0]).toMatchObject({
         id: '20251110-61-61440',
         calendarDate: undefined,
         tripHeadsign: '61 - Union Station',
@@ -341,11 +365,11 @@ describe('GtfsService', () => {
       });
 
       // Check stop times parsing - should have 1 stop
-      const stopTimesCalls = mockEntityManager.create.mock.calls.filter(
-        (call) => call[1]?.stopSequence !== undefined,
+      const stopTimesCalls = mockRepository.create.mock.calls.filter(
+        (call) => call[0]?.stopSequence !== undefined,
       );
       expect(stopTimesCalls.length).toBe(1);
-      expect(stopTimesCalls[0][1]).toMatchObject({
+      expect(stopTimesCalls[0][0]).toMatchObject({
         id: '20251110-61-61440',
         stopSequence: 22,
         arrivalTime: '14:30:00',
