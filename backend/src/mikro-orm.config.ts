@@ -6,7 +6,9 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
 
 const logger = new Logger('MikroORM');
-const logFn = (message: string) => logger.log(message);
+const logFn = (message: string) => {
+  logger.log(message);
+};
 
 export default defineConfig({
   schema: 'go-train-group-pass',
