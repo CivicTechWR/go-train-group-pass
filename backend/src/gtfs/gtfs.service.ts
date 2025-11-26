@@ -215,12 +215,12 @@ export class GtfsService {
    * Clear all GTFS data from database
    */
   private async clearGTFSData(): Promise<void> {
-    await this.em.nativeDelete(GTFSStopTime, {});
-    await this.em.nativeDelete(GTFSTrip, {});
-    await this.em.nativeDelete(GTFSStop, {});
-    await this.em.nativeDelete(GTFSRoute, {});
-    await this.em.nativeDelete(GTFSCalendarDate, {});
-    await this.em.nativeDelete(Agency, {});
+    await this.em.getRepository(GTFSStopTime).nativeDelete({});
+    await this.em.getRepository(GTFSTrip).nativeDelete({});
+    await this.em.getRepository(GTFSStop).nativeDelete({});
+    await this.em.getRepository(GTFSRoute).nativeDelete({});
+    await this.em.getRepository(GTFSCalendarDate).nativeDelete({});
+    await this.em.getRepository(Agency).nativeDelete({});
   }
 
   /**
@@ -231,11 +231,12 @@ export class GtfsService {
 
     this.logger.log(`Importing ${agencies.length} agencies...`);
     const batchSize = 100;
+    const agencyRepo = this.em.getRepository(Agency);
 
     for (let i = 0; i < agencies.length; i += batchSize) {
       const batch = agencies.slice(i, i + batchSize);
       const entities = batch.map((row) =>
-        this.em.create(Agency, {
+        agencyRepo.create({
           id: row.agency_id,
           agencyName: row.agency_name,
           agencyUrl: row.agency_url,
@@ -256,6 +257,7 @@ export class GtfsService {
 
     this.logger.log(`Importing ${calendarDates.length} calendar dates...`);
     const batchSize = 500;
+    const calendarDateRepo = this.em.getRepository(GTFSCalendarDate);
 
     for (let i = 0; i < calendarDates.length; i += batchSize) {
       const batch = calendarDates.slice(i, i + batchSize);
@@ -266,7 +268,7 @@ export class GtfsService {
         const day = parseInt(dateStr.substring(6, 8));
         const date = new Date(year, month, day);
 
-        return this.em.create(GTFSCalendarDate, {
+        return calendarDateRepo.create({
           serviceId: row.service_id,
           date: date,
           exceptionType: parseInt(row.exception_type),
@@ -284,16 +286,18 @@ export class GtfsService {
 
     this.logger.log(`Importing ${routes.length} routes...`);
     const batchSize = 100;
+    const routeRepo = this.em.getRepository(GTFSRoute);
+    const agencyRepo = this.em.getRepository(Agency);
 
     for (let i = 0; i < routes.length; i += batchSize) {
       const batch = routes.slice(i, i + batchSize);
       const entities = await Promise.all(
         batch.map(async (row) => {
           const agency = row.agency_id
-            ? await this.em.findOne(Agency, { id: row.agency_id })
+            ? await agencyRepo.findOne({ id: row.agency_id })
             : null;
 
-          return this.em.create(GTFSRoute, {
+          return routeRepo.create({
             id: row.route_id,
             routeShortName: row.route_short_name,
             routeLongName: row.route_long_name,
@@ -318,11 +322,12 @@ export class GtfsService {
 
     this.logger.log(`Importing ${stops.length} stops...`);
     const batchSize = 500;
+    const stopRepo = this.em.getRepository(GTFSStop);
 
     for (let i = 0; i < stops.length; i += batchSize) {
       const batch = stops.slice(i, i + batchSize);
       const entities = batch.map((row) =>
-        this.em.create(GTFSStop, {
+        stopRepo.create({
           id: row.stop_id,
           stopName: row.stop_name,
           stopDesc: row.stop_desc,
@@ -351,17 +356,20 @@ export class GtfsService {
 
     this.logger.log(`Importing ${trips.length} trips...`);
     const batchSize = 500;
+    const tripRepo = this.em.getRepository(GTFSTrip);
+    const routeRepo = this.em.getRepository(GTFSRoute);
+    const calendarDateRepo = this.em.getRepository(GTFSCalendarDate);
 
     for (let i = 0; i < trips.length; i += batchSize) {
       const batch = trips.slice(i, i + batchSize);
       const entities = await Promise.all(
         batch.map(async (row) => {
-          const route = await this.em.findOne(GTFSRoute, { id: row.route_id });
-          const calendarDate = await this.em.findOne(GTFSCalendarDate, {
+          const route = await routeRepo.findOne({ id: row.route_id });
+          const calendarDate = await calendarDateRepo.findOne({
             serviceId: row.service_id,
           });
 
-          return this.em.create(GTFSTrip, {
+          return tripRepo.create({
             id: row.trip_id,
             calendarDate: calendarDate!,
             tripHeadsign: row.trip_headsign,
@@ -393,15 +401,18 @@ export class GtfsService {
 
     this.logger.log(`Importing ${stopTimes.length} stop times...`);
     const batchSize = 1000;
+    const stopTimeRepo = this.em.getRepository(GTFSStopTime);
+    const tripRepo = this.em.getRepository(GTFSTrip);
+    const stopRepo = this.em.getRepository(GTFSStop);
 
     for (let i = 0; i < stopTimes.length; i += batchSize) {
       const batch = stopTimes.slice(i, i + batchSize);
       const entities = await Promise.all(
         batch.map(async (row) => {
-          const trip = await this.em.findOne(GTFSTrip, { id: row.trip_id });
-          const stop = await this.em.findOne(GTFSStop, { id: row.stop_id });
+          const trip = await tripRepo.findOne({ id: row.trip_id });
+          const stop = await stopRepo.findOne({ id: row.stop_id });
 
-          return this.em.create(GTFSStopTime, {
+          return stopTimeRepo.create({
             id: row.trip_id,
             stopSequence: parseInt(row.stop_sequence),
             arrivalTime: row.arrival_time,
