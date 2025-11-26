@@ -1,7 +1,7 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
 import { randomUUID } from 'crypto';
 
-@Entity({tableName: 'gtfs_feed_info'})
+@Entity({ tableName: 'gtfs_feed_info' })
 export class GTFSFeedInfo {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id: string = randomUUID();

@@ -21,6 +21,8 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "types": ["vitest/globals"]
+    "types": [
+      "vitest/globals"
+    ]
   }
 }
