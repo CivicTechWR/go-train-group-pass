@@ -6,11 +6,12 @@ import {
   OneToMany,
   Collection,
 } from '@mikro-orm/core';
-import { GTFSTrip } from './gtfs_trip.entitity';
+import { GTFSTrip } from './gtfs_trip.entity';
 import { Agency } from './gtfs_agency.entity';
+import { BaseEntity } from './base';
 
 @Entity({ tableName: 'gtfs_routes' })
-export class GTFSRoute {
+export class GTFSRoute extends BaseEntity {
   @PrimaryKey()
   id!: string;
 
