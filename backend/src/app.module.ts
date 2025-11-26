@@ -3,12 +3,25 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AppConfigModule } from './modules/config.module';
 import { OrmModule } from './modules/orm.module';
-import { AuthModule } from './auth/auth.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { GtfsModule } from './gtfs/gtfs.module';
+import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { ZodValidationPipe } from 'nestjs-zod';
+import { ResponseSerializeInterceptor } from './common/interceptors/response.interceptor';
 
 @Module({
   imports: [AppConfigModule, OrmModule, AuthModule, GtfsModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseSerializeInterceptor,
+    },
+    {
+      provide: APP_PIPE,
+      useClass: ZodValidationPipe,
+    },
+  ],
 })
 export class AppModule {}

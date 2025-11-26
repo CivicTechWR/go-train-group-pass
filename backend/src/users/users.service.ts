@@ -1,85 +1,50 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/postgresql';
+import { Injectable } from '@nestjs/common';
 import { User } from '../entities/user.entity';
+import { InjectRepository } from '@mikro-orm/nestjs';
+import { UserRepository } from './users.repository';
 
-export interface CreateUserDto extends Partial<User> {
+export interface CreateUserDto {
   email: string;
   authUserId: string;
   name: string;
-  phoneNumber?: string;
+  phoneNumber: string;
 }
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: UserRepository,
+  ) {}
+
+  /**
+   * Create a new user and persist to database
+   */
+  async create(dto: CreateUserDto): Promise<User> {
+    const user = this.userRepository.create(dto);
+    await this.userRepository.getEntityManager().persistAndFlush(user);
+    return user;
+  }
 
   /**
    * Find a user by their Supabase auth user ID
    */
   async findByAuthUserId(authUserId: string): Promise<User | null> {
-    return this.em.findOne(User, { authUserId });
+    return this.userRepository.findOne({ authUserId });
   }
 
   /**
-   * Find or create a user in the database
-   * This is used during sign-in when a user exists in Supabase but not in our DB
+   * Find a user by their Supabase auth user ID or throw error
    */
-  async findOrCreate(createUserDto: CreateUserDto): Promise<User> {
-    const { authUserId, email, name, phoneNumber } = createUserDto;
-
-    let user = await this.findByAuthUserId(authUserId);
-
-    if (!user) {
-      user = this.em.create(User, {
-        email,
-        authUserId,
-        name,
-        phoneNumber,
-      });
-      await this.em.persistAndFlush(user);
-    }
-
-    return user;
+  async findByAuthUserIdOrFail(authUserId: string): Promise<User> {
+    return this.userRepository.findOneOrFail({ authUserId });
   }
 
   /**
-   * Create a new user in the database
+   * Update the last sign in timestamp
    */
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const { email, authUserId, name, phoneNumber } = createUserDto;
-
-    const user = this.em.create(User, {
-      email,
-      name,
-      phoneNumber,
-      authUserId,
-      lastSignInAt: new Date(),
-    });
-
-    await this.em.persistAndFlush(user);
-
-    return user;
-  }
-
-  /**
-   * Update the last sign-in timestamp for a user
-   */
-  async updateLastSignIn(userId: string): Promise<void> {
-    const user = await this.em.findOne(User, { id: userId });
-
-    if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
-    }
-
-    user.lastSignInAt = new Date();
-    await this.em.flush();
-  }
-
-  /**
-   * Get user details by ID
-   */
-  async findById(id: string): Promise<User | null> {
-    return this.em.findOne(User, { id });
+  async updateLastSignIn(id: string): Promise<void> {
+    await this.userRepository.updateLastSignIn(id);
   }
 
   /**

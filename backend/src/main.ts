@@ -1,5 +1,4 @@
 import { NestFactory } from '@nestjs/core';
-import { ZodValidationPipe } from 'nestjs-zod';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import {
@@ -13,7 +12,6 @@ async function bootstrap() {
     new FastifyAdapter(),
     { cors: true },
   );
-  app.useGlobalPipes(new ZodValidationPipe());
 
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
@@ -25,7 +23,7 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api', app, document);
   }
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3001);
 }
 
 bootstrap().catch((err: unknown) => {
