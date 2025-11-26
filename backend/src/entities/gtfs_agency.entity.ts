@@ -1,10 +1,14 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import { randomUUID } from 'crypto';
 import { BaseEntity } from './base';
 
 @Entity()
 export class Agency extends BaseEntity {
-  @PrimaryKey()
-  id!: string;
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id: string = randomUUID();
+
+  @Property()
+  agency_id!: string;
 
   @Property()
   agencyName!: string;

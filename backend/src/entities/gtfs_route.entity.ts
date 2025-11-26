@@ -8,12 +8,17 @@ import {
 } from '@mikro-orm/core';
 import { GTFSTrip } from './gtfs_trip.entity';
 import { Agency } from './gtfs_agency.entity';
+import { randomUUID } from 'crypto';
+import { GTFSFeedInfo } from './gtfs_feed_info.entity';
 import { BaseEntity } from './base';
 
 @Entity({ tableName: 'gtfs_routes' })
 export class GTFSRoute extends BaseEntity {
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id: string = randomUUID();
+
   @PrimaryKey()
-  id!: string;
+  route_id!: string;
 
   @Property()
   routeShortName!: string;
@@ -41,4 +46,7 @@ export class GTFSRoute extends BaseEntity {
 
   @OneToMany(() => GTFSTrip, (trip: GTFSTrip) => trip.route)
   trips = new Collection<GTFSTrip>(this);
+
+  @ManyToOne(() => GTFSFeedInfo)
+  GTFSFeedInfo!: GTFSFeedInfo;
 }
