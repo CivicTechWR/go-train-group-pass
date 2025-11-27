@@ -144,14 +144,16 @@ export class GtfsService {
   /**
    * Parse CSV string into array of objects
    */
-  private parseCSV(content: string | undefined): any[] {
+  private parseCSV(
+    content: string | undefined,
+  ): { [key: string]: string | undefined }[] {
     if (!content) return [];
 
     const lines = content.trim().split('\n');
     if (lines.length < 2) return [];
 
     const headers = this.parseCSVLine(lines[0]);
-    const result: any[] = [];
+    const result: { [key: string]: string | undefined }[] = [];
 
     for (let i = 1; i < lines.length; i++) {
       if (!lines[i].trim()) continue;
