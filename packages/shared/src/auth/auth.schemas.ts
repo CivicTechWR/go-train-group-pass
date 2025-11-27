@@ -61,6 +61,19 @@ export const PasswordUpdateSchema = z.object({
 export type PasswordUpdate = z.infer<typeof PasswordUpdateSchema>;
 
 /**
+ * Schema for password reset using a recovery token
+ */
+export const PasswordResetSchema = z.object({
+  recoveryToken: z.string().min(1, 'Recovery token is required'),
+  newPassword: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .max(72, 'Password must not exceed 72 characters'),
+});
+
+export type PasswordReset = z.infer<typeof PasswordResetSchema>;
+
+/**
  * Schema for refresh token request
  */
 export const RefreshTokenSchema = z.object({

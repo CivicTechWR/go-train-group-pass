@@ -200,6 +200,26 @@ Authorization: Bearer <access_token>
 }
 ```
 
+### POST `/auth/password/reset`
+Reset user password using a recovery token from the email link (does not require authentication).
+
+**Request Body:**
+```json
+{
+  "recoveryToken": "recovery-token-from-email-link",
+  "newPassword": "newsecurepassword123"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Password reset successfully"
+}
+```
+
+This endpoint is used when a user clicks the password reset link in their email. The frontend extracts the recovery token from the URL and sends it along with the new password to this endpoint.
+
 ## Using the Auth Guard
 
 To protect routes that require authentication, use the `AuthGuard`:

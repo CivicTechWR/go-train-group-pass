@@ -21,6 +21,7 @@ import {
   RefreshTokenDto,
   PasswordResetRequestDto,
   PasswordUpdateDto,
+  PasswordResetDto,
 } from '@go-train-group-pass/shared';
 
 @ApiTags('Auth')
@@ -95,6 +96,16 @@ export class AuthController {
   ) {
     const token = this.extractToken(authorization);
     return this.authService.updatePassword(token, body.newPassword);
+  }
+
+  @Post('password/reset')
+  @ApiOperation({ summary: 'Reset password using recovery token' })
+  @ApiResponse({ status: 200, description: 'Password successfully reset' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() body: PasswordResetDto) {
+    return this.authService.resetPassword(body.recoveryToken, body.newPassword);
   }
 
   private extractToken(authorization?: string): string {
