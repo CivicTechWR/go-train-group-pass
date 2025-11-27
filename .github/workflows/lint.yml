@@ -28,19 +28,20 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: ${{ matrix.workspace }}/package-lock.json
 
       - name: Install dependencies
+        working-directory: ${{ matrix.workspace }}
         run: npm ci
 
-      - name: Build shared package
-        run: npm run build --workspace=@go-train-group-pass/shared
-
       - name: Run ESLint
-        run: npm run lint --workspace=${{ matrix.workspace }}
+        working-directory: ${{ matrix.workspace }}
+        run: npm run lint
 
       - name: Type check
-        run: npm run type-check --workspace=${{ matrix.workspace }}
+        working-directory: ${{ matrix.workspace }}
+        run: npm run type-check
 
       - name: Verify formatting
-        run: npm run format:check --workspace=${{ matrix.workspace }}
+        working-directory: ${{ matrix.workspace }}
+        run: npm run format:check
