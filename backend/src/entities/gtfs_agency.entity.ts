@@ -8,7 +8,7 @@ export class Agency extends BaseEntity {
   id: string = randomUUID();
 
   @Property()
-  agency_id!: string;
+  agencyId!: string;
 
   @Property()
   agencyName!: string;
