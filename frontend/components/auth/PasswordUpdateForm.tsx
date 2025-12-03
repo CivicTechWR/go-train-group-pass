@@ -1,135 +1,172 @@
 'use client';
 
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+  Input,
+} from '@/components/ui';
 import { apiPost } from '@/lib/api';
-import { PasswordUpdateSchema } from '@/lib/types';
+import {
+  PasswordUpdateFormInput,
+  PasswordUpdateFormSchema,
+} from '@/lib/types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 
 export function PasswordUpdateForm() {
   const router = useRouter();
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setErrors({});
-    setSubmitError(null);
-    setSuccess(false);
+  const {
+    control,
+    handleSubmit,
+    setError,
+    formState: { isSubmitting, isSubmitted, errors },
+  } = useForm<PasswordUpdateFormInput>({
+    resolver: zodResolver(PasswordUpdateFormSchema),
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      newPassword: '',
+      confirmPassword: '',
+    },
+  });
 
-    // Check passwords match
-    if (password !== confirmPassword) {
-      setErrors({
-        confirmPassword: 'Passwords do not match',
-      });
-      return;
-    }
-
-    // Validate with zod
-    const validationResult = PasswordUpdateSchema.safeParse({
-      newPassword: password,
-    });
-    if (!validationResult.success) {
-      const fieldErrors: Record<string, string> = {};
-      validationResult.error.issues.forEach(issue => {
-        const path = issue.path[0] as string;
-        fieldErrors[path] = issue.message;
-      });
-      setErrors(fieldErrors);
-      return;
-    }
-
-    setIsLoading(true);
+  const onSubmit = async (data: PasswordUpdateFormInput) => {
     try {
-      await apiPost('/auth/password/update', validationResult.data);
+      // Only send newPassword to the API
+      await apiPost('/auth/password/update', {
+        newPassword: data.newPassword,
+      });
       setSuccess(true);
     } catch (error) {
-      setSubmitError(
-        error instanceof Error ? error.message : 'Failed to update password'
-      );
-    } finally {
-      setIsLoading(false);
+      setError('root', {
+        type: 'manual',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Failed to update password. Please try again.',
+      });
     }
   };
 
   if (success) {
     return (
-      <div className='space-y-4'>
-        <div className='bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded'>
-          Password updated successfully!
-        </div>
-        <button
-          onClick={() => router.push('/protected')}
-          className='w-full bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg'
-        >
-          Back to Protected Page
-        </button>
-      </div>
+      <Card className='w-full py-4 sm:py-6'>
+        <CardHeader className='text-center pb-4 sm:pb-6'>
+          <CardTitle className='text-2xl sm:text-3xl font-bold'>
+            Password Updated
+          </CardTitle>
+          <CardDescription>
+            Your password has been updated successfully!
+          </CardDescription>
+        </CardHeader>
+        <CardFooter className='flex-col gap-3 sm:gap-4 pt-0 mt-4 sm:mt-7'>
+          <Button onClick={() => router.push('/protected')} className='w-full'>
+            Back to Protected Page
+          </Button>
+        </CardFooter>
+      </Card>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className='space-y-4'>
-      {submitError && (
-        <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded'>
-          {submitError}
-        </div>
-      )}
-
-      <div>
-        <label htmlFor='password' className='block text-sm font-medium mb-1'>
-          New Password
-        </label>
-        <input
-          id='password'
-          type='password'
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          className='w-full px-3 py-2 border rounded-md'
-          required
-          minLength={8}
-          maxLength={72}
-        />
-        {errors.newPassword && (
-          <p className='mt-1 text-sm text-red-600'>{errors.newPassword}</p>
-        )}
-        <p className='mt-1 text-xs text-gray-600'>
-          Must be at least 8 characters
-        </p>
-      </div>
-
-      <div>
-        <label
-          htmlFor='confirmPassword'
-          className='block text-sm font-medium mb-1'
-        >
-          Confirm Password
-        </label>
-        <input
-          id='confirmPassword'
-          type='password'
-          value={confirmPassword}
-          onChange={e => setConfirmPassword(e.target.value)}
-          className='w-full px-3 py-2 border rounded-md'
-          required
-          minLength={8}
-          maxLength={72}
-        />
-        {errors.confirmPassword && (
-          <p className='mt-1 text-sm text-red-600'>{errors.confirmPassword}</p>
-        )}
-      </div>
-
-      <button
-        type='submit'
-        disabled={isLoading}
-        className='w-full bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed'
-      >
-        {isLoading ? 'Updating...' : 'Update Password'}
-      </button>
-    </form>
+    <Card className='w-full py-4 sm:py-6'>
+      <CardHeader className='text-center pb-4 sm:pb-6'>
+        <CardTitle className='text-2xl sm:text-3xl font-bold'>
+          Update Password
+        </CardTitle>
+        <CardDescription>
+          Enter your new password below
+        </CardDescription>
+      </CardHeader>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <CardContent>
+          <FieldSet>
+            <FieldGroup>
+              <Controller
+                name='newPassword'
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>New Password</FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      type='password'
+                      aria-invalid={fieldState.invalid}
+                      placeholder='********'
+                    />
+                    <FieldError
+                      errors={
+                        fieldState.error &&
+                        (fieldState.isTouched || isSubmitted)
+                          ? [fieldState.error]
+                          : undefined
+                      }
+                    />
+                    <p className='mt-1 text-xs text-gray-600'>
+                      Must be at least 8 characters
+                    </p>
+                  </Field>
+                )}
+              />
+              <Controller
+                name='confirmPassword'
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>
+                      Confirm Password
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      type='password'
+                      aria-invalid={fieldState.invalid}
+                      placeholder='********'
+                    />
+                    <FieldError
+                      errors={
+                        fieldState.error &&
+                        (fieldState.isTouched || isSubmitted)
+                          ? [fieldState.error]
+                          : undefined
+                      }
+                    />
+                  </Field>
+                )}
+              />
+              {errors.root && <FieldError errors={[errors.root]} />}
+            </FieldGroup>
+          </FieldSet>
+        </CardContent>
+        <CardFooter className='flex-col gap-3 sm:gap-4 pt-0 mt-4 sm:mt-7'>
+          <Button type='submit' disabled={isSubmitting} className='w-full'>
+            {isSubmitting ? (
+              <>
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                Updating...
+              </>
+            ) : (
+              'Update Password'
+            )}
+          </Button>
+        </CardFooter>
+      </form>
+    </Card>
   );
 }

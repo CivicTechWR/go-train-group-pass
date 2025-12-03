@@ -56,6 +56,24 @@ export const PasswordUpdateSchema = z.object({
 export type PasswordUpdateInput = z.infer<typeof PasswordUpdateSchema>;
 
 /**
+ * Schema for password update form (includes confirmation)
+ */
+export const PasswordUpdateFormSchema = z
+  .object({
+    newPassword: z
+      .string()
+      .min(8, 'Password must be at least 8 characters')
+      .max(72, 'Password must not exceed 72 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .refine(data => data.newPassword === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
+
+export type PasswordUpdateFormInput = z.infer<typeof PasswordUpdateFormSchema>;
+
+/**
  * Schema for refresh token request
  * Matches backend RefreshTokenSchema
  */
