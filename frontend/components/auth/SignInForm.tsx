@@ -58,9 +58,11 @@ export function SignInForm() {
   };
 
   return (
-    <Card className='w-full'>
-      <CardHeader className='text-center'>
-        <CardTitle className='text-3xl font-bold'>Sign In</CardTitle>
+    <Card className='w-full py-4 sm:py-6'>
+      <CardHeader className='text-center pb-4 sm:pb-6'>
+        <CardTitle className='text-2xl sm:text-3xl font-bold'>
+          Sign In
+        </CardTitle>
         <CardDescription>
           Enter your email and password to sign in
         </CardDescription>
@@ -121,7 +123,7 @@ export function SignInForm() {
             </FieldGroup>
           </FieldSet>
         </CardContent>
-        <CardFooter className='flex-col gap-4 pt-0 mt-7'>
+        <CardFooter className='flex-col gap-3 sm:gap-4 pt-0 mt-4 sm:mt-7'>
           <Button type='submit' disabled={isSubmitting} className='w-full'>
             {isSubmitting ? (
               <>
