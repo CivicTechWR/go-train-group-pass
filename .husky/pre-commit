@@ -1,2 +1,2 @@
 #!/bin/sh
-cd backend && npm run check
+cd apps/backend && npm run check
