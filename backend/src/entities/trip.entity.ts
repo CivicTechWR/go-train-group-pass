@@ -1,9 +1,10 @@
-import { Entity, PrimaryKey, Property, ManyToOne, wrap } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, ManyToOne, wrap, Unique } from '@mikro-orm/core';
 import { randomUUID } from 'crypto';
 import { GTFSTrip } from './gtfs_trip.entity';
 import { GTFSStopTime } from './gtfs_stop_times.entity';
 
 @Entity()
+@Unique({ properties: ['gtfsTrip', 'originStopTime', 'destinationStopTime'] })
 export class Trip {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id: string = randomUUID();

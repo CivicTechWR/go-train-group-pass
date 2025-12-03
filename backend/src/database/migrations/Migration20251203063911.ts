@@ -1,9 +1,10 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20251203055412 extends Migration {
+export class Migration20251203063911 extends Migration {
 
   override async up(): Promise<void> {
     this.addSql(`create table "go-train-group-pass"."trip" ("id" uuid not null default gen_random_uuid(), "gtfs_trip_id" uuid not null, "origin_stop_time_id" uuid not null, "destination_stop_time_id" uuid not null, constraint "trip_pkey" primary key ("id"));`);
+    this.addSql(`alter table "go-train-group-pass"."trip" add constraint "trip_gtfs_trip_id_origin_stop_time_id_destination_59c37_unique" unique ("gtfs_trip_id", "origin_stop_time_id", "destination_stop_time_id");`);
 
     this.addSql(`create table "go-train-group-pass"."travel_group" ("id" uuid not null default gen_random_uuid(), "group_number" int not null, "finalized_at" timestamptz null, "status" text check ("status" in ('forming', 'finalized', 'departed', 'completed')) not null default 'forming', "created_at" timestamptz not null, "updated_at" timestamptz not null, "trip_id" uuid not null, "steward_id" uuid not null, constraint "travel_group_pkey" primary key ("id"));`);
     this.addSql(`create index "travel_group_trip_id_index" on "go-train-group-pass"."travel_group" ("trip_id");`);
