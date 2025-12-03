@@ -71,12 +71,9 @@ export type RefreshTokenInput = z.infer<typeof RefreshTokenSchema>;
 export const UserSchema = z.object({
   id: z.string(),
   email: z.string(),
-  fullName: z.string().nullable(),
   phoneNumber: z.string().nullable(),
-  avatarUrl: z.string().nullable().optional(),
-  isActive: z.boolean(),
-  createdAt: z.string().datetime(),
-  lastSignInAt: z.string().datetime().nullable(),
+  createdAt: z.iso.datetime(),
+  lastSignInAt: z.iso.datetime().nullable(),
 });
 
 export type User = z.infer<typeof UserSchema>;
