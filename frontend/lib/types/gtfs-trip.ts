@@ -6,8 +6,7 @@ import { z } from 'zod';
  */
 export const GTFSTripSchema = z.object({
   id: z.string(),
-  // calendarDateServiceId: z.string(), // Reference to calendarDate (composite key part 1)
-  // calendarDateDate: z.iso.date(), // Reference to calendarDate (composite key part 2)
+  calendarDate: z.iso.date(),
   tripHeadsign: z.string().nullable().optional(),
   tripShortName: z.string().nullable().optional(),
   directionId: z.number().nullable().optional(),
