@@ -2,6 +2,12 @@
 
 import {
   Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
   Field,
   FieldError,
   FieldGroup,
@@ -13,6 +19,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { SignInInput, SignInSchema } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Controller, useForm } from 'react-hook-form';
 
@@ -51,55 +58,70 @@ export function SignInForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <FieldSet>
-        <FieldGroup>
-          <Controller
-            name='email'
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                <Input
-                  {...field}
-                  id={field.name}
-                  type='email'
-                  aria-invalid={fieldState.invalid}
-                  placeholder='janedoe@example.com'
-                />
-                <FieldError
-                  errors={
-                    fieldState.error && (fieldState.isTouched || isSubmitted)
-                      ? [fieldState.error]
-                      : undefined
-                  }
-                />
-              </Field>
-            )}
-          />
-          <Controller
-            name='password'
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                <Input
-                  {...field}
-                  id={field.name}
-                  type='password'
-                  aria-invalid={fieldState.invalid}
-                  placeholder='********'
-                />
-                <FieldError
-                  errors={
-                    fieldState.error && (fieldState.isTouched || isSubmitted)
-                      ? [fieldState.error]
-                      : undefined
-                  }
-                />
-              </Field>
-            )}
-          />
+    <Card className='w-full'>
+      <CardHeader className='text-center'>
+        <CardTitle className='text-3xl font-bold'>Sign In</CardTitle>
+        <CardDescription>
+          Enter your email and password to sign in
+        </CardDescription>
+      </CardHeader>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <CardContent>
+          <FieldSet>
+            <FieldGroup>
+              <Controller
+                name='email'
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      type='email'
+                      aria-invalid={fieldState.invalid}
+                      placeholder='janedoe@example.com'
+                    />
+                    <FieldError
+                      errors={
+                        fieldState.error &&
+                        (fieldState.isTouched || isSubmitted)
+                          ? [fieldState.error]
+                          : undefined
+                      }
+                    />
+                  </Field>
+                )}
+              />
+              <Controller
+                name='password'
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      type='password'
+                      aria-invalid={fieldState.invalid}
+                      placeholder='********'
+                    />
+                    <FieldError
+                      errors={
+                        fieldState.error &&
+                        (fieldState.isTouched || isSubmitted)
+                          ? [fieldState.error]
+                          : undefined
+                      }
+                    />
+                  </Field>
+                )}
+              />
+              {errors.root && <FieldError errors={[errors.root]} />}
+            </FieldGroup>
+          </FieldSet>
+        </CardContent>
+        <CardFooter className='flex-col gap-4 pt-0 mt-7'>
           <Button type='submit' disabled={isSubmitting} className='w-full'>
             {isSubmitting ? (
               <>
@@ -110,9 +132,24 @@ export function SignInForm() {
               'Sign in'
             )}
           </Button>
-          {errors.root && <FieldError errors={[errors.root]} />}
-        </FieldGroup>
-      </FieldSet>
-    </form>
+          <div className='flex flex-col gap-2 text-center text-sm'>
+            <p>
+              Don&apos;t have an account?{' '}
+              <Link href='/signup' className='text-emerald-600 hover:underline'>
+                Sign up
+              </Link>
+            </p>
+            <p>
+              <Link
+                href='/forgot-password'
+                className='text-emerald-600 hover:underline'
+              >
+                Forgot your password?
+              </Link>
+            </p>
+          </div>
+        </CardFooter>
+      </form>
+    </Card>
   );
 }
