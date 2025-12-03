@@ -1,153 +1,194 @@
 'use client';
 
+import {
+  Button,
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+  Input,
+} from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
-import { SignUpSchema, type SignUpInput } from '@/lib/types';
+import { SignUpInput, SignUpSchema } from '@/lib/types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { FormEvent, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 
 export function SignUpForm() {
-  const router = useRouter();
   const { signUp } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const router = useRouter();
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setErrors({});
-    setSubmitError(null);
+  const {
+    control,
+    handleSubmit,
+    setError,
+    formState: { isSubmitting, isSubmitted, errors },
+  } = useForm<SignUpInput>({
+    resolver: zodResolver(SignUpSchema),
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      email: '',
+      password: '',
+      fullName: '',
+      phoneNumber: undefined,
+    },
+  });
 
-    // Build data object (only include fields that have values)
-    const data: SignUpInput = {
-      email,
-      password,
-    };
-    if (fullName.trim()) {
-      data.fullName = fullName.trim();
-    }
-    if (phoneNumber.trim()) {
-      data.phoneNumber = phoneNumber.trim();
-    }
-
-    // Validate with zod
-    const validationResult = SignUpSchema.safeParse(data);
-    if (!validationResult.success) {
-      const fieldErrors: Record<string, string> = {};
-      validationResult.error.issues.forEach(issue => {
-        const path = issue.path[0] as string;
-        fieldErrors[path] = issue.message;
-      });
-      setErrors(fieldErrors);
-      return;
-    }
-
-    setIsLoading(true);
+  const onSubmit = async (data: SignUpInput) => {
     try {
-      await signUp(validationResult.data);
+      // Build data object (only include optional fields that have values)
+      const submitData: SignUpInput = {
+        email: data.email,
+        password: data.password,
+        fullName: data.fullName,
+      };
+      if (data.phoneNumber) {
+        submitData.phoneNumber = data.phoneNumber;
+      }
+
+      await signUp(submitData);
       router.push('/protected');
     } catch (error) {
-      setSubmitError(
-        error instanceof Error ? error.message : 'Failed to sign up'
-      );
-    } finally {
-      setIsLoading(false);
+      setError('root', {
+        type: 'manual',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Sign up failed. Please try again.',
+      });
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className='space-y-4'>
-      {submitError && (
-        <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded'>
-          {submitError}
-        </div>
-      )}
-
-      <div>
-        <label htmlFor='email' className='block text-sm font-medium mb-1'>
-          Email
-        </label>
-        <input
-          id='email'
-          type='email'
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          className='w-full px-3 py-2 border rounded-md'
-          required
-        />
-        {errors.email && (
-          <p className='mt-1 text-sm text-red-600'>{errors.email}</p>
-        )}
-      </div>
-
-      <div>
-        <label htmlFor='password' className='block text-sm font-medium mb-1'>
-          Password
-        </label>
-        <input
-          id='password'
-          type='password'
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          className='w-full px-3 py-2 border rounded-md'
-          required
-          minLength={8}
-          maxLength={72}
-        />
-        {errors.password && (
-          <p className='mt-1 text-sm text-red-600'>{errors.password}</p>
-        )}
-        <p className='mt-1 text-xs text-gray-600'>
-          Must be at least 8 characters
-        </p>
-      </div>
-
-      <div>
-        <label htmlFor='fullName' className='block text-sm font-medium mb-1'>
-          Full Name (optional)
-        </label>
-        <input
-          id='fullName'
-          type='text'
-          value={fullName}
-          onChange={e => setFullName(e.target.value)}
-          className='w-full px-3 py-2 border rounded-md'
-        />
-        {errors.fullName && (
-          <p className='mt-1 text-sm text-red-600'>{errors.fullName}</p>
-        )}
-      </div>
-
-      <div>
-        <label htmlFor='phoneNumber' className='block text-sm font-medium mb-1'>
-          Phone Number (optional)
-        </label>
-        <input
-          id='phoneNumber'
-          type='tel'
-          value={phoneNumber}
-          onChange={e => setPhoneNumber(e.target.value)}
-          className='w-full px-3 py-2 border rounded-md'
-          placeholder='+1234567890'
-        />
-        {errors.phoneNumber && (
-          <p className='mt-1 text-sm text-red-600'>{errors.phoneNumber}</p>
-        )}
-        <p className='mt-1 text-xs text-gray-600'>
-          Format: +1234567890 (E.164)
-        </p>
-      </div>
-
-      <button
-        type='submit'
-        disabled={isLoading}
-        className='w-full bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed'
-      >
-        {isLoading ? 'Signing up...' : 'Sign Up'}
-      </button>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <FieldSet>
+        <FieldGroup>
+          <Controller
+            name='email'
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                <Input
+                  {...field}
+                  id={field.name}
+                  type='email'
+                  aria-invalid={fieldState.invalid}
+                  placeholder='janedoe@example.com'
+                />
+                <FieldError
+                  errors={
+                    fieldState.error && (fieldState.isTouched || isSubmitted)
+                      ? [fieldState.error]
+                      : undefined
+                  }
+                />
+              </Field>
+            )}
+          />
+          <Controller
+            name='password'
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                <Input
+                  {...field}
+                  id={field.name}
+                  type='password'
+                  aria-invalid={fieldState.invalid}
+                  placeholder='********'
+                />
+                <FieldError
+                  errors={
+                    fieldState.error && (fieldState.isTouched || isSubmitted)
+                      ? [fieldState.error]
+                      : undefined
+                  }
+                />
+                <p className='mt-1 text-xs text-gray-600'>
+                  Must be at least 8 characters
+                </p>
+              </Field>
+            )}
+          />
+          <Controller
+            name='fullName'
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Full Name</FieldLabel>
+                <Input
+                  {...field}
+                  id={field.name}
+                  type='text'
+                  value={field.value || ''}
+                  onChange={e => {
+                    const value = e.target.value.trim();
+                    field.onChange(value === '' ? undefined : value);
+                  }}
+                  aria-invalid={fieldState.invalid}
+                  placeholder='John Doe'
+                />
+                <FieldError
+                  errors={
+                    fieldState.error && (fieldState.isTouched || isSubmitted)
+                      ? [fieldState.error]
+                      : undefined
+                  }
+                />
+              </Field>
+            )}
+          />
+          <Controller
+            name='phoneNumber'
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>
+                  Phone Number (optional)
+                </FieldLabel>
+                <Input
+                  {...field}
+                  id={field.name}
+                  type='tel'
+                  value={field.value || ''}
+                  onChange={e => {
+                    const value = e.target.value.trim();
+                    field.onChange(value === '' ? undefined : value);
+                  }}
+                  aria-invalid={fieldState.invalid}
+                  placeholder='+1234567890'
+                />
+                <FieldError
+                  errors={
+                    fieldState.error && (fieldState.isTouched || isSubmitted)
+                      ? [fieldState.error]
+                      : undefined
+                  }
+                />
+                <p className='mt-1 text-xs text-gray-600'>
+                  Format: +1234567890 (E.164)
+                </p>
+              </Field>
+            )}
+          />
+          <Button type='submit' disabled={isSubmitting} className='w-full'>
+            {isSubmitting ? (
+              <>
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                Signing up...
+              </>
+            ) : (
+              'Sign Up'
+            )}
+          </Button>
+          {errors.root && <FieldError errors={[errors.root]} />}
+        </FieldGroup>
+      </FieldSet>
     </form>
   );
 }

@@ -24,10 +24,11 @@ export function SignInForm() {
     control,
     handleSubmit,
     setError,
-    formState: { isSubmitting, errors },
+    formState: { isSubmitting, isSubmitted, errors },
   } = useForm<SignInInput>({
     resolver: zodResolver(SignInSchema),
-    mode: 'onChange',
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
     defaultValues: {
       email: '',
       password: '',
@@ -67,7 +68,11 @@ export function SignInForm() {
                   placeholder='janedoe@example.com'
                 />
                 <FieldError
-                  errors={fieldState.error ? [fieldState.error] : undefined}
+                  errors={
+                    fieldState.error && (fieldState.isTouched || isSubmitted)
+                      ? [fieldState.error]
+                      : undefined
+                  }
                 />
               </Field>
             )}
@@ -86,7 +91,11 @@ export function SignInForm() {
                   placeholder='********'
                 />
                 <FieldError
-                  errors={fieldState.error ? [fieldState.error] : undefined}
+                  errors={
+                    fieldState.error && (fieldState.isTouched || isSubmitted)
+                      ? [fieldState.error]
+                      : undefined
+                  }
                 />
               </Field>
             )}
