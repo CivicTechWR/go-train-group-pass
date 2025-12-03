@@ -1,4 +1,11 @@
-import { Entity, PrimaryKey, Property, ManyToOne, wrap, Unique } from '@mikro-orm/core';
+import {
+  Entity,
+  PrimaryKey,
+  Property,
+  ManyToOne,
+  wrap,
+  Unique,
+} from '@mikro-orm/core';
 import { randomUUID } from 'crypto';
 import { GTFSTrip } from './gtfs_trip.entity';
 import { GTFSStopTime } from './gtfs_stop_times.entity';
