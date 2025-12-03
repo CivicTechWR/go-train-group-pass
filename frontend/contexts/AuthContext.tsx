@@ -1,7 +1,14 @@
 'use client';
 
 import { apiGet, apiPost } from '@/lib/api';
-import type { AuthResponse, SignInInput, SignUpInput, User } from '@/lib/types';
+import type {
+  AuthResponse,
+  PasswordResetRequestInput,
+  PasswordUpdateInput,
+  SignInInput,
+  SignUpInput,
+  User,
+} from '@/lib/types';
 import {
   createContext,
   useCallback,
@@ -17,6 +24,8 @@ interface AuthContextType {
   signIn: (data: SignInInput) => Promise<AuthResponse>;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  requestPasswordReset: (data: PasswordResetRequestInput) => Promise<void>;
+  updatePassword: (data: PasswordUpdateInput) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -53,7 +62,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = useCallback(
     async (data: SignInInput): Promise<AuthResponse> => {
       const response = await apiPost<AuthResponse>('/auth/signin', data);
-      setUser(response.user);
+      setUser({
+        ...response.user,
+        name: response.session.user.user_metadata.full_name ?? 'Anonymous',
+      });
       return response;
     },
     []
@@ -78,6 +90,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const requestPasswordReset = useCallback(
+    async (data: PasswordResetRequestInput): Promise<void> => {
+      await apiPost('/auth/password/reset-request', data);
+    },
+    []
+  );
+
+  const updatePassword = useCallback(
+    async (data: PasswordUpdateInput): Promise<void> => {
+      await apiPost('/auth/password/update', data);
+    },
+    []
+  );
+
   return (
     <AuthContext.Provider
       value={{
@@ -87,6 +113,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signIn,
         signOut,
         refreshUser,
+        requestPasswordReset,
+        updatePassword,
       }}
     >
       {children}

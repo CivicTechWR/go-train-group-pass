@@ -59,7 +59,7 @@ export function SignInForm() {
 
   return (
     <Card className='w-full py-4 sm:py-6'>
-      <CardHeader className='text-center pb-4 sm:pb-6'>
+      <CardHeader className='text-center'>
         <CardTitle className='text-2xl sm:text-3xl font-bold'>
           Sign In
         </CardTitle>

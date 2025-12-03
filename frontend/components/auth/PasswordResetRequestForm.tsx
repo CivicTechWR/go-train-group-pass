@@ -15,7 +15,7 @@ import {
   FieldSet,
   Input,
 } from '@/components/ui';
-import { apiPost } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   PasswordResetRequestInput,
   PasswordResetRequestSchema,
@@ -27,6 +27,7 @@ import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 export function PasswordResetRequestForm() {
+  const { requestPasswordReset } = useAuth();
   const [success, setSuccess] = useState(false);
 
   const {
@@ -45,7 +46,7 @@ export function PasswordResetRequestForm() {
 
   const onSubmit = async (data: PasswordResetRequestInput) => {
     try {
-      await apiPost('/auth/password/reset-request', data);
+      await requestPasswordReset(data);
       setSuccess(true);
     } catch (error) {
       setError('root', {
@@ -61,7 +62,7 @@ export function PasswordResetRequestForm() {
   if (success) {
     return (
       <Card className='w-full py-4 sm:py-6'>
-        <CardHeader className='text-center pb-4 sm:pb-6'>
+        <CardHeader className='text-center'>
           <CardTitle className='text-2xl sm:text-3xl font-bold'>
             Email Sent
           </CardTitle>
@@ -80,7 +81,7 @@ export function PasswordResetRequestForm() {
 
   return (
     <Card className='w-full py-4 sm:py-6'>
-      <CardHeader className='text-center pb-4 sm:pb-6'>
+      <CardHeader className='text-center'>
         <CardTitle className='text-2xl sm:text-3xl font-bold'>
           Reset Password
         </CardTitle>

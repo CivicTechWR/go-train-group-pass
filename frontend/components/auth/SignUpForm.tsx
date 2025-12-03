@@ -71,8 +71,10 @@ export function SignUpForm() {
 
   return (
     <Card className='w-full py-4 sm:py-6'>
-      <CardHeader className='text-center pb-4 sm:pb-6'>
-        <CardTitle className='text-2xl sm:text-3xl font-bold'>Sign Up</CardTitle>
+      <CardHeader className='text-center'>
+        <CardTitle className='text-2xl sm:text-3xl font-bold'>
+          Sign Up
+        </CardTitle>
         <CardDescription>
           Enter your information to create a new account
         </CardDescription>
@@ -126,7 +128,7 @@ export function SignUpForm() {
                           : undefined
                       }
                     />
-                    <p className='mt-1 text-xs text-gray-600'>
+                    <p className='mt-1 text-xs text-gray-600 dark:text-gray-400'>
                       Must be at least 8 characters
                     </p>
                   </Field>
@@ -189,7 +191,7 @@ export function SignUpForm() {
                           : undefined
                       }
                     />
-                    <p className='mt-1 text-xs text-gray-600'>
+                    <p className='mt-1 text-xs text-gray-600 dark:text-gray-400'>
                       Format: +1234567890 (E.164)
                     </p>
                   </Field>

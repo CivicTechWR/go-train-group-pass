@@ -15,11 +15,8 @@ import {
   FieldSet,
   Input,
 } from '@/components/ui';
-import { apiPost } from '@/lib/api';
-import {
-  PasswordUpdateFormInput,
-  PasswordUpdateFormSchema,
-} from '@/lib/types';
+import { useAuth } from '@/contexts/AuthContext';
+import { PasswordUpdateFormInput, PasswordUpdateFormSchema } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -27,6 +24,7 @@ import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 export function PasswordUpdateForm() {
+  const { updatePassword } = useAuth();
   const router = useRouter();
   const [success, setSuccess] = useState(false);
 
@@ -48,7 +46,7 @@ export function PasswordUpdateForm() {
   const onSubmit = async (data: PasswordUpdateFormInput) => {
     try {
       // Only send newPassword to the API
-      await apiPost('/auth/password/update', {
+      await updatePassword({
         newPassword: data.newPassword,
       });
       setSuccess(true);
@@ -66,7 +64,7 @@ export function PasswordUpdateForm() {
   if (success) {
     return (
       <Card className='w-full py-4 sm:py-6'>
-        <CardHeader className='text-center pb-4 sm:pb-6'>
+        <CardHeader className='text-center'>
           <CardTitle className='text-2xl sm:text-3xl font-bold'>
             Password Updated
           </CardTitle>
@@ -74,7 +72,7 @@ export function PasswordUpdateForm() {
             Your password has been updated successfully!
           </CardDescription>
         </CardHeader>
-        <CardFooter className='flex-col gap-3 sm:gap-4 pt-0 mt-4 sm:mt-7'>
+        <CardFooter className='mt-0'>
           <Button onClick={() => router.push('/protected')} className='w-full'>
             Back to Protected Page
           </Button>
@@ -85,13 +83,11 @@ export function PasswordUpdateForm() {
 
   return (
     <Card className='w-full py-4 sm:py-6'>
-      <CardHeader className='text-center pb-4 sm:pb-6'>
+      <CardHeader className='text-center'>
         <CardTitle className='text-2xl sm:text-3xl font-bold'>
           Update Password
         </CardTitle>
-        <CardDescription>
-          Enter your new password below
-        </CardDescription>
+        <CardDescription>Enter your new password below</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent>
@@ -118,7 +114,7 @@ export function PasswordUpdateForm() {
                           : undefined
                       }
                     />
-                    <p className='mt-1 text-xs text-gray-600'>
+                    <p className='mt-1 text-xs text-gray-600 dark:text-gray-400'>
                       Must be at least 8 characters
                     </p>
                   </Field>
@@ -154,7 +150,7 @@ export function PasswordUpdateForm() {
             </FieldGroup>
           </FieldSet>
         </CardContent>
-        <CardFooter className='flex-col gap-3 sm:gap-4 pt-0 mt-4 sm:mt-7'>
+        <CardFooter className='flex-col gap-3 sm:gap-4 pt-0 mt-0 sm:mt-7'>
           <Button type='submit' disabled={isSubmitting} className='w-full'>
             {isSubmitting ? (
               <>
