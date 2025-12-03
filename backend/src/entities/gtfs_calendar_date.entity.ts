@@ -1,4 +1,10 @@
-import { Entity, PrimaryKey, Property, Index, ManyToOne } from '@mikro-orm/core';
+import {
+  Entity,
+  PrimaryKey,
+  Property,
+  Index,
+  ManyToOne,
+} from '@mikro-orm/core';
 import { randomUUID } from 'crypto';
 import { GTFSFeedInfo } from './gtfs_feed_info.entity';
 import { BaseEntity } from './base';

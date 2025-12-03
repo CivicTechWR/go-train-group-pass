@@ -21,10 +21,10 @@ export class GTFSStopTime extends BaseEntity {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id: string = randomUUID();
 
-  @PrimaryKey()
+  @Property()
   stop_time_id!: string;
 
-  @PrimaryKey()
+  @Property()
   stopSequence!: number;
 
   @Property({ type: GTFSTimeType })
