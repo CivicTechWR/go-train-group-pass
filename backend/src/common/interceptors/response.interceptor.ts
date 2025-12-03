@@ -31,10 +31,9 @@ export class ResponseSerializeInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map((data: unknown) => {
         // 3. Explicitly type the Reflector result
-        let schema = this.reflector.getAllAndOverride<ZodSchema | ZodDto | undefined>(
-          ZOD_RESPONSE_SCHEMA,
-          [context.getHandler(), context.getClass()],
-        );
+        let schema = this.reflector.getAllAndOverride<
+          ZodSchema | ZodDto | undefined
+        >(ZOD_RESPONSE_SCHEMA, [context.getHandler(), context.getClass()]);
 
         // Pass-through if no schema is defined
         if (!schema) {
@@ -48,7 +47,8 @@ export class ResponseSerializeInterceptor implements NestInterceptor {
 
         // 5. Safe Data Access: Cast data to a known shape to read properties
         // We assume 'data' is an object if we are trying to access .data/.meta
-        const dataObj = (data && typeof data === 'object') ? (data as ResponseEnvelope) : null;
+        const dataObj =
+          data && typeof data === 'object' ? (data as ResponseEnvelope) : null;
 
         const responseObj = {
           data: dataObj?.data || data, // Unwrapping if already wrapped, or raw data

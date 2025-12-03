@@ -11,7 +11,7 @@ import { User } from './user.entity';
 import { ItineraryStatusLog, TripBooking } from '.';
 import { BaseEntity } from './base';
 import { randomUUID } from 'crypto';
-import { ItineraryStatus } from './intineraryStatusEnum';
+import { ItineraryStatus } from './itineraryStatusEnum';
 
 @Entity()
 export class Itinerary extends BaseEntity {

@@ -1,6 +1,6 @@
 import { Entity, ManyToOne, Index } from '@mikro-orm/core';
 import { Itinerary } from '.';
-import { ItineraryStatus } from './intineraryStatusEnum';
+import { ItineraryStatus } from './itineraryStatusEnum';
 import { BaseStatusLog } from './base_status_log';
 
 @Entity()

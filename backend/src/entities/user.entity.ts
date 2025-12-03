@@ -12,7 +12,7 @@ import { TripBooking } from './trip_booking.entity';
 import { randomUUID } from 'crypto';
 import { Payment } from '.';
 import { BaseEntity } from './base';
-import { UserRepository } from 'src/users/users.repository';
+import { UserRepository } from '../users/users.repository';
 
 @Entity({ tableName: 'users', repository: () => UserRepository })
 export class User extends BaseEntity {
