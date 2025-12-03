@@ -1,3 +1,4 @@
+import { Navbar } from '@/components/Navbar';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/contexts/AuthContext';
 import type { Metadata } from 'next';
@@ -36,6 +37,7 @@ export default function RootLayout({
           enableSystem={false}
         >
           <AuthProvider>
+            <Navbar />
             {children}
             <Toaster />
           </AuthProvider>
