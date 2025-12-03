@@ -17,7 +17,7 @@ export class GTFSRoute extends BaseEntity {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id: string = randomUUID();
 
-  @PrimaryKey()
+  @Property()
   route_id!: string;
 
   @Property()
