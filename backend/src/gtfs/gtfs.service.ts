@@ -20,6 +20,7 @@ import {
   GTFSStopTimesImport,
   GTFSTripsImport,
 } from './gtfs-import.types';
+import { GTFSFeedInfo } from 'src/entities/gtfs_feed_info.entity';
 
 interface GtfsFiles {
   [filename: string]: string;
@@ -216,6 +217,7 @@ export class GtfsService {
           agencyTimezone: row.agency_timezone,
           agencyLang: row.agency_lang,
           agencyPhone: row.agency_phone,
+          agencyId: row.agency_id || '',
         }),
       );
       await this.em.persistAndFlush(entities);
@@ -233,6 +235,7 @@ export class GtfsService {
     this.logger.log(`Importing ${calendarDates.length} calendar dates...`);
     const batchSize = 500;
     const calendarDateRepo = this.em.getRepository(GTFSCalendarDate);
+    const feedInfoRepo = this.em.getRepository(GTFSFeedInfo);
 
     for (let i = 0; i < calendarDates.length; i += batchSize) {
       const batch = calendarDates.slice(i, i + batchSize);
@@ -247,6 +250,7 @@ export class GtfsService {
           serviceId: row.service_id,
           date: date,
           exceptionType: parseInt(row.exception_type),
+          GTFSFeedInfo: feedInfoRepo.getReference('default'),
         });
       });
       await this.em.persistAndFlush(entities);
@@ -263,6 +267,7 @@ export class GtfsService {
     const batchSize = 100;
     const routeRepo = this.em.getRepository(GTFSRoute);
     const agencyRepo = this.em.getRepository(Agency);
+    const feedInfoRepo = this.em.getRepository(GTFSFeedInfo);
 
     for (let i = 0; i < routes.length; i += batchSize) {
       const batch = routes.slice(i, i + batchSize);
@@ -282,6 +287,8 @@ export class GtfsService {
             routeColor: row.route_color,
             routeTextColor: row.route_text_color,
             agency: agency || undefined,
+            GTFSFeedInfo: feedInfoRepo.getReference('default'),
+            route_id: row.route_id || '',
           });
         }),
       );
@@ -298,6 +305,7 @@ export class GtfsService {
     this.logger.log(`Importing ${stops.length} stops...`);
     const batchSize = 500;
     const stopRepo = this.em.getRepository(GTFSStop);
+    const feedInfoRepo = this.em.getRepository(GTFSFeedInfo);
 
     for (let i = 0; i < stops.length; i += batchSize) {
       const batch = stops.slice(i, i + batchSize);
@@ -317,6 +325,8 @@ export class GtfsService {
           wheelchairBoarding: row.wheelchair_boarding
             ? parseInt(row.wheelchair_boarding)
             : undefined,
+          GTFSFeedInfo: feedInfoRepo.getReference('default'),
+          stopid: row.stop_id || '',
         }),
       );
       await this.em.persistAndFlush(entities);
@@ -334,6 +344,7 @@ export class GtfsService {
     const tripRepo = this.em.getRepository(GTFSTrip);
     const routeRepo = this.em.getRepository(GTFSRoute);
     const calendarDateRepo = this.em.getRepository(GTFSCalendarDate);
+    const feedInfoRepo = this.em.getRepository(GTFSFeedInfo);
 
     for (let i = 0; i < trips.length; i += batchSize) {
       const batch = trips.slice(i, i + batchSize);
@@ -363,6 +374,8 @@ export class GtfsService {
               ? parseInt(row.bikes_allowed)
               : undefined,
             route: route!,
+            trip_id: row.trip_id || '',
+            GTFSFeedInfo: feedInfoRepo.getReference('default'),
           });
         }),
       );
@@ -383,6 +396,7 @@ export class GtfsService {
     const stopTimeRepo = this.em.getRepository(GTFSStopTime);
     const tripRepo = this.em.getRepository(GTFSTrip);
     const stopRepo = this.em.getRepository(GTFSStop);
+    const feedInfoRepo = this.em.getRepository(GTFSFeedInfo);
 
     for (let i = 0; i < stopTimes.length; i += batchSize) {
       const batch = stopTimes.slice(i, i + batchSize);
@@ -407,6 +421,8 @@ export class GtfsService {
             timepoint: row.timepoint ? parseInt(row.timepoint) : undefined,
             stop: stop!,
             trip: trip!,
+            GTFSFeedInfo: feedInfoRepo.getReference('default'),
+            stop_time_id: row.trip_id || '',
           });
         }),
       );
