@@ -8,6 +8,8 @@ import {
 import { GTFSStop, GTFSTrip } from '.';
 import { BaseEntity } from './base';
 import { GTFSTimeType } from '../database/types/GTFSTimeType';
+import { randomUUID } from 'crypto';
+import { GTFSFeedInfo } from './gtfs_feed_info.entity';
 
 @Entity({ tableName: 'gtfs_stop_times' })
 @Index({ name: 'idx_stop_times_stop', properties: ['stop'] })
@@ -16,10 +18,13 @@ import { GTFSTimeType } from '../database/types/GTFSTimeType';
   properties: ['stop', 'departureTime'],
 })
 export class GTFSStopTime extends BaseEntity {
-  @PrimaryKey()
-  id!: string;
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id: string = randomUUID();
 
-  @PrimaryKey()
+  @Property()
+  stop_time_id!: string;
+
+  @Property()
   stopSequence!: number;
 
   @Property({ type: GTFSTimeType })
@@ -51,4 +56,7 @@ export class GTFSStopTime extends BaseEntity {
 
   @ManyToOne(() => GTFSTrip)
   trip!: GTFSTrip;
+
+  @ManyToOne(() => GTFSFeedInfo)
+  GTFSFeedInfo!: GTFSFeedInfo;
 }

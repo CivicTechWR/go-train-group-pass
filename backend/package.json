@@ -50,6 +50,7 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@darraghor/eslint-plugin-nestjs-typed": "^6.9.9",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
     "@mikro-orm/cli": "^6.5.9",
