@@ -14,8 +14,7 @@ export const SignUpInputSchema = z.object({
   fullName: z.string().min(1, 'Full name must not be empty'),
   phoneNumber: z
     .string()
-    .regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format')
-    .optional(),
+    .regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format'),
 });
 
 export const SignInInputSchema = z.object({

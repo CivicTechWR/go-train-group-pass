@@ -14,8 +14,10 @@ import {
   UserDto,
 } from './dto/auth.dto';
 
+import { IAuthService } from './auth.interface';
+
 @Injectable()
-export class AuthService {
+export class AuthService implements IAuthService {
   constructor(
     private readonly supabaseService: SupabaseService,
     private readonly usersService: UsersService,

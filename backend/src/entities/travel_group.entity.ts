@@ -1,4 +1,5 @@
 import {
+  BaseEntity,
   Collection,
   Entity,
   Enum,
@@ -18,7 +19,7 @@ import {
 import { TravelGroupStatus } from './travelGroupEnum';
 
 @Entity()
-export class TravelGroup {
+export class TravelGroup extends BaseEntity {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id: string = randomUUID();
 
@@ -33,12 +34,6 @@ export class TravelGroup {
     default: TravelGroupStatus.FORMING,
   })
   status: TravelGroupStatus = TravelGroupStatus.FORMING;
-
-  @Property({ onCreate: () => new Date() })
-  createdAt: Date = new Date();
-
-  @Property({ onUpdate: () => new Date() })
-  updatedAt: Date = new Date();
 
   @ManyToOne(() => Trip, {
     index: true,

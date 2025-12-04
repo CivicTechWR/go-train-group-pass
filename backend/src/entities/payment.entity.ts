@@ -10,9 +10,10 @@ import { TripBooking } from './trip_booking.entity';
 import { User } from './user.entity';
 import { randomUUID } from 'crypto';
 import { PaymentCalculation } from '.';
+import { BaseEntity } from './base';
 
 @Entity()
-export class Payment {
+export class Payment extends BaseEntity {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id: string = randomUUID();
 

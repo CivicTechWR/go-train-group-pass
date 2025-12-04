@@ -7,7 +7,6 @@ import { BaseStatusLog } from './base_status_log';
 @Index({ properties: ['itinerary'] })
 export class ItineraryStatusLog extends BaseStatusLog<ItineraryStatus> {
   @ManyToOne(() => Itinerary, {
-    fieldName: 'itineraryId',
     inversedBy: 'statusLogs',
   })
   itinerary: Itinerary;

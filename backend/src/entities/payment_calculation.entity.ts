@@ -2,9 +2,10 @@ import { Entity, PrimaryKey, Property, OneToOne } from '@mikro-orm/core';
 import { randomUUID } from 'crypto';
 
 import { Payment } from './payment.entity';
+import { BaseEntity } from './base';
 
 @Entity()
-export class PaymentCalculation {
+export class PaymentCalculation extends BaseEntity {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id: string = randomUUID();
 

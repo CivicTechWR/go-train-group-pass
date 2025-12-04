@@ -6,6 +6,7 @@ import {
   OneToMany,
   Collection,
   Entity,
+  BaseEntity,
 } from '@mikro-orm/core';
 import { randomUUID } from 'crypto';
 import { Itinerary } from './itinerary.entity';
@@ -16,7 +17,7 @@ import { Payment, TicketPurchase, TripBookingStatusLog } from '.';
 import { TripBookingStatus } from './tripBookingEnum';
 
 @Entity()
-export class TripBooking {
+export class TripBooking extends BaseEntity {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id: string = randomUUID();
 
@@ -40,12 +41,6 @@ export class TripBooking {
 
   @Property({ type: 'boolean', default: true })
   memberPresent: boolean = true;
-
-  @Property({ onCreate: () => new Date() })
-  createdAt: Date = new Date();
-
-  @Property({ onUpdate: () => new Date() })
-  updatedAt: Date = new Date();
 
   @ManyToOne(() => User, {
     index: true,

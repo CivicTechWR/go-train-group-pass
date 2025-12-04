@@ -1373,26 +1373,6 @@
           ],
           "mappedType": "enum"
         },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamptz",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 6,
-          "mappedType": "datetime"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamptz",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 6,
-          "mappedType": "datetime"
-        },
         "trip_id": {
           "name": "trip_id",
           "type": "uuid",
@@ -1743,26 +1723,6 @@
           "nullable": false,
           "default": "true",
           "mappedType": "boolean"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamptz",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 6,
-          "mappedType": "datetime"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamptz",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 6,
-          "mappedType": "datetime"
         },
         "user_id": {
           "name": "user_id",
@@ -2157,6 +2117,26 @@
           "default": "gen_random_uuid()",
           "mappedType": "uuid"
         },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
         "amount_owed": {
           "name": "amount_owed",
           "type": "numeric(10,2)",
@@ -2347,6 +2327,26 @@
           "default": "gen_random_uuid()",
           "mappedType": "uuid"
         },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
         "calculation_version": {
           "name": "calculation_version",
           "type": "varchar(50)",
@@ -2479,8 +2479,8 @@
           "length": 6,
           "mappedType": "datetime"
         },
-        "itineraryId": {
-          "name": "itineraryId",
+        "itinerary_id": {
+          "name": "itinerary_id",
           "type": "uuid",
           "unsigned": false,
           "autoincrement": false,
@@ -2493,9 +2493,9 @@
       "schema": "go-train-group-pass",
       "indexes": [
         {
-          "keyName": "itinerary_status_log_itineraryId_index",
+          "keyName": "itinerary_status_log_itinerary_id_index",
           "columnNames": [
-            "itineraryId"
+            "itinerary_id"
           ],
           "composite": false,
           "constraint": false,
@@ -2515,10 +2515,10 @@
       ],
       "checks": [],
       "foreignKeys": {
-        "itinerary_status_log_itineraryId_foreign": {
-          "constraintName": "itinerary_status_log_itineraryId_foreign",
+        "itinerary_status_log_itinerary_id_foreign": {
+          "constraintName": "itinerary_status_log_itinerary_id_foreign",
           "columnNames": [
-            "itineraryId"
+            "itinerary_id"
           ],
           "localTableName": "go-train-group-pass.itinerary_status_log",
           "referencedColumnNames": [
