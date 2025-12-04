@@ -27,12 +27,20 @@ export function Navbar() {
           {/* Navigation Links */}
           <div className='flex items-center gap-6'>
             {!loading && user && (
-              <Link
-                href='/trips'
-                className='text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
-              >
-                Trips
-              </Link>
+              <>
+                <Link
+                  href='/trips'
+                  className='text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
+                >
+                  Trips
+                </Link>
+                <Link
+                  href='/itineraries'
+                  className='text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
+                >
+                  Itineraries
+                </Link>
+              </>
             )}
 
             {/* Auth Buttons */}

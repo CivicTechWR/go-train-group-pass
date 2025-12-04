@@ -14,3 +14,6 @@ export * from './response';
 export * from './gtfs-route';
 export * from './gtfs-trip';
 
+// Itinerary schemas and types
+export * from './itinerary';
+
