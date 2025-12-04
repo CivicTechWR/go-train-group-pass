@@ -1,10 +1,29 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
 
 import { GtfsService } from './gtfs.service';
+import {
+  Agency,
+  GTFSRoute,
+  GTFSStop,
+  GTFSTrip,
+  GTFSStopTime,
+  GTFSCalendarDate,
+} from '../entities';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [ConfigModule],
+  imports: [
+    MikroOrmModule.forFeature([
+      Agency,
+      GTFSRoute,
+      GTFSStop,
+      GTFSTrip,
+      GTFSStopTime,
+      GTFSCalendarDate,
+    ]),
+    ConfigModule,
+  ],
   providers: [GtfsService],
   exports: [GtfsService],
 })
