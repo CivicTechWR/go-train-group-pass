@@ -211,12 +211,12 @@ export class GtfsService {
       const batch = agencies.slice(i, i + batchSize);
       const entities = batch.map((row) =>
         agencyRepo.create({
-          agencyId: row.agency_id ?? '',
+          agencyId: row.agency_id || '',
           agencyName: row.agency_name,
           agencyUrl: row.agency_url,
           agencyTimezone: row.agency_timezone,
-          agencyLang: row.agency_lang ?? undefined,
-          agencyPhone: row.agency_phone ?? undefined,
+          agencyLang: row.agency_lang,
+          agencyPhone: row.agency_phone,
         }),
       );
       await this.em.persistAndFlush(entities);
@@ -228,13 +228,13 @@ export class GtfsService {
    */
   private async importCalendarDates(
     calendarDates: GTFSCalendarDatesImport[],
-    feedInfo: GTFSFeedInfo,
   ): Promise<void> {
     if (!calendarDates.length) return;
 
     this.logger.log(`Importing ${calendarDates.length} calendar dates...`);
     const batchSize = 500;
     const calendarDateRepo = this.em.getRepository(GTFSCalendarDate);
+    const feedInfoRepo = this.em.getRepository(GTFSFeedInfo);
 
     for (let i = 0; i < calendarDates.length; i += batchSize) {
       const batch = calendarDates.slice(i, i + batchSize);
@@ -249,7 +249,7 @@ export class GtfsService {
           serviceId: row.service_id,
           date: date,
           exceptionType: parseInt(row.exception_type),
-          GTFSFeedInfo: feedInfo,
+          GTFSFeedInfo: feedInfoRepo.getReference('default'),
         });
       });
       await this.em.persistAndFlush(entities);
@@ -259,16 +259,14 @@ export class GtfsService {
   /**
    * Import routes into database
    */
-  private async importRoutes(
-    routes: GTFSRoutesImport[],
-    feedInfo: GTFSFeedInfo,
-  ): Promise<void> {
+  private async importRoutes(routes: GTFSRoutesImport[]): Promise<void> {
     if (!routes.length) return;
 
     this.logger.log(`Importing ${routes.length} routes...`);
     const batchSize = 100;
     const routeRepo = this.em.getRepository(GTFSRoute);
     const agencyRepo = this.em.getRepository(Agency);
+    const feedInfoRepo = this.em.getRepository(GTFSFeedInfo);
 
     for (let i = 0; i < routes.length; i += batchSize) {
       const batch = routes.slice(i, i + batchSize);
@@ -279,16 +277,16 @@ export class GtfsService {
             : null;
 
           return routeRepo.create({
-            route_id: row.route_id ?? '',
+            route_id: row.route_id || '',
             routeShortName: row.route_short_name,
             routeLongName: row.route_long_name,
             routeDesc: row.route_desc ?? undefined,
             routeType: parseInt(row.route_type),
-            routeUrl: row.route_url ?? undefined,
-            routeColor: row.route_color ?? undefined,
-            routeTextColor: row.route_text_color ?? undefined,
-            agency: agency ?? undefined,
-            GTFSFeedInfo: feedInfo,
+            routeUrl: row.route_url,
+            routeColor: row.route_color,
+            routeTextColor: row.route_text_color,
+            agency: agency || undefined,
+            GTFSFeedInfo: feedInfoRepo.getReference('default'),
           });
         }),
       );
@@ -299,21 +297,19 @@ export class GtfsService {
   /**
    * Import stops into database
    */
-  private async importStops(
-    stops: GTFSStopsImport[],
-    feedInfo: GTFSFeedInfo,
-  ): Promise<void> {
+  private async importStops(stops: GTFSStopsImport[]): Promise<void> {
     if (!stops.length) return;
 
     this.logger.log(`Importing ${stops.length} stops...`);
     const batchSize = 500;
     const stopRepo = this.em.getRepository(GTFSStop);
+    const feedInfoRepo = this.em.getRepository(GTFSFeedInfo);
 
     for (let i = 0; i < stops.length; i += batchSize) {
       const batch = stops.slice(i, i + batchSize);
       const entities = batch.map((row) =>
         stopRepo.create({
-          stopid: row.stop_id ?? '',
+          stopid: row.stop_id || '',
           stopName: row.stop_name,
           stopDesc: row.stop_desc ?? undefined,
           stopLat: parseFloat(row.stop_lat),
@@ -327,7 +323,7 @@ export class GtfsService {
           wheelchairBoarding: row.wheelchair_boarding
             ? parseInt(row.wheelchair_boarding)
             : undefined,
-          GTFSFeedInfo: feedInfo,
+          GTFSFeedInfo: feedInfoRepo.getReference('default'),
         }),
       );
       await this.em.persistAndFlush(entities);
@@ -337,10 +333,7 @@ export class GtfsService {
   /**
    * Import trips into database
    */
-  private async importTrips(
-    trips: GTFSTripsImport[],
-    feedInfo: GTFSFeedInfo,
-  ): Promise<void> {
+  private async importTrips(trips: GTFSTripsImport[]): Promise<void> {
     if (!trips.length) return;
 
     this.logger.log(`Importing ${trips.length} trips...`);
@@ -348,6 +341,7 @@ export class GtfsService {
     const tripRepo = this.em.getRepository(GTFSTrip);
     const routeRepo = this.em.getRepository(GTFSRoute);
     const calendarDateRepo = this.em.getRepository(GTFSCalendarDate);
+    const feedInfoRepo = this.em.getRepository(GTFSFeedInfo);
 
     for (let i = 0; i < trips.length; i += batchSize) {
       const batch = trips.slice(i, i + batchSize);
@@ -361,7 +355,7 @@ export class GtfsService {
           });
 
           return tripRepo.create({
-            trip_id: row.trip_id ?? '',
+            trip_id: row.trip_id || '',
             calendarDate: calendarDate!,
             tripHeadsign: row.trip_headsign ?? undefined,
             tripShortName: row.trip_short_name ?? undefined,
@@ -377,7 +371,7 @@ export class GtfsService {
               ? parseInt(row.bikes_allowed)
               : undefined,
             route: route!,
-            GTFSFeedInfo: feedInfo,
+            GTFSFeedInfo: feedInfoRepo.getReference('default'),
           });
         }),
       );
@@ -390,7 +384,6 @@ export class GtfsService {
    */
   private async importStopTimes(
     stopTimes: GTFSStopTimesImport[],
-    feedInfo: GTFSFeedInfo,
   ): Promise<void> {
     if (!stopTimes.length) return;
 
@@ -399,6 +392,7 @@ export class GtfsService {
     const stopTimeRepo = this.em.getRepository(GTFSStopTime);
     const tripRepo = this.em.getRepository(GTFSTrip);
     const stopRepo = this.em.getRepository(GTFSStop);
+    const feedInfoRepo = this.em.getRepository(GTFSFeedInfo);
 
     for (let i = 0; i < stopTimes.length; i += batchSize) {
       const batch = stopTimes.slice(i, i + batchSize);
@@ -423,7 +417,7 @@ export class GtfsService {
             timepoint: row.timepoint ? parseInt(row.timepoint) : undefined,
             stop: stop!,
             trip: trip!,
-            GTFSFeedInfo: feedInfo,
+            GTFSFeedInfo: feedInfoRepo.getReference('default'),
           });
         }),
       );
