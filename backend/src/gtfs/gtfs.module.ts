@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 
 import { GtfsService } from './gtfs.service';
+import { RoundTripController } from './gtfs.controller';
 import {
   Agency,
   GTFSRoute,
@@ -24,6 +25,7 @@ import { ConfigModule } from '@nestjs/config';
     ]),
     ConfigModule,
   ],
+  controllers: [RoundTripController],
   providers: [GtfsService],
   exports: [GtfsService],
 })
