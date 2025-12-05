@@ -16,17 +16,17 @@ Go Train Group Pass is a civic-tech collaboration that streamlines the purchase 
 ### Product Principles
 
 - **Support stewards, not replace them:** The app augments the existing steward-led process and does not referee peer-to-peer payments.
-- **Time-sensitive coordination:** Push notifications and real-time status cues are core to keeping the group aligned in the minutes leading up to boarding and while on the train.
+- **Time-sensitive coordination:** Clear status cues are core to keeping the group aligned in the minutes leading up to boarding and while on the train.
 - **Clarity over chat scrollback:** Interfaces focus on surfacing the current itinerary state rather than relying on ad-hoc messaging threads.
 
 ### Rider Journey Stages
 
-The product vision spans four coordination stages captured in the Notion design brief. The current MVP focuses on the in-progress phases while the bookend steps remain in discovery:
+The stages below map to open issues in this repository:
 
-1. **Pre-board (MVP):** Final group formation happens minutes before departure as stewards purchase and share pass details.
-2. **On board (MVP):** Riders may be seated apart; quick regrouping and proof-of-purchase handling (e.g., fare inspections) is essential.
-3. **Pre-planning (Future):** Riders signal interest in outbound or return itineraries and nominate potential stewards.
-4. **Post board (Future):** Stewards reconcile payments and capture participation outcomes for the return leg.
+1. **Pre-board (MVP):** Group formation, check-in, QR/scan, and steward confirmations ([#67–71](https://github.com/CivicTechWR/go-train-group-pass/issues?q=is%3Aissue+is%3Aopen+67..71), [#93–100](https://github.com/CivicTechWR/go-train-group-pass/issues?q=is%3Aissue+is%3Aopen+93..100), [#104–110](https://github.com/CivicTechWR/go-train-group-pass/issues?q=is%3Aissue+is%3Aopen+104..110)).
+2. **On board (MVP):** Steward tools for verification and regrouping (same issue sets as above).
+3. **Pre-planning (Planned):** Trip search and itinerary creation ([#64–66](https://github.com/CivicTechWR/go-train-group-pass/issues?q=is%3Aissue+is%3Aopen+64..66), [#74–86](https://github.com/CivicTechWR/go-train-group-pass/issues?q=is%3Aissue+is%3Aopen+74..86)).
+4. **Post board (Planned):** Ticket purchase, cost splits, and payments/reconciliation ([#72–73](https://github.com/CivicTechWR/go-train-group-pass/issues?q=is%3Aissue+is%3Aopen+72..73), [#107–115](https://github.com/CivicTechWR/go-train-group-pass/issues?q=is%3Aissue+is%3Aopen+107..115)).
 
 ```mermaid
 flowchart LR
@@ -56,7 +56,7 @@ flowchart LR
 - **Backend:** NestJS 11 (Fastify adapter), TypeScript, MikroORM (PostgreSQL)
 - **Authentication:** Supabase Auth (JWT session tokens)
 - **Data Source:** GO Transit GTFS feeds mapped into Supabase PostgreSQL 17
-- **Frontend (planned):** Next.js + React web client (currently in discovery; implementation will land in a dedicated frontend workspace)
+- **Frontend (planned):** Next.js + React web client (see issues [#26](https://github.com/CivicTechWR/go-train-group-pass/issues/26) and [#52](https://github.com/CivicTechWR/go-train-group-pass/issues/52))
 - **Tooling:** ESLint, Prettier, Vitest, SWC, ts-node
 - **Automation:** GitHub Actions for linting, accessibility audits, and security scans
 
@@ -76,7 +76,7 @@ Follow the guide for the area you plan to work on:
 | ------------------ | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Backend API        | Active       | [`backend/README.md#getting-started`](backend/README.md#getting-started)                                                                                       |
 | Supabase stack     | Active       | [`backend/SUPABASE_SETUP.md`](backend/SUPABASE_SETUP.md)                                                                                                       |
-| Frontend (Next.js) | In discovery | Track progress in [Figma board](https://www.figma.com/board/5AhW638DdlgCooNjtEZnEG/Metrolinx-Group-Pass?node-id=0-1&t=e1jtwAZg5bLGRAGI-1) and forthcoming docs |
+| Frontend (Next.js) | Planned      | Track via issues [#26](https://github.com/CivicTechWR/go-train-group-pass/issues/26) and [#52](https://github.com/CivicTechWR/go-train-group-pass/issues/52); setup docs will follow |
 
 ## Project Structure
 
@@ -87,19 +87,21 @@ Follow the guide for the area you plan to work on:
 
 ## Key Features
 
-### Current Capabilities
+### Current state (in repo)
 
-- Account creation and authentication so riders and stewards can sign in securely.
-- Itinerary and schedule data modeled from GO Transit GTFS feeds to anchor trip planning conversations.
-- Steward-centric flows in the backend (sign-up, session management, upcoming itinerary endpoints) that support day-of coordination (`pre-board` and `on-board` stages).
+- Supabase-authenticated REST endpoints for signup/signin/refresh/password flows (`backend/src/auth`).
+- GTFS data models defined via MikroORM entities (`backend/src/entities`), ready for ingestion and API layers.
+- CI workflows for linting, accessibility smoke tests, and security scans (see badges above).
 
-### In Flight
+### Planned/backlog (open issues)
 
-- Guided UI flows for each journey stage with context-aware push notifications.
-- Steward workspace to share proof-of-purchase, confirm rider check-ins, and track reimbursements.
-- Rider-facing status views including a lightweight schedule viewer and reminders for boarding and regrouping moments.
+- Trip search and itinerary creation APIs: [#64–66](https://github.com/CivicTechWR/go-train-group-pass/issues?q=is%3Aissue+is%3Aopen+64..66), [#74–86](https://github.com/CivicTechWR/go-train-group-pass/issues?q=is%3Aissue+is%3Aopen+74..86)
+- Group formation, check-in, steward views, QR/scan, and confirmations: [#67–71](https://github.com/CivicTechWR/go-train-group-pass/issues?q=is%3Aissue+is%3Aopen+67..71), [#93–100](https://github.com/CivicTechWR/go-train-group-pass/issues?q=is%3Aissue+is%3Aopen+93..100), [#104–110](https://github.com/CivicTechWR/go-train-group-pass/issues?q=is%3Aissue+is%3Aopen+104..110)
+- Ticket purchase, cost split, payments, and mark-paid flows: [#72–73](https://github.com/CivicTechWR/go-train-group-pass/issues?q=is%3Aissue+is%3Aopen+72..73), [#107–115](https://github.com/CivicTechWR/go-train-group-pass/issues?q=is%3Aissue+is%3Aopen+107..115)
+- GTFS ingestion and schedule import: [#3](https://github.com/CivicTechWR/go-train-group-pass/issues/3), [#13](https://github.com/CivicTechWR/go-train-group-pass/issues/13)
+- Frontend Next.js/React app and hosting decisions: [#26](https://github.com/CivicTechWR/go-train-group-pass/issues/26), [#27](https://github.com/CivicTechWR/go-train-group-pass/issues/27), [#52](https://github.com/CivicTechWR/go-train-group-pass/issues/52)
 
-Refer to the [Technical Design Document](https://www.notion.so/Technical-Design-Document-WIP-2a1e01ee4c0080a391bfcd52b067f9a9) for the full backlog and target experience.
+Refer to the [Technical Design Document](https://www.notion.so/Technical-Design-Document-WIP-2a1e01ee4c0080a391bfcd52b067f9a9) for the broader roadmap; keep the README aligned with open issues when adding new commitments.
 
 ## Development Workflow
 
