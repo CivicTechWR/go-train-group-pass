@@ -10,7 +10,7 @@ on:
       response_guide_url:
         type: string
         required: false
-        default: https://github.com/CivicTechWR/.github/blob/main/docs/gitleaks-response.md
+        default: https://github.com/CivicTechWR/go-train-group-pass/blob/main/docs/gitleaks-response.md
       block_on_findings:
         type: boolean
         required: false
