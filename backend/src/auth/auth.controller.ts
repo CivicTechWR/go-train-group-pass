@@ -22,7 +22,7 @@ import {
   PasswordResetRequestDto,
   PasswordUpdateDto,
   PasswordResetDto,
-} from './dto/auth.dto';
+} from '@go-train-group-pass/shared';
 
 @ApiTags('Auth')
 @Controller('auth')

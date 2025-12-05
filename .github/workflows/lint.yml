@@ -28,11 +28,13 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: ${{ matrix.workspace }}/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        working-directory: ${{ matrix.workspace }}
         run: npm ci
+
+      - name: Build shared package
+        run: npm run build --workspace=@go-train-group-pass/shared
 
       - name: Run ESLint
         working-directory: ${{ matrix.workspace }}

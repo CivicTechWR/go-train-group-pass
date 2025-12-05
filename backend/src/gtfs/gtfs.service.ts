@@ -9,6 +9,7 @@ import {
   GTFSTrip,
   GTFSStopTime,
   GTFSCalendarDate,
+  GTFSFeedInfo,
 } from '../entities';
 import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import { InjectRepository } from '@mikro-orm/nestjs';
@@ -20,7 +21,6 @@ import {
   GTFSStopTimesImport,
   GTFSTripsImport,
 } from './gtfs-import.types';
-import { GTFSFeedInfo } from 'src/entities/gtfs_feed_info.entity';
 
 interface GtfsFiles {
   [filename: string]: string;
@@ -211,13 +211,12 @@ export class GtfsService {
       const batch = agencies.slice(i, i + batchSize);
       const entities = batch.map((row) =>
         agencyRepo.create({
-          id: row.agency_id,
+          agencyId: row.agency_id || '',
           agencyName: row.agency_name,
           agencyUrl: row.agency_url,
           agencyTimezone: row.agency_timezone,
           agencyLang: row.agency_lang,
           agencyPhone: row.agency_phone,
-          agencyId: row.agency_id || '',
         }),
       );
       await this.em.persistAndFlush(entities);
@@ -274,21 +273,20 @@ export class GtfsService {
       const entities = await Promise.all(
         batch.map(async (row) => {
           const agency = row.agency_id
-            ? await agencyRepo.findOne({ id: row.agency_id })
+            ? await agencyRepo.findOne({ agencyId: row.agency_id })
             : null;
 
           return routeRepo.create({
-            id: row.route_id,
+            route_id: row.route_id || '',
             routeShortName: row.route_short_name,
             routeLongName: row.route_long_name,
-            routeDesc: row.route_desc,
+            routeDesc: row.route_desc ?? undefined,
             routeType: parseInt(row.route_type),
             routeUrl: row.route_url,
             routeColor: row.route_color,
             routeTextColor: row.route_text_color,
             agency: agency || undefined,
             GTFSFeedInfo: feedInfoRepo.getReference('default'),
-            route_id: row.route_id || '',
           });
         }),
       );
@@ -311,22 +309,21 @@ export class GtfsService {
       const batch = stops.slice(i, i + batchSize);
       const entities = batch.map((row) =>
         stopRepo.create({
-          id: row.stop_id,
+          stopid: row.stop_id || '',
           stopName: row.stop_name,
-          stopDesc: row.stop_desc,
+          stopDesc: row.stop_desc ?? undefined,
           stopLat: parseFloat(row.stop_lat),
           stopLon: parseFloat(row.stop_lon),
-          zoneId: row.zone_id,
-          stopUrl: row.stop_url,
+          zoneId: row.zone_id ?? undefined,
+          stopUrl: row.stop_url ?? undefined,
           locationType: row.location_type
             ? parseInt(row.location_type)
             : undefined,
-          parentStation: row.parent_station,
+          parentStation: row.parent_station ?? undefined,
           wheelchairBoarding: row.wheelchair_boarding
             ? parseInt(row.wheelchair_boarding)
             : undefined,
           GTFSFeedInfo: feedInfoRepo.getReference('default'),
-          stopid: row.stop_id || '',
         }),
       );
       await this.em.persistAndFlush(entities);
@@ -351,22 +348,22 @@ export class GtfsService {
       const entities = await Promise.all(
         batch.map(async (row) => {
           const route = await routeRepo.findOne({
-            id: row.route_id,
+            route_id: row.route_id ?? '',
           });
           const calendarDate = await calendarDateRepo.findOne({
-            serviceId: row.service_id,
+            serviceId: row.service_id ?? '',
           });
 
           return tripRepo.create({
-            id: row.trip_id,
+            trip_id: row.trip_id || '',
             calendarDate: calendarDate!,
-            tripHeadsign: row.trip_headsign,
-            tripShortName: row.trip_short_name,
+            tripHeadsign: row.trip_headsign ?? undefined,
+            tripShortName: row.trip_short_name ?? undefined,
             directionId: row.direction_id
               ? parseInt(row.direction_id)
               : undefined,
-            blockId: row.block_id,
-            shapeId: row.shape_id,
+            blockId: row.block_id ?? undefined,
+            shapeId: row.shape_id ?? undefined,
             wheelchairAccessible: row.wheelchair_accessible
               ? parseInt(row.wheelchair_accessible)
               : undefined,
@@ -374,7 +371,6 @@ export class GtfsService {
               ? parseInt(row.bikes_allowed)
               : undefined,
             route: route!,
-            trip_id: row.trip_id || '',
             GTFSFeedInfo: feedInfoRepo.getReference('default'),
           });
         }),
@@ -402,15 +398,15 @@ export class GtfsService {
       const batch = stopTimes.slice(i, i + batchSize);
       const entities = await Promise.all(
         batch.map(async (row) => {
-          const trip = await tripRepo.findOne({ id: row.trip_id });
-          const stop = await stopRepo.findOne({ id: row.stop_id });
+          const trip = await tripRepo.findOne({ trip_id: row.trip_id ?? '' });
+          const stop = await stopRepo.findOne({ stopid: row.stop_id ?? '' });
 
           return stopTimeRepo.create({
-            id: row.trip_id,
+            stop_time_id: `${row.trip_id ?? ''}_${row.stop_sequence}`,
             stopSequence: parseInt(row.stop_sequence),
             arrivalTime: row.arrival_time,
             departureTime: row.departure_time,
-            stopHeadsign: row.stop_headsign,
+            stopHeadsign: row.stop_headsign ?? undefined,
             pickupType: row.pickup_type ? parseInt(row.pickup_type) : undefined,
             dropOffType: row.drop_off_type
               ? parseInt(row.drop_off_type)
@@ -422,7 +418,6 @@ export class GtfsService {
             stop: stop!,
             trip: trip!,
             GTFSFeedInfo: feedInfoRepo.getReference('default'),
-            stop_time_id: row.trip_id || '',
           });
         }),
       );
