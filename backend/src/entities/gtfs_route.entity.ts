@@ -5,6 +5,7 @@ import {
   ManyToOne,
   OneToMany,
   Collection,
+  Unique,
 } from '@mikro-orm/core';
 import { GTFSTrip } from './gtfs_trip.entity';
 import { Agency } from './gtfs_agency.entity';
@@ -13,6 +14,7 @@ import { GTFSFeedInfo } from './gtfs_feed_info.entity';
 import { BaseEntity } from './base';
 
 @Entity({ tableName: 'gtfs_routes' })
+@Unique({ properties: ['route_id', 'GTFSFeedInfo'] })
 export class GTFSRoute extends BaseEntity {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id: string = randomUUID();
@@ -47,6 +49,6 @@ export class GTFSRoute extends BaseEntity {
   @OneToMany(() => GTFSTrip, (trip: GTFSTrip) => trip.route)
   trips = new Collection<GTFSTrip>(this);
 
-  @ManyToOne(() => GTFSFeedInfo)
+  @ManyToOne(() => GTFSFeedInfo, { deleteRule: 'cascade' })
   GTFSFeedInfo!: GTFSFeedInfo;
 }

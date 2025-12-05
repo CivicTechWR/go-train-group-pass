@@ -3,7 +3,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { SupabaseService } from './supabase.service';
 import { AuthGuard } from './auth.guard';
-import { UsersModule } from '../users/users.module';
+import { UsersModule } from '../../users/users.module';
 
 @Module({
   imports: [UsersModule],

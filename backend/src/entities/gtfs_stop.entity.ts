@@ -5,6 +5,7 @@ import {
   OneToMany,
   Collection,
   ManyToOne,
+  Unique,
 } from '@mikro-orm/core';
 import { GTFSStopTime } from '.';
 import { randomUUID } from 'crypto';
@@ -12,12 +13,13 @@ import { GTFSFeedInfo } from './gtfs_feed_info.entity';
 import { BaseEntity } from './base';
 
 @Entity({ tableName: 'gtfs_stops' })
+@Unique({ properties: ['stopId', 'GTFSFeedInfo'] })
 export class GTFSStop extends BaseEntity {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id: string = randomUUID();
 
   @Property()
-  stopid!: string;
+  stopId!: string;
 
   @Property()
   stopName!: string;
@@ -49,6 +51,6 @@ export class GTFSStop extends BaseEntity {
   @OneToMany(() => GTFSStopTime, (stopTime: GTFSStopTime) => stopTime.stop)
   stopTimes = new Collection<GTFSStopTime>(this);
 
-  @ManyToOne(() => GTFSFeedInfo)
+  @ManyToOne(() => GTFSFeedInfo, { deleteRule: 'cascade' })
   GTFSFeedInfo!: GTFSFeedInfo;
 }

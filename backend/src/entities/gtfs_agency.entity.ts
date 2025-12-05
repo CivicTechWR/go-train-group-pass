@@ -1,8 +1,16 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import {
+  Entity,
+  ManyToOne,
+  PrimaryKey,
+  Property,
+  Unique,
+} from '@mikro-orm/core';
 import { randomUUID } from 'crypto';
 import { BaseEntity } from './base';
+import { GTFSFeedInfo } from './gtfs_feed_info.entity';
 
 @Entity()
+@Unique({ properties: ['agencyId', 'GTFSFeedInfo'] })
 export class Agency extends BaseEntity {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id: string = randomUUID();
@@ -24,4 +32,7 @@ export class Agency extends BaseEntity {
 
   @Property({ nullable: true })
   agencyPhone?: string;
+
+  @ManyToOne(() => GTFSFeedInfo, { deleteRule: 'cascade' })
+  GTFSFeedInfo!: GTFSFeedInfo;
 }

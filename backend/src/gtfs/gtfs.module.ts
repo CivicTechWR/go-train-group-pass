@@ -12,6 +12,9 @@ import {
 } from '../entities';
 import { ConfigModule } from '@nestjs/config';
 
+import { GtfsController } from './gtfs.controller';
+import { GTFSFeedInfo } from 'src/entities/gtfs_feed_info.entity';
+
 @Module({
   imports: [
     MikroOrmModule.forFeature([
@@ -21,9 +24,11 @@ import { ConfigModule } from '@nestjs/config';
       GTFSTrip,
       GTFSStopTime,
       GTFSCalendarDate,
+      GTFSFeedInfo,
     ]),
     ConfigModule,
   ],
+  controllers: [GtfsController],
   providers: [GtfsService],
   exports: [GtfsService],
 })

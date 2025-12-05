@@ -13,7 +13,7 @@ export type GTFSTimeString = string & { readonly __brand: 'GtfsTimeString' };
  * A simple regex to validate the HH:MM:SS format.
  * (e.g., "25", "48").
  */
-const gtfsTimeRegex = /^\d{2}:\d{2}:\d{2}$/;
+export const gtfsTimeRegex = /^\d+:\d{2}:\d{2}$/;
 
 /**
  * This checks if the value is a string and matches the
@@ -30,4 +30,23 @@ export function isGtfsTimeString(value: unknown): value is GTFSTimeString {
 
   // 2. Check if it matches the GTFS time format
   return gtfsTimeRegex.test(value);
+}
+
+/**
+ * This checks if the value is a string and matches the
+ * GTFS time format (e.g., "25:30:00").
+ *
+ * @param value The value to check.
+ * @returns True if the value is a GtfsTimeString, false otherwise.
+ */
+export function parseGTFSTimeString(
+  value: unknown,
+): GTFSTimeString | undefined {
+  // 1. Check if it's a string
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+
+  // 2. Check if it matches the GTFS time format
+  return gtfsTimeRegex.test(value) ? (value as GTFSTimeString) : undefined;
 }
