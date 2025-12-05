@@ -22,7 +22,7 @@ import { GTFSFeedInfo } from './gtfs_feed_info.entity';
 @Unique({ properties: ['trip', 'stopSequence', 'GTFSFeedInfo'] })
 export class GTFSStopTime extends BaseEntity {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
-  id: string = randomUUID();
+  id?: string = randomUUID();
 
   @Property()
   stopSequence!: number;
