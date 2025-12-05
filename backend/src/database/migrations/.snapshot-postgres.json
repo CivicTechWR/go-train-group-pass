@@ -16,117 +16,6 @@
           "default": "gen_random_uuid()",
           "mappedType": "uuid"
         },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamptz",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 6,
-          "mappedType": "datetime"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamptz",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 6,
-          "mappedType": "datetime"
-        },
-        "agency_id": {
-          "name": "agency_id",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "agency_name": {
-          "name": "agency_name",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "agency_url": {
-          "name": "agency_url",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "agency_timezone": {
-          "name": "agency_timezone",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "agency_lang": {
-          "name": "agency_lang",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "agency_phone": {
-          "name": "agency_phone",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "length": 255,
-          "mappedType": "string"
-        }
-      },
-      "name": "agency",
-      "schema": "go-train-group-pass",
-      "indexes": [
-        {
-          "keyName": "agency_pkey",
-          "columnNames": [
-            "id"
-          ],
-          "composite": false,
-          "constraint": true,
-          "primary": true,
-          "unique": true
-        }
-      ],
-      "checks": [],
-      "foreignKeys": {},
-      "nativeEnums": {}
-    },
-    {
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "default": "gen_random_uuid()",
-          "mappedType": "uuid"
-        },
         "feed_publisher_name": {
           "name": "feed_publisher_name",
           "type": "varchar(255)",
@@ -186,11 +75,31 @@
           "nullable": false,
           "length": 255,
           "mappedType": "string"
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
         }
       },
       "name": "gtfs_feed_info",
       "schema": "go-train-group-pass",
       "indexes": [
+        {
+          "keyName": "gtfs_feed_info_feed_version_unique",
+          "columnNames": [
+            "feed_version"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
         {
           "keyName": "gtfs_feed_info_pkey",
           "columnNames": [
@@ -291,6 +200,17 @@
           "unique": false
         },
         {
+          "keyName": "gtfs_calendar_dates_service_id_gtfsfeed_info_id_unique",
+          "columnNames": [
+            "service_id",
+            "gtfsfeed_info_id"
+          ],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
           "keyName": "gtfs_calendar_dates_pkey",
           "columnNames": [
             "id"
@@ -313,6 +233,152 @@
             "id"
           ],
           "referencedTableName": "go-train-group-pass.gtfs_feed_info",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "gen_random_uuid()",
+          "mappedType": "uuid"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "agency_id": {
+          "name": "agency_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "agency_name": {
+          "name": "agency_name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "agency_url": {
+          "name": "agency_url",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "agency_timezone": {
+          "name": "agency_timezone",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "agency_lang": {
+          "name": "agency_lang",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "agency_phone": {
+          "name": "agency_phone",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "gtfsfeed_info_id": {
+          "name": "gtfsfeed_info_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        }
+      },
+      "name": "agency",
+      "schema": "go-train-group-pass",
+      "indexes": [
+        {
+          "keyName": "agency_agency_id_gtfsfeed_info_id_unique",
+          "columnNames": [
+            "agency_id",
+            "gtfsfeed_info_id"
+          ],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "agency_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "agency_gtfsfeed_info_id_foreign": {
+          "constraintName": "agency_gtfsfeed_info_id_foreign",
+          "columnNames": [
+            "gtfsfeed_info_id"
+          ],
+          "localTableName": "go-train-group-pass.agency",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.gtfs_feed_info",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -452,6 +518,17 @@
       "schema": "go-train-group-pass",
       "indexes": [
         {
+          "keyName": "gtfs_routes_route_id_gtfsfeed_info_id_unique",
+          "columnNames": [
+            "route_id",
+            "gtfsfeed_info_id"
+          ],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
           "keyName": "gtfs_routes_pkey",
           "columnNames": [
             "id"
@@ -487,6 +564,7 @@
             "id"
           ],
           "referencedTableName": "go-train-group-pass.gtfs_feed_info",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -524,8 +602,8 @@
           "length": 6,
           "mappedType": "datetime"
         },
-        "stopid": {
-          "name": "stopid",
+        "stop_id": {
+          "name": "stop_id",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
@@ -638,6 +716,17 @@
       "schema": "go-train-group-pass",
       "indexes": [
         {
+          "keyName": "gtfs_stops_stop_id_gtfsfeed_info_id_unique",
+          "columnNames": [
+            "stop_id",
+            "gtfsfeed_info_id"
+          ],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
           "keyName": "gtfs_stops_pkey",
           "columnNames": [
             "id"
@@ -660,6 +749,7 @@
             "id"
           ],
           "referencedTableName": "go-train-group-pass.gtfs_feed_info",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -827,6 +917,17 @@
           "unique": false
         },
         {
+          "keyName": "gtfs_trips_trip_id_gtfsfeed_info_id_unique",
+          "columnNames": [
+            "trip_id",
+            "gtfsfeed_info_id"
+          ],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
           "keyName": "gtfs_trips_pkey",
           "columnNames": [
             "id"
@@ -861,6 +962,7 @@
             "id"
           ],
           "referencedTableName": "go-train-group-pass.gtfs_feed_info",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -897,16 +999,6 @@
           "nullable": false,
           "length": 6,
           "mappedType": "datetime"
-        },
-        "stop_time_id": {
-          "name": "stop_time_id",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
         },
         "stop_sequence": {
           "name": "stop_sequence",
@@ -1038,6 +1130,18 @@
           "unique": false
         },
         {
+          "keyName": "gtfs_stop_times_trip_id_stop_sequence_gtfsfeed_info_id_unique",
+          "columnNames": [
+            "trip_id",
+            "stop_sequence",
+            "gtfsfeed_info_id"
+          ],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
           "keyName": "gtfs_stop_times_pkey",
           "columnNames": [
             "id"
@@ -1084,6 +1188,7 @@
             "id"
           ],
           "referencedTableName": "go-train-group-pass.gtfs_feed_info",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },

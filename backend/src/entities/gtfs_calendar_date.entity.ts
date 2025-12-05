@@ -4,6 +4,7 @@ import {
   Property,
   Index,
   ManyToOne,
+  Unique,
 } from '@mikro-orm/core';
 import { randomUUID } from 'crypto';
 import { GTFSFeedInfo } from './gtfs_feed_info.entity';
@@ -11,6 +12,7 @@ import { BaseEntity } from './base';
 
 @Entity({ tableName: 'gtfs_calendar_dates' })
 @Index({ name: 'idx_calendar_dates_date', properties: ['date'] })
+@Unique({ properties: ['serviceId', 'GTFSFeedInfo'] })
 export class GTFSCalendarDate extends BaseEntity {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id: string = randomUUID();
@@ -24,6 +26,6 @@ export class GTFSCalendarDate extends BaseEntity {
   @Property()
   exceptionType!: number; // 1=added, 2=removed
 
-  @ManyToOne(() => GTFSFeedInfo)
+  @ManyToOne(() => GTFSFeedInfo, { deleteRule: 'cascade' })
   GTFSFeedInfo!: GTFSFeedInfo;
 }

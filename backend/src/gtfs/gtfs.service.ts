@@ -2,6 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import JSZip from 'jszip';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
 import {
   Agency,
   GTFSRoute,
@@ -10,20 +13,39 @@ import {
   GTFSStopTime,
   GTFSCalendarDate,
 } from '../entities';
-import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
+import {
+  CreateRequestContext,
+  EntityManager,
+  EntityRepository,
+} from '@mikro-orm/postgresql';
 import { InjectRepository } from '@mikro-orm/nestjs';
+
 import {
   GTFSAgencyImport,
-  GTFSCalendarDatesImport,
-  GTFSRoutesImport,
-  GTFSStopsImport,
-  GTFSStopTimesImport,
-  GTFSTripsImport,
-} from './gtfs-import.types';
+  GTFSAgencySchema,
+  GTFSCalendarDateImport,
+  GTFSCalendarDateSchema,
+  GTFSFeedInfoSchema,
+  GTFSRouteImport,
+  GTFSRouteSchema,
+  GTFSStopImport,
+  GTFSStopSchema,
+  GTFSStopTimeImport,
+  GTFSStopTimeSchema,
+  GTFSTripImport,
+  GTFSTripSchema,
+} from './gtfs.schemas';
 import { GTFSFeedInfo } from 'src/entities/gtfs_feed_info.entity';
+import { parseCsvWithSchema } from 'src/utils/parseCSVWithZod';
+import { gtfsDateStringToDate } from 'src/utils/gtfsDateStringToDate';
 
 interface GtfsFiles {
   [filename: string]: string;
+}
+
+export enum DownloadAndImportGTFSDataResult {
+  FEED_EXISTS = 'FEED_EXISTS',
+  FEED_UPDATED = 'FEED_UPDATED',
 }
 
 @Injectable()
@@ -93,13 +115,6 @@ export class GtfsService {
       >;
       const data = resp.data;
 
-      if (status === 304) {
-        this.logger.log(
-          'GTFS not modified (304). Keeping existing in-memory files.',
-        );
-        return this.getLatestGtfsFiles(); // returns defensive copy
-      }
-
       // Save ETag / Last-Modified for conditional requests
       if (responseHeaders['etag']) {
         this.etag = String(responseHeaders['etag']);
@@ -118,17 +133,24 @@ export class GtfsService {
       const buffer = Buffer.from(data);
       const zip = await JSZip.loadAsync(buffer);
 
+      const extractDir = path.join(os.tmpdir(), 'gtfs-data');
+      if (!fs.existsSync(extractDir)) {
+        fs.mkdirSync(extractDir, { recursive: true });
+      }
+
       const files: GtfsFiles = {};
       for (const [name, file] of Object.entries(zip.files)) {
         if (!file.dir) {
-          // small scale: load as string. If large, consider streaming or selective files.
-          files[name] = await file.async('string');
+          const filePath = path.join(extractDir, name);
+          const content = await file.async('nodebuffer');
+          fs.writeFileSync(filePath, content);
+          files[name] = filePath;
         }
       }
 
       this.latestGtfsFiles = files;
       this.logger.log(
-        `Downloaded and extracted ${Object.keys(files).length} GTFS files to memory`,
+        `Downloaded and extracted ${Object.keys(files).length} GTFS files to ${extractDir}`,
       );
       return this.getLatestGtfsFiles();
     } catch (err: unknown) {
@@ -139,78 +161,118 @@ export class GtfsService {
     }
   }
 
-  // Return a defensive shallow copy to avoid external mutation
   getLatestGtfsFiles(): GtfsFiles {
     return { ...this.latestGtfsFiles };
   }
 
-  /**
-   * Parse CSV string into array of objects
-   */
-  private parseCSV(
-    content: string | undefined,
-  ): { [key: string]: string | undefined }[] {
-    if (!content) return [];
+  @CreateRequestContext()
+  async downloadAndImportToDatabase() {
+    const files = await this.downloadGtfs();
+    if (!files) return;
 
-    const lines = content.trim().split('\n');
-    if (lines.length < 2) return [];
+    this.logger.log('Parsing feed_info.txt...');
+    const { validRows: feedInfoData, errors: feedInfoErrors } =
+      parseCsvWithSchema(files['feed_info.txt'], GTFSFeedInfoSchema);
+    if (feedInfoErrors.length) throw new Error(`Error parsing feed_info.txt`);
+    if (!feedInfoData.length) throw new Error('No feed_info found!');
+    if (feedInfoData.length > 1)
+      throw new Error(
+        'Supporting more than one feed info per upload is not supported',
+      );
 
-    const headers = this.parseCSVLine(lines[0]);
-    const result: { [key: string]: string | undefined }[] = [];
+    const rawFeed = feedInfoData[0];
+    const validatedFeed = GTFSFeedInfoSchema.parse(rawFeed);
+    const feedInfo = await this.feedInfoRepository.findOne({
+      feedVersion: validatedFeed.feed_version,
+    });
 
-    for (let i = 1; i < lines.length; i++) {
-      if (!lines[i].trim()) continue;
-
-      const values = this.parseCSVLine(lines[i]);
-      const obj: { [key: string]: string | undefined } = {};
-
-      headers.forEach((header, index) => {
-        obj[header] = values[index] || undefined;
-      });
-
-      result.push(obj);
+    if (feedInfo) {
+      this.logger.log(
+        `Feed info already exists for version ${validatedFeed.feed_version}`,
+      );
+      return DownloadAndImportGTFSDataResult.FEED_EXISTS;
     }
+    const newFeed = this.feedInfoRepository.create({
+      feedPublisherName: validatedFeed.feed_publisher_name,
+      feedPublisherUrl: validatedFeed.feed_publisher_url,
+      feedLang: validatedFeed.feed_lang,
+      feedStartDate: gtfsDateStringToDate(validatedFeed.feed_start_date), // "20251201"
+      feedEndDate: gtfsDateStringToDate(validatedFeed.feed_end_date), // "20260101"
+      feedVersion: validatedFeed.feed_version,
+      isActive: false,
+    });
 
-    return result;
-  }
+    await this.feedInfoRepository.getEntityManager().persistAndFlush(newFeed);
+    this.logger.log(`Created new Feed Version: ID ${newFeed.id}`);
+    try {
+      const { validRows: agencyData, errors: agencyErrors } =
+        parseCsvWithSchema(files['agency.txt'], GTFSAgencySchema);
+      if (agencyErrors.length) throw new Error(`Error parsing agency.txt`);
+      const agencyMap = await this.importAgencies(agencyData, newFeed);
 
-  /**
-   * Parse a single CSV line, handling quoted fields
-   */
-  private parseCSVLine(line: string): string[] {
-    const result: string[] = [];
-    let current = '';
-    let inQuotes = false;
+      const { errors: calendarDateErrors } = parseCsvWithSchema(
+        files['calendar_dates.txt'],
+        GTFSCalendarDateSchema,
+      );
+      if (calendarDateErrors.length)
+        throw new Error(`Error parsing calendar_dates.txt`);
 
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
+      const { validRows: routeData, errors: routeErrors } = parseCsvWithSchema(
+        files['routes.txt'],
+        GTFSRouteSchema,
+      );
+      if (routeErrors.length) throw new Error(`Error parsing routes.txt`);
+      const routeMap = await this.importRoutes(routeData, newFeed, agencyMap);
 
-      if (char === '"') {
-        inQuotes = !inQuotes;
-      } else if (char === ',' && !inQuotes) {
-        result.push(current.trim());
-        current = '';
-      } else {
-        current += char;
+      const { validRows: stopData, errors: stopErrors } = parseCsvWithSchema(
+        files['stops.txt'],
+        GTFSStopSchema,
+      );
+      if (stopErrors.length) throw new Error(`Error parsing stops.txt`);
+      const stopMap = await this.importStops(stopData, newFeed);
+
+      const { validRows: tripData, errors: tripErrors } = parseCsvWithSchema(
+        files['trips.txt'],
+        GTFSTripSchema,
+      );
+      // print errors
+      if (tripErrors.length) throw new Error(`Error parsing trips.txt`);
+      const tripMap = await this.importTrips(tripData, newFeed, routeMap);
+
+      const { validRows: stopTimeData, errors: stopTimeErrors } =
+        parseCsvWithSchema(files['stop_times.txt'], GTFSStopTimeSchema);
+      if (stopTimeErrors.length)
+        throw new Error(`Error parsing stop_times.txt`);
+      await this.importStopTimes(stopTimeData, newFeed, stopMap, tripMap);
+    } catch (err) {
+      this.logger.error('Error during GTFS import; rolling back.', err);
+      // 6. SAFETY NET: Delete the half-finished feed
+      if (newFeed && newFeed.id) {
+        this.logger.log(`Cleaning up broken feed ${newFeed.id}...`);
+        // Assuming you have Cascade Delete set up in your Entity,
+        // this ONE line deletes thousands of orphan stops/routes.
+        await this.feedInfoRepository
+          .getEntityManager()
+          .removeAndFlush(newFeed);
       }
+      throw err;
     }
 
-    result.push(current.trim());
-    return result;
-  }
-
-  private downloadAndImportToDatabase() {
-    // get recent feed info
-    // download
-    // import
-
+    this.logger.log(`Import Complete. Marking Feed ${newFeed.id} as active.`);
+    newFeed.isActive = true;
+    await this.feedInfoRepository.getEntityManager().persistAndFlush(newFeed);
+    return DownloadAndImportGTFSDataResult.FEED_UPDATED;
   }
 
   /**
    * Import agencies into database
    */
-  private async importAgencies(agencies: GTFSAgencyImport[]): Promise<void> {
-    if (!agencies.length) return;
+  private async importAgencies(
+    agencies: GTFSAgencyImport[],
+    feedInfo: GTFSFeedInfo,
+  ): Promise<Map<string, string>> {
+    const agencyMap = new Map<string, string>();
+    if (!agencies.length) return agencyMap;
 
     this.logger.log(`Importing ${agencies.length} agencies...`);
     const batchSize = 100;
@@ -219,25 +281,27 @@ export class GtfsService {
       const batch = agencies.slice(i, i + batchSize);
       const entities = batch.map((row) =>
         this.agencyRepository.create({
-          id: row.agency_id,
           agencyName: row.agency_name,
           agencyUrl: row.agency_url,
           agencyTimezone: row.agency_timezone,
           agencyLang: row.agency_lang,
           agencyPhone: row.agency_phone,
           agencyId: row.agency_id || '',
+          GTFSFeedInfo: feedInfo,
         }),
       );
-      await this.em.persistAndFlush(entities);
+      await this.agencyRepository.getEntityManager().persistAndFlush(entities);
+      entities.forEach((entity) => agencyMap.set(entity.agencyId, entity.id));
     }
+    return agencyMap;
   }
 
   /**
    * Import calendar dates into database
    */
   private async importCalendarDates(
-    calendarDates: GTFSCalendarDatesImport[],
-    feedInfoId: string,
+    calendarDates: GTFSCalendarDateImport[],
+    feedInfo: GTFSFeedInfo,
   ): Promise<void> {
     if (!calendarDates.length) return;
 
@@ -248,19 +312,16 @@ export class GtfsService {
       const batch = calendarDates.slice(i, i + batchSize);
       const entities = batch.map((row) => {
         const dateStr = row.date.toString();
-        const year = parseInt(dateStr.substring(0, 4));
-        const month = parseInt(dateStr.substring(4, 6)) - 1;
-        const day = parseInt(dateStr.substring(6, 8));
-        const date = new Date(year, month, day);
-
         return this.calendarDateRepository.create({
           serviceId: row.service_id,
-          date: date,
+          date: gtfsDateStringToDate(dateStr),
           exceptionType: parseInt(row.exception_type),
-          GTFSFeedInfo: this.feedInfoRepository.getReference(feedInfoId),
+          GTFSFeedInfo: feedInfo,
         });
       });
-      await this.em.persistAndFlush(entities);
+      await this.calendarDateRepository
+        .getEntityManager()
+        .persistAndFlush(entities);
     }
   }
 
@@ -268,59 +329,65 @@ export class GtfsService {
    * Import routes into database
    */
   private async importRoutes(
-    routes: GTFSRoutesImport[],
-    feedInfoId: string,
-  ): Promise<void> {
-    if (!routes.length) return;
+    routes: GTFSRouteImport[],
+    feedInfo: GTFSFeedInfo,
+    agencyMap: Map<string, string>,
+  ): Promise<Map<string, string>> {
+    const routeMap = new Map<string, string>();
+    if (!routes.length) return routeMap;
 
     this.logger.log(`Importing ${routes.length} routes...`);
     const batchSize = 100;
 
     for (let i = 0; i < routes.length; i += batchSize) {
       const batch = routes.slice(i, i + batchSize);
-      const entities = await Promise.all(
-        batch.map(async (row) => {
-          const agency = row.agency_id
-            ? await this.agencyRepository.findOne({ id: row.agency_id })
-            : null;
 
-          return this.routeRepository.create({
-            id: row.route_id,
-            routeShortName: row.route_short_name,
-            routeLongName: row.route_long_name,
-            routeDesc: row.route_desc,
-            routeType: parseInt(row.route_type),
-            routeUrl: row.route_url,
-            routeColor: row.route_color,
-            routeTextColor: row.route_text_color,
-            agency: agency || undefined,
-            GTFSFeedInfo: this.feedInfoRepository.getReference(feedInfoId),
-            route_id: row.route_id || '',
-          });
-        }),
-      );
-      await this.em.persistAndFlush(entities);
+      const entities = batch.map((row) => {
+        const agencyId = row.agency_id || '';
+        const agencyPk = agencyMap.get(agencyId);
+        if (!agencyPk) {
+          throw new Error(
+            `Agency ID '${agencyId}' not found for route ${row.route_id}`,
+          );
+        }
+
+        return this.routeRepository.create({
+          routeShortName: row.route_short_name,
+          routeLongName: row.route_long_name,
+          routeDesc: row.route_desc,
+          routeType: parseInt(row.route_type),
+          routeUrl: row.route_url,
+          routeColor: row.route_color,
+          routeTextColor: row.route_text_color,
+          agency: this.agencyRepository.getReference(agencyPk),
+          GTFSFeedInfo: feedInfo,
+          route_id: row.route_id || '',
+        });
+      });
+
+      await this.routeRepository.getEntityManager().persistAndFlush(entities);
+      entities.forEach((entity) => routeMap.set(entity.route_id, entity.id));
     }
+    return routeMap;
   }
 
   /**
    * Import stops into database
    */
   private async importStops(
-    stops: GTFSStopsImport[],
-    feedInfoId: string,
-  ): Promise<void> {
-    if (!stops.length) return;
+    stops: GTFSStopImport[],
+    feedInfo: GTFSFeedInfo,
+  ): Promise<Map<string, string>> {
+    const stopMap = new Map<string, string>();
+    if (!stops.length) return stopMap;
 
     this.logger.log(`Importing ${stops.length} stops...`);
     const batchSize = 500;
-
 
     for (let i = 0; i < stops.length; i += batchSize) {
       const batch = stops.slice(i, i + batchSize);
       const entities = batch.map((row) =>
         this.stopRepository.create({
-          id: row.stop_id,
           stopName: row.stop_name,
           stopDesc: row.stop_desc,
           stopLat: parseFloat(row.stop_lat),
@@ -334,62 +401,74 @@ export class GtfsService {
           wheelchairBoarding: row.wheelchair_boarding
             ? parseInt(row.wheelchair_boarding)
             : undefined,
-          GTFSFeedInfo: this.feedInfoRepository.getReference(feedInfoId),
-          stopid: row.stop_id || '',
+          GTFSFeedInfo: feedInfo,
+          stopId: row.stop_id || '',
         }),
       );
-      await this.em.persistAndFlush(entities);
+      await this.stopRepository.getEntityManager().persistAndFlush(entities);
+      entities.forEach((entity) => stopMap.set(entity.stopId, entity.id));
     }
+    return stopMap;
   }
 
   /**
    * Import trips into database
    */
   private async importTrips(
-    trips: GTFSTripsImport[],
-    feedInfoId: string,
-  ): Promise<void> {
-    if (!trips.length) return;
+    trips: GTFSTripImport[],
+    feedInfo: GTFSFeedInfo,
+    routeMap: Map<string, string>,
+  ): Promise<Map<string, string>> {
+    const tripMap = new Map<string, string>();
+    if (!trips.length) return tripMap;
 
     this.logger.log(`Importing ${trips.length} trips...`);
     const batchSize = 500;
 
     for (let i = 0; i < trips.length; i += batchSize) {
       const batch = trips.slice(i, i + batchSize);
-      const entities = await Promise.all(
-        batch.map(async (row) => {
-          return this.tripRepository.create({
-            id: row.trip_id,
-            serviceId: row.service_id!,
-            tripHeadsign: row.trip_headsign,
-            tripShortName: row.trip_short_name,
-            directionId: row.direction_id
-              ? parseInt(row.direction_id)
-              : undefined,
-            blockId: row.block_id,
-            shapeId: row.shape_id,
-            wheelchairAccessible: row.wheelchair_accessible
-              ? parseInt(row.wheelchair_accessible)
-              : undefined,
-            bikesAllowed: row.bikes_allowed
-              ? parseInt(row.bikes_allowed)
-              : undefined,
-            route: this.routeRepository.getReference(row.route_id || ''),
-            trip_id: row.trip_id || '',
-            GTFSFeedInfo: this.feedInfoRepository.getReference(feedInfoId),
-          });
-        }),
-      );
-      await this.em.persistAndFlush(entities);
+      const entities = batch.map((row) => {
+        const routePk = routeMap.get(row.route_id);
+        if (!routePk)
+          throw new Error(
+            `Route ID '${row.route_id}' not found for trip ${row.trip_id}`,
+          );
+
+        return this.tripRepository.create({
+          serviceId: row.service_id,
+          tripHeadsign: row.trip_headsign,
+          tripShortName: row.trip_short_name,
+          directionId: row.direction_id
+            ? parseInt(row.direction_id)
+            : undefined,
+          blockId: row.block_id,
+          shapeId: row.shape_id,
+          wheelchairAccessible: row.wheelchair_accessible
+            ? parseInt(row.wheelchair_accessible)
+            : undefined,
+          bikesAllowed: row.bikes_allowed
+            ? parseInt(row.bikes_allowed)
+            : undefined,
+          route: this.routeRepository.getReference(routePk),
+          trip_id: row.trip_id,
+          GTFSFeedInfo: feedInfo,
+        });
+      });
+
+      await this.tripRepository.getEntityManager().persistAndFlush(entities);
+      entities.forEach((entity) => tripMap.set(entity.trip_id, entity.id));
     }
+    return tripMap;
   }
 
   /**
    * Import stop times into database
    */
   private async importStopTimes(
-    stopTimes: GTFSStopTimesImport[],
-    feedInfoId: string,
+    stopTimes: GTFSStopTimeImport[],
+    newFeed: GTFSFeedInfo,
+    stopMap: Map<string, string>,
+    tripMap: Map<string, string>,
   ): Promise<void> {
     if (!stopTimes.length) return;
 
@@ -398,31 +477,46 @@ export class GtfsService {
 
     for (let i = 0; i < stopTimes.length; i += batchSize) {
       const batch = stopTimes.slice(i, i + batchSize);
-      const entities = await Promise.all(
-        batch.map(async (row) => {
+      const entities = batch.map((row) => {
+        //validate row as GTFSStopTimeImport
+        const validatedRow = GTFSStopTimeSchema.parse(row);
+        const stopPk = stopMap.get(validatedRow.stop_id);
+        const tripPk = tripMap.get(validatedRow.trip_id);
 
-          return this.stopTimeRepository.create({
-            id: row.trip_id,
-            stopSequence: parseInt(row.stop_sequence),
-            arrivalTime: row.arrival_time,
-            departureTime: row.departure_time,
-            stopHeadsign: row.stop_headsign,
-            pickupType: row.pickup_type ? parseInt(row.pickup_type) : undefined,
-            dropOffType: row.drop_off_type
-              ? parseInt(row.drop_off_type)
-              : undefined,
-            shapeDistTraveled: row.shape_dist_traveled
-              ? parseFloat(row.shape_dist_traveled)
-              : undefined,
-            timepoint: row.timepoint ? parseInt(row.timepoint) : undefined,
-            stop: this.stopRepository.getReference(row.stop_id || ''),
-            trip: this.tripRepository.getReference(row.trip_id || ''),
-            GTFSFeedInfo: this.feedInfoRepository.getReference(feedInfoId),
-            stop_time_id: row.trip_id || '',
-          });
-        }),
-      );
-      await this.em.persistAndFlush(entities);
+        if (!stopPk)
+          throw new Error(
+            `Stop ID '${validatedRow.stop_id}' not found for stop time`,
+          );
+        if (!tripPk)
+          throw new Error(
+            `Trip ID '${validatedRow.trip_id}' not found for stop time`,
+          );
+
+        return this.stopTimeRepository.create({
+          stopSequence: parseInt(validatedRow.stop_sequence),
+          arrivalTime: validatedRow.arrival_time,
+          departureTime: validatedRow.departure_time,
+          stopHeadsign: validatedRow.stop_headsign,
+          pickupType: validatedRow.pickup_type
+            ? parseInt(validatedRow.pickup_type)
+            : undefined,
+          dropOffType: validatedRow.drop_off_type
+            ? parseInt(validatedRow.drop_off_type)
+            : undefined,
+          shapeDistTraveled: validatedRow.shape_dist_traveled
+            ? parseFloat(validatedRow.shape_dist_traveled)
+            : undefined,
+          timepoint: validatedRow.timepoint
+            ? parseInt(validatedRow.timepoint)
+            : undefined,
+          stop: this.stopRepository.getReference(stopPk),
+          trip: this.tripRepository.getReference(tripPk),
+          GTFSFeedInfo: newFeed,
+        });
+      });
+      await this.stopTimeRepository
+        .getEntityManager()
+        .persistAndFlush(entities);
     }
   }
 }
