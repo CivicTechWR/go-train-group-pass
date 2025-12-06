@@ -24,14 +24,15 @@ import {
   PasswordResetResponseDto,
   AuthResponseDto,
   UserDto,
-} from './dto/auth.dto';
+  AuthResponseSchema,
+  UserSchema,
+} from '@go-train-group-pass/shared';
 import { Serialize } from '../../common/decorators/serialize.decorator';
-import { AuthResponseSchema, UserSchema } from './auth.schemas';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post('signup')
   @ApiOperation({ summary: 'Register a new user' })

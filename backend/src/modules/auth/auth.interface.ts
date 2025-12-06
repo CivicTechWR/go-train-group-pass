@@ -5,7 +5,7 @@ import {
   PasswordUpdateInputDto,
   AuthResponseDto,
   UserDto,
-} from './dto/auth.dto';
+} from '@go-train-group-pass/shared';
 
 export interface IAuthService {
   signUp(signUpInput: SignUpInputDto): Promise<void>;

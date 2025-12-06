@@ -10,6 +10,8 @@ const logFn = (message: string) => {
   logger.log(message);
 };
 
+import * as entities from './entities';
+
 export default defineConfig({
   schema: 'go-train-group-pass',
   clientUrl: process.env.DATABASE_URL,
@@ -30,8 +32,7 @@ export default defineConfig({
   seeder: {
     path: './src/database/seeders',
   },
-  entities: ['./dist/**/*.entity.js'], // Compiled JS files
-  entitiesTs: ['./src/**/*.entity.ts'],
+  entities: Object.values(entities),
   metadataCache: {
     enabled: true,
   },

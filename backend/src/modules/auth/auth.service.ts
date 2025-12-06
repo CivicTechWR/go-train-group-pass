@@ -12,7 +12,7 @@ import {
   PasswordUpdateInputDto,
   AuthResponseDto,
   UserDto,
-} from './dto/auth.dto';
+} from '@go-train-group-pass/shared';
 
 import { IAuthService } from './auth.interface';
 
@@ -21,7 +21,7 @@ export class AuthService implements IAuthService {
   constructor(
     private readonly supabaseService: SupabaseService,
     private readonly usersService: UsersService,
-  ) {}
+  ) { }
 
   /**
    * Sign up a new user using Supabase Auth and create a user record in our database
