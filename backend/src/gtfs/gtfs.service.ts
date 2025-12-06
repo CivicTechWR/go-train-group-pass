@@ -194,11 +194,18 @@ export class GtfsService {
       feedVersion: validatedFeed.feed_version,
     });
 
-    if (feedInfo) {
+    if (feedInfo && feedInfo.isActive) {
       this.logger.log(
         `Feed info already exists for version ${validatedFeed.feed_version}`,
       );
       return DownloadAndImportGTFSDataResult.FEED_EXISTS;
+    }
+
+    if (feedInfo && !feedInfo.isActive) {
+      this.logger.log(
+        `Feed info already exists for version ${validatedFeed.feed_version} but is inactive; assuming corruption and re-importing.`,
+      );
+      await this.feedInfoRepository.nativeDelete(feedInfo);
     }
 
     const newFeed = this.feedInfoRepository.create({
@@ -226,7 +233,7 @@ export class GtfsService {
       if (newFeed && newFeed.id) {
         this.logger.log(`Cleaning up broken feed ${newFeed.id}...`);
         // using native delete because it's faster
-        await this.em.nativeDelete(GTFSFeedInfo, newFeed);
+        await this.feedInfoRepository.nativeDelete(newFeed);
       }
       throw err;
     }
