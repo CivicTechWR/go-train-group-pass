@@ -1855,7 +1855,8 @@
             "checked_in",
             "grouped",
             "completed",
-            "no_show"
+            "no_show",
+            "cancelled"
           ],
           "mappedType": "enum"
         },

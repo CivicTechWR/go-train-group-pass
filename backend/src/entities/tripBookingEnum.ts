@@ -4,4 +4,5 @@ export enum TripBookingStatus {
   GROUPED = 'grouped',
   COMPLETED = 'completed',
   NO_SHOW = 'no_show',
+  CANCELLED = 'cancelled',
 }
