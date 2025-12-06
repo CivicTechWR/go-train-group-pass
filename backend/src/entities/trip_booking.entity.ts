@@ -34,13 +34,13 @@ export class TripBooking extends BaseEntity {
   status: TripBookingStatus = TripBookingStatus.PENDING;
 
   @Property({ type: 'boolean', default: false })
-  isConfirmedBySteward: boolean = false;
+  isConfirmedBySteward?: boolean = false;
 
   @Property({ type: 'datetime', nullable: true })
   confirmedAt?: Date;
 
-  @Property({ type: 'boolean', default: true })
-  memberPresent: boolean = true;
+  @Property({ type: 'boolean', default: false })
+  memberPresent?: boolean = false;
 
   @ManyToOne(() => User, {
     index: true,
