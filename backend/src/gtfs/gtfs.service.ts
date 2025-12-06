@@ -13,6 +13,7 @@ import {
   GTFSTrip,
   GTFSStopTime,
   GTFSCalendarDate,
+  GTFSFeedInfo,
 } from '../entities';
 import {
   CreateRequestContext,
@@ -36,9 +37,8 @@ import {
   GTFSTripImport,
   GTFSTripSchema,
 } from './gtfs.schemas';
-import { GTFSFeedInfo } from 'src/entities/gtfs_feed_info.entity';
-import { parseCsvWithSchema } from 'src/utils/parseCSVWithZod';
-import { gtfsDateStringToDate } from 'src/utils/gtfsDateStringToDate';
+import { parseCsvWithSchema } from '../utils/parseCSVWithZod';
+import { gtfsDateStringToDate } from '../utils/gtfsDateStringToDate';
 
 interface GtfsFiles {
   [filename: string]: string;
@@ -421,15 +421,15 @@ export class GtfsService {
       const entities = batch.map((row) =>
         this.stopRepository.create({
           stopName: row.stop_name,
-          stopDesc: row.stop_desc,
+          stopDesc: row.stop_desc ?? undefined,
           stopLat: parseFloat(row.stop_lat),
           stopLon: parseFloat(row.stop_lon),
-          zoneId: row.zone_id,
-          stopUrl: row.stop_url,
+          zoneId: row.zone_id ?? undefined,
+          stopUrl: row.stop_url ?? undefined,
           locationType: row.location_type
             ? parseInt(row.location_type)
             : undefined,
-          parentStation: row.parent_station,
+          parentStation: row.parent_station ?? undefined,
           wheelchairBoarding: row.wheelchair_boarding
             ? parseInt(row.wheelchair_boarding)
             : undefined,
