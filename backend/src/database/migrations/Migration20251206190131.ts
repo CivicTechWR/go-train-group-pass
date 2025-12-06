@@ -1,12 +1,12 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20251205042537 extends Migration {
+export class Migration20251206190131 extends Migration {
 
   override async up(): Promise<void> {
     this.addSql(`create table "go-train-group-pass"."trip" ("id" uuid not null default gen_random_uuid(), "gtfs_trip_id" uuid not null, "origin_stop_time_id" uuid not null, "destination_stop_time_id" uuid not null, constraint "trip_pkey" primary key ("id"));`);
     this.addSql(`alter table "go-train-group-pass"."trip" add constraint "trip_gtfs_trip_id_origin_stop_time_id_destination_59c37_unique" unique ("gtfs_trip_id", "origin_stop_time_id", "destination_stop_time_id");`);
 
-    this.addSql(`create table "go-train-group-pass"."travel_group" ("id" uuid not null default gen_random_uuid(), "group_number" int not null, "finalized_at" timestamptz null, "status" text check ("status" in ('forming', 'finalized', 'departed', 'completed')) not null default 'forming', "trip_id" uuid not null, "steward_id" uuid not null, constraint "travel_group_pkey" primary key ("id"));`);
+    this.addSql(`create table "go-train-group-pass"."travel_group" ("id" uuid not null default gen_random_uuid(), "created_at" timestamptz not null, "updated_at" timestamptz not null, "group_number" int not null, "finalized_at" timestamptz null, "status" text check ("status" in ('forming', 'finalized', 'departed', 'completed')) not null default 'forming', "trip_id" uuid not null, "steward_id" uuid not null, constraint "travel_group_pkey" primary key ("id"));`);
     this.addSql(`create index "travel_group_trip_id_index" on "go-train-group-pass"."travel_group" ("trip_id");`);
     this.addSql(`create index "travel_group_steward_id_index" on "go-train-group-pass"."travel_group" ("steward_id");`);
 
@@ -15,7 +15,7 @@ export class Migration20251205042537 extends Migration {
     this.addSql(`create table "go-train-group-pass"."itinerary" ("id" uuid not null default gen_random_uuid(), "created_at" timestamptz not null, "updated_at" timestamptz not null, "status" text check ("status" in ('draft', 'confirmed', 'in_progress', 'completed', 'cancelled')) not null default 'draft', "wants_to_steward" boolean not null default false, "user_id" uuid not null, constraint "itinerary_pkey" primary key ("id"));`);
     this.addSql(`create index "itinerary_user_id_index" on "go-train-group-pass"."itinerary" ("user_id");`);
 
-    this.addSql(`create table "go-train-group-pass"."trip_booking" ("id" uuid not null default gen_random_uuid(), "sequence" int null, "checked_in_at" timestamptz null, "status" text check ("status" in ('pending', 'checked_in', 'grouped', 'completed', 'no_show')) not null default 'pending', "is_confirmed_by_steward" boolean not null default false, "confirmed_at" timestamptz null, "member_present" boolean not null default true, "user_id" uuid not null, "itinerary_id" uuid null, "trip_id" uuid not null, "group_id" uuid null, constraint "trip_booking_pkey" primary key ("id"));`);
+    this.addSql(`create table "go-train-group-pass"."trip_booking" ("id" uuid not null default gen_random_uuid(), "created_at" timestamptz not null, "updated_at" timestamptz not null, "sequence" int null, "checked_in_at" timestamptz null, "status" text check ("status" in ('pending', 'checked_in', 'grouped', 'completed', 'no_show')) not null default 'pending', "is_confirmed_by_steward" boolean not null default false, "confirmed_at" timestamptz null, "member_present" boolean not null default true, "user_id" uuid not null, "itinerary_id" uuid null, "trip_id" uuid not null, "group_id" uuid null, constraint "trip_booking_pkey" primary key ("id"));`);
     this.addSql(`create index "trip_booking_user_id_index" on "go-train-group-pass"."trip_booking" ("user_id");`);
     this.addSql(`create index "trip_booking_itinerary_id_index" on "go-train-group-pass"."trip_booking" ("itinerary_id");`);
     this.addSql(`create index "trip_booking_trip_id_index" on "go-train-group-pass"."trip_booking" ("trip_id");`);
@@ -86,9 +86,9 @@ export class Migration20251205042537 extends Migration {
     this.addSql(`alter table "go-train-group-pass"."gtfs_calendar_dates" add constraint "gtfs_calendar_dates_gtfsfeed_info_id_foreign" foreign key ("gtfsfeed_info_id") references "go-train-group-pass"."gtfs_feed_info" ("id") on update cascade on delete cascade;`);
     this.addSql(`alter table "go-train-group-pass"."gtfs_calendar_dates" add constraint "gtfs_calendar_dates_service_id_gtfsfeed_info_id_unique" unique ("service_id", "gtfsfeed_info_id");`);
 
-    this.addSql(`alter table "go-train-group-pass"."agency" add column "feed_info_id" uuid not null;`);
-    this.addSql(`alter table "go-train-group-pass"."agency" add constraint "agency_feed_info_id_foreign" foreign key ("feed_info_id") references "go-train-group-pass"."gtfs_feed_info" ("id") on update cascade on delete cascade;`);
-    this.addSql(`alter table "go-train-group-pass"."agency" add constraint "agency_agency_id_feed_info_id_unique" unique ("agency_id", "feed_info_id");`);
+    this.addSql(`alter table "go-train-group-pass"."agency" add column "gtfsfeed_info_id" uuid not null;`);
+    this.addSql(`alter table "go-train-group-pass"."agency" add constraint "agency_gtfsfeed_info_id_foreign" foreign key ("gtfsfeed_info_id") references "go-train-group-pass"."gtfs_feed_info" ("id") on update cascade on delete cascade;`);
+    this.addSql(`alter table "go-train-group-pass"."agency" add constraint "agency_agency_id_gtfsfeed_info_id_unique" unique ("agency_id", "gtfsfeed_info_id");`);
 
     this.addSql(`alter table "go-train-group-pass"."gtfs_routes" add constraint "gtfs_routes_gtfsfeed_info_id_foreign" foreign key ("gtfsfeed_info_id") references "go-train-group-pass"."gtfs_feed_info" ("id") on update cascade on delete cascade;`);
     this.addSql(`alter table "go-train-group-pass"."gtfs_routes" add constraint "gtfs_routes_route_id_gtfsfeed_info_id_unique" unique ("route_id", "gtfsfeed_info_id");`);
@@ -108,7 +108,7 @@ export class Migration20251205042537 extends Migration {
     this.addSql(`alter table "go-train-group-pass"."gtfs_stop_times" drop column "stop_time_id";`);
 
     this.addSql(`alter table "go-train-group-pass"."gtfs_stop_times" add constraint "gtfs_stop_times_gtfsfeed_info_id_foreign" foreign key ("gtfsfeed_info_id") references "go-train-group-pass"."gtfs_feed_info" ("id") on update cascade on delete cascade;`);
-    this.addSql(`alter table "go-train-group-pass"."gtfs_stop_times" add constraint "gtfs_stop_times_trip_id_arrival_time_departure_ti_dfcdb_unique" unique ("trip_id", "arrival_time", "departure_time", "stop_id", "gtfsfeed_info_id");`);
+    this.addSql(`alter table "go-train-group-pass"."gtfs_stop_times" add constraint "gtfs_stop_times_trip_id_stop_sequence_gtfsfeed_info_id_unique" unique ("trip_id", "stop_sequence", "gtfsfeed_info_id");`);
 
     this.addSql(`alter table "go-train-group-pass"."users" alter column "phone_number" type varchar(20) using ("phone_number"::varchar(20));`);
     this.addSql(`alter table "go-train-group-pass"."users" alter column "phone_number" set not null;`);
@@ -160,7 +160,7 @@ export class Migration20251205042537 extends Migration {
 
     this.addSql(`drop table if exists "go-train-group-pass"."itinerary_status_log" cascade;`);
 
-    this.addSql(`alter table "go-train-group-pass"."agency" drop constraint "agency_feed_info_id_foreign";`);
+    this.addSql(`alter table "go-train-group-pass"."agency" drop constraint "agency_gtfsfeed_info_id_foreign";`);
 
     this.addSql(`alter table "go-train-group-pass"."gtfs_calendar_dates" drop constraint "gtfs_calendar_dates_gtfsfeed_info_id_foreign";`);
 
@@ -172,8 +172,8 @@ export class Migration20251205042537 extends Migration {
 
     this.addSql(`alter table "go-train-group-pass"."gtfs_trips" drop constraint "gtfs_trips_gtfsfeed_info_id_foreign";`);
 
-    this.addSql(`alter table "go-train-group-pass"."agency" drop constraint "agency_agency_id_feed_info_id_unique";`);
-    this.addSql(`alter table "go-train-group-pass"."agency" drop column "feed_info_id";`);
+    this.addSql(`alter table "go-train-group-pass"."agency" drop constraint "agency_agency_id_gtfsfeed_info_id_unique";`);
+    this.addSql(`alter table "go-train-group-pass"."agency" drop column "gtfsfeed_info_id";`);
 
     this.addSql(`alter table "go-train-group-pass"."gtfs_calendar_dates" drop constraint "gtfs_calendar_dates_service_id_gtfsfeed_info_id_unique";`);
 
@@ -186,7 +186,7 @@ export class Migration20251205042537 extends Migration {
 
     this.addSql(`alter table "go-train-group-pass"."gtfs_routes" add constraint "gtfs_routes_gtfsfeed_info_id_foreign" foreign key ("gtfsfeed_info_id") references "go-train-group-pass"."gtfs_feed_info" ("id") on update cascade on delete no action;`);
 
-    this.addSql(`alter table "go-train-group-pass"."gtfs_stop_times" drop constraint "gtfs_stop_times_trip_id_arrival_time_departure_ti_dfcdb_unique";`);
+    this.addSql(`alter table "go-train-group-pass"."gtfs_stop_times" drop constraint "gtfs_stop_times_trip_id_stop_sequence_gtfsfeed_info_id_unique";`);
 
     this.addSql(`alter table "go-train-group-pass"."gtfs_stop_times" add column "stop_time_id" varchar(255) not null;`);
     this.addSql(`alter table "go-train-group-pass"."gtfs_stop_times" add constraint "gtfs_stop_times_gtfsfeed_info_id_foreign" foreign key ("gtfsfeed_info_id") references "go-train-group-pass"."gtfs_feed_info" ("id") on update cascade on delete no action;`);

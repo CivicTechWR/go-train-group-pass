@@ -6,7 +6,6 @@ import {
   OneToMany,
   Collection,
   Entity,
-  BaseEntity,
 } from '@mikro-orm/core';
 import { randomUUID } from 'crypto';
 import { Itinerary } from './itinerary.entity';
@@ -15,6 +14,7 @@ import { Trip } from './trip.entity';
 import { User } from './user.entity';
 import { Payment, TicketPurchase, TripBookingStatusLog } from '.';
 import { TripBookingStatus } from './tripBookingEnum';
+import { BaseEntity } from './base';
 
 @Entity()
 export class TripBooking extends BaseEntity {

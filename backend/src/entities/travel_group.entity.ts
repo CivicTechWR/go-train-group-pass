@@ -1,5 +1,4 @@
 import {
-  BaseEntity,
   Collection,
   Entity,
   Enum,
@@ -17,6 +16,7 @@ import {
   TravelGroupStatusLog,
 } from '.';
 import { TravelGroupStatus } from './travelGroupEnum';
+import { BaseEntity } from './base';
 
 @Entity()
 export class TravelGroup extends BaseEntity {
