@@ -9,10 +9,11 @@ import {
 import { randomUUID } from 'crypto';
 import { GTFSTrip } from './gtfs_trip.entity';
 import { GTFSStopTime } from './gtfs_stop_times.entity';
+import { BaseEntity } from './base';
 
 @Entity()
 @Unique({ properties: ['gtfsTrip', 'originStopTime', 'destinationStopTime'] })
-export class Trip {
+export class Trip extends BaseEntity {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id: string = randomUUID();
 
