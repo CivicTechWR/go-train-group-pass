@@ -1206,6 +1206,26 @@
           "default": "gen_random_uuid()",
           "mappedType": "uuid"
         },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
         "gtfs_trip_id": {
           "name": "gtfs_trip_id",
           "type": "uuid",
@@ -1866,7 +1886,7 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "default": "true",
+          "default": "false",
           "mappedType": "boolean"
         },
         "user_id": {

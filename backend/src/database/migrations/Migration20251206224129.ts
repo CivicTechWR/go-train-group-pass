@@ -1,9 +1,9 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20251206190131 extends Migration {
+export class Migration20251206224129 extends Migration {
 
   override async up(): Promise<void> {
-    this.addSql(`create table "go-train-group-pass"."trip" ("id" uuid not null default gen_random_uuid(), "gtfs_trip_id" uuid not null, "origin_stop_time_id" uuid not null, "destination_stop_time_id" uuid not null, constraint "trip_pkey" primary key ("id"));`);
+    this.addSql(`create table "go-train-group-pass"."trip" ("id" uuid not null default gen_random_uuid(), "created_at" timestamptz not null, "updated_at" timestamptz not null, "gtfs_trip_id" uuid not null, "origin_stop_time_id" uuid not null, "destination_stop_time_id" uuid not null, constraint "trip_pkey" primary key ("id"));`);
     this.addSql(`alter table "go-train-group-pass"."trip" add constraint "trip_gtfs_trip_id_origin_stop_time_id_destination_59c37_unique" unique ("gtfs_trip_id", "origin_stop_time_id", "destination_stop_time_id");`);
 
     this.addSql(`create table "go-train-group-pass"."travel_group" ("id" uuid not null default gen_random_uuid(), "created_at" timestamptz not null, "updated_at" timestamptz not null, "group_number" int not null, "finalized_at" timestamptz null, "status" text check ("status" in ('forming', 'finalized', 'departed', 'completed')) not null default 'forming', "trip_id" uuid not null, "steward_id" uuid not null, constraint "travel_group_pkey" primary key ("id"));`);
@@ -15,7 +15,7 @@ export class Migration20251206190131 extends Migration {
     this.addSql(`create table "go-train-group-pass"."itinerary" ("id" uuid not null default gen_random_uuid(), "created_at" timestamptz not null, "updated_at" timestamptz not null, "status" text check ("status" in ('draft', 'confirmed', 'in_progress', 'completed', 'cancelled')) not null default 'draft', "wants_to_steward" boolean not null default false, "user_id" uuid not null, constraint "itinerary_pkey" primary key ("id"));`);
     this.addSql(`create index "itinerary_user_id_index" on "go-train-group-pass"."itinerary" ("user_id");`);
 
-    this.addSql(`create table "go-train-group-pass"."trip_booking" ("id" uuid not null default gen_random_uuid(), "created_at" timestamptz not null, "updated_at" timestamptz not null, "sequence" int null, "checked_in_at" timestamptz null, "status" text check ("status" in ('pending', 'checked_in', 'grouped', 'completed', 'no_show')) not null default 'pending', "is_confirmed_by_steward" boolean not null default false, "confirmed_at" timestamptz null, "member_present" boolean not null default true, "user_id" uuid not null, "itinerary_id" uuid null, "trip_id" uuid not null, "group_id" uuid null, constraint "trip_booking_pkey" primary key ("id"));`);
+    this.addSql(`create table "go-train-group-pass"."trip_booking" ("id" uuid not null default gen_random_uuid(), "created_at" timestamptz not null, "updated_at" timestamptz not null, "sequence" int null, "checked_in_at" timestamptz null, "status" text check ("status" in ('pending', 'checked_in', 'grouped', 'completed', 'no_show')) not null default 'pending', "is_confirmed_by_steward" boolean not null default false, "confirmed_at" timestamptz null, "member_present" boolean not null default false, "user_id" uuid not null, "itinerary_id" uuid null, "trip_id" uuid not null, "group_id" uuid null, constraint "trip_booking_pkey" primary key ("id"));`);
     this.addSql(`create index "trip_booking_user_id_index" on "go-train-group-pass"."trip_booking" ("user_id");`);
     this.addSql(`create index "trip_booking_itinerary_id_index" on "go-train-group-pass"."trip_booking" ("itinerary_id");`);
     this.addSql(`create index "trip_booking_trip_id_index" on "go-train-group-pass"."trip_booking" ("trip_id");`);
