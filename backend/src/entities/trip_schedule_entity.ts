@@ -3,19 +3,19 @@ import { Entity, Property } from '@mikro-orm/core';
 @Entity({
   expression: `
     SELECT
-      f.id as "feedId",
-      t.id as "tripId",
-      r.id as "routeId",
-      r.route_short_name as "routeShortName",
-      r.route_long_name as "routeLongName",
-      st1.departure_time as "departureTime",
-      st2.arrival_time as "arrivalTime",
-      t.service_id as "serviceId",
-      s1.stop_name as "startStopName",
-      s2.stop_name as "endStopName",
+      f.id as "feed_id",
+      t.id as "trip_id",
+      r.id as "route_id",
+      r.route_short_name as "route_short_name",
+      r.route_long_name as "route_long_name",
+      st1.departure_time as "departure_time",
+      st2.arrival_time as "arrival_time",
+      t.service_id as "service_id",
+      s1.stop_name as "start_stop_name",
+      s2.stop_name as "end_stop_name",
       cd.date as "date",
-      st1.id as "startStopTime_id",
-      st2.id as "endStopTime_id"
+      st1.id as "start_stop_time_id",
+      st2.id as "end_stop_time_id"
     FROM gtfs_trips t
     JOIN gtfs_feed_info f ON t.gtfsfeed_info_id = f.id
     JOIN gtfs_routes r ON t.route_id = r.id
