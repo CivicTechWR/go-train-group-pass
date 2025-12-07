@@ -1,6 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository, EntityManager } from '@mikro-orm/postgresql';
+import {
+  EntityRepository,
+  EntityManager,
+  LockMode,
+} from '@mikro-orm/postgresql';
 import { Trip, TripBooking, TravelGroup, User } from '../entities';
 import { TripBookingStatus } from '../entities/tripBookingEnum';
 import { TravelGroupStatus } from '../entities/travelGroupEnum';
@@ -9,7 +14,7 @@ import { TravelGroupStatus } from '../entities/travelGroupEnum';
  * Represents a group of users with identical itineraries who can be grouped together
  */
 interface ItineraryGroup {
-  /** Hash key representing the unique set of trip IDs */
+  /** Hash key representing the unique set of trip IDs (sorted, normalized) */
   itineraryHash: string;
   /** All checked-in bookings for users with this itinerary hash */
   bookings: TripBooking[];
@@ -31,6 +36,15 @@ export interface GroupFormationResult {
 }
 
 /**
+ * Metrics for observability
+ */
+export interface GroupFormationMetrics {
+  runDurationMs: number;
+  stewardShortageIncidents: number;
+  groupsTooSmallIncidents: number;
+}
+
+/**
  * Overall result of a group formation run
  */
 export interface GroupFormationRunResult {
@@ -40,16 +54,22 @@ export interface GroupFormationRunResult {
   totalUsersGrouped: number;
   totalUsersNotGrouped: number;
   results: GroupFormationResult[];
+  metrics: GroupFormationMetrics;
 }
 
-// Constants
-const DEPARTURE_WINDOW_MINUTES = 15;
-const MIN_GROUP_SIZE = 2;
-const MAX_GROUP_SIZE = 5;
+// Configuration defaults
+const DEFAULT_DEPARTURE_WINDOW_MINUTES = 15;
+const DEFAULT_MIN_GROUP_SIZE = 2;
+const DEFAULT_MAX_GROUP_SIZE = 5;
 
 @Injectable()
 export class GroupFormationService {
   private readonly logger = new Logger(GroupFormationService.name);
+
+  // Configurable parameters (can be overridden via env vars)
+  private readonly departureWindowMinutes: number;
+  private readonly minGroupSize: number;
+  private readonly maxGroupSize: number;
 
   constructor(
     @InjectRepository(Trip)
@@ -59,13 +79,34 @@ export class GroupFormationService {
     @InjectRepository(TravelGroup)
     private readonly travelGroupRepository: EntityRepository<TravelGroup>,
     private readonly em: EntityManager,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    // Load configurable parameters
+    this.departureWindowMinutes =
+      this.configService.get<number>('GROUP_FORMATION_WINDOW_MINUTES') ??
+      DEFAULT_DEPARTURE_WINDOW_MINUTES;
+    this.minGroupSize =
+      this.configService.get<number>('GROUP_FORMATION_MIN_SIZE') ??
+      DEFAULT_MIN_GROUP_SIZE;
+    this.maxGroupSize =
+      this.configService.get<number>('GROUP_FORMATION_MAX_SIZE') ??
+      DEFAULT_MAX_GROUP_SIZE;
+
+    this.logger.log(
+      `Initialized with: windowMinutes=${this.departureWindowMinutes}, ` +
+        `minSize=${this.minGroupSize}, maxSize=${this.maxGroupSize}`,
+    );
+  }
 
   /**
    * Main entry point for group formation.
    * Finds all trips departing soon and forms groups for checked-in users.
+   *
+   * Uses database transactions and locking for concurrency safety.
    */
   async formGroups(): Promise<GroupFormationRunResult> {
+    const startTime = Date.now();
+
     const runResult: GroupFormationRunResult = {
       timestamp: new Date(),
       tripsProcessed: 0,
@@ -73,69 +114,89 @@ export class GroupFormationService {
       totalUsersGrouped: 0,
       totalUsersNotGrouped: 0,
       results: [],
+      metrics: {
+        runDurationMs: 0,
+        stewardShortageIncidents: 0,
+        groupsTooSmallIncidents: 0,
+      },
     };
 
     try {
-      // Find trips departing in the next DEPARTURE_WINDOW_MINUTES
+      // Find trips departing in the next window (UTC-based)
       const tripsToProcess = await this.findTripsWithDepartingSoon();
       runResult.tripsProcessed = tripsToProcess.length;
 
       if (tripsToProcess.length === 0) {
         this.logger.log('No trips departing soon. Nothing to process.');
+        runResult.metrics.runDurationMs = Date.now() - startTime;
         return runResult;
       }
 
       this.logger.log(
-        `Found ${tripsToProcess.length} trips departing in the next ${DEPARTURE_WINDOW_MINUTES} minutes`,
+        `[METRICS] Found ${tripsToProcess.length} trips departing in the next ${this.departureWindowMinutes} minutes`,
       );
 
-      // Process each trip
+      // Process each trip in its own transaction
       for (const trip of tripsToProcess) {
-        const tripResult = await this.formGroupsForTrip(trip);
+        const tripResult = await this.formGroupsForTripWithTransaction(trip);
         runResult.results.push(tripResult);
         runResult.totalGroupsFormed += tripResult.groupsFormed;
         runResult.totalUsersGrouped += tripResult.usersGrouped;
         runResult.totalUsersNotGrouped += tripResult.usersNotGrouped;
+        runResult.metrics.stewardShortageIncidents +=
+          tripResult.failedGroupsNoSteward;
+        runResult.metrics.groupsTooSmallIncidents +=
+          tripResult.failedGroupsTooSmall;
       }
 
+      runResult.metrics.runDurationMs = Date.now() - startTime;
+
+      // Log summary metrics
       this.logger.log(
-        `Group formation complete: ${runResult.totalGroupsFormed} groups formed, ` +
-          `${runResult.totalUsersGrouped} users grouped, ` +
-          `${runResult.totalUsersNotGrouped} users not grouped`,
+        `[METRICS] Group formation complete: ` +
+          `trips=${runResult.tripsProcessed}, ` +
+          `groupsFormed=${runResult.totalGroupsFormed}, ` +
+          `usersGrouped=${runResult.totalUsersGrouped}, ` +
+          `usersNotGrouped=${runResult.totalUsersNotGrouped}, ` +
+          `stewardShortages=${runResult.metrics.stewardShortageIncidents}, ` +
+          `tooSmall=${runResult.metrics.groupsTooSmallIncidents}, ` +
+          `durationMs=${runResult.metrics.runDurationMs}`,
       );
 
       return runResult;
     } catch (error) {
-      this.logger.error('Error during group formation', error);
+      runResult.metrics.runDurationMs = Date.now() - startTime;
+      this.logger.error(
+        `[ERROR] Group formation failed after ${runResult.metrics.runDurationMs}ms`,
+        error instanceof Error ? error.stack : error,
+      );
       throw error;
     }
   }
 
   /**
-   * Find all trips with departures in the next DEPARTURE_WINDOW_MINUTES.
-   * A trip is ready for grouping if its origin stop time departs within the window.
+   * Find all trips with departures in the configured time window.
+   * Uses UTC for consistent timezone handling.
    */
   private async findTripsWithDepartingSoon(): Promise<Trip[]> {
+    // Use UTC for all time calculations
     const now = new Date();
     const windowEnd = new Date(
-      now.getTime() + DEPARTURE_WINDOW_MINUTES * 60 * 1000,
+      now.getTime() + this.departureWindowMinutes * 60 * 1000,
     );
 
-    // Get current time in GTFS format (HH:MM:SS)
-    const currentTimeStr = this.toGTFSTimeString(now);
-    const windowEndTimeStr = this.toGTFSTimeString(windowEnd);
+    // Get current time in GTFS format (HH:MM:SS) using UTC
+    const currentTimeStr = this.toGTFSTimeStringUTC(now);
+    const windowEndTimeStr = this.toGTFSTimeStringUTC(windowEnd);
 
-    // Get today's date in YYYYMMDD format for service ID matching
+    // Get today's date in YYYYMMDD format for service ID matching (using local time for date)
     const todayServiceId = this.toServiceIdFormat(now);
 
     this.logger.debug(
-      `Looking for trips departing between ${currentTimeStr} and ${windowEndTimeStr} on ${todayServiceId}`,
+      `Looking for trips departing between ${currentTimeStr} and ${windowEndTimeStr} UTC on service ${todayServiceId}`,
     );
 
-    // Query trips where:
-    // 1. The gtfsTrip.serviceId matches today's date
-    // 2. The originStopTime.departureTime is within our window
-    // 3. There are CHECKED_IN bookings that haven't been grouped yet
+    // Query trips for today's service
     const trips = await this.tripRepository.find(
       {
         gtfsTrip: {
@@ -158,12 +219,15 @@ export class GroupFormationService {
     // Further filter to only include trips that have ungrouped, checked-in bookings
     const tripsWithEligibleBookings: Trip[] = [];
     for (const trip of tripsInWindow) {
-      const hasEligibleBookings = await this.tripBookingRepository.count({
+      const eligibleCount = await this.tripBookingRepository.count({
         trip,
         status: TripBookingStatus.CHECKED_IN,
         group: null,
       });
-      if (hasEligibleBookings > 0) {
+      if (eligibleCount > 0) {
+        this.logger.debug(
+          `Trip ${trip.id} has ${eligibleCount} eligible bookings`,
+        );
         tripsWithEligibleBookings.push(trip);
       }
     }
@@ -172,10 +236,12 @@ export class GroupFormationService {
   }
 
   /**
-   * Form groups for a specific trip.
-   * Groups users by identical itineraries.
+   * Form groups for a specific trip within a database transaction.
+   * Uses row-level locking to prevent concurrent processing of the same bookings.
    */
-  private async formGroupsForTrip(trip: Trip): Promise<GroupFormationResult> {
+  private async formGroupsForTripWithTransaction(
+    trip: Trip,
+  ): Promise<GroupFormationResult> {
     const result: GroupFormationResult = {
       tripId: trip.id,
       tripDepartureTime: trip.originStopTime.departureTime,
@@ -186,49 +252,70 @@ export class GroupFormationService {
       failedGroupsTooSmall: 0,
     };
 
-    // Get all checked-in, ungrouped bookings for this trip
-    const eligibleBookings = await this.tripBookingRepository.find(
-      {
-        trip,
-        status: TripBookingStatus.CHECKED_IN,
-        group: null,
-      },
-      {
-        populate: [
-          'user',
-          'itinerary',
-          'itinerary.tripBookings',
-          'itinerary.tripBookings.trip',
-        ],
-      },
-    );
+    // Use a forked EntityManager for transaction isolation
+    const fork = this.em.fork();
 
-    if (eligibleBookings.length < MIN_GROUP_SIZE) {
-      this.logger.log(
-        `Trip ${trip.id}: Not enough eligible bookings (${eligibleBookings.length})`,
+    try {
+      await fork.transactional(async (txEm) => {
+        // Get eligible bookings with FOR UPDATE lock to prevent concurrent processing
+        const eligibleBookings = await txEm.find(
+          TripBooking,
+          {
+            trip: { id: trip.id },
+            status: TripBookingStatus.CHECKED_IN,
+            group: null,
+          },
+          {
+            populate: [
+              'user',
+              'itinerary',
+              'itinerary.tripBookings',
+              'itinerary.tripBookings.trip',
+            ],
+            lockMode: LockMode.PESSIMISTIC_WRITE,
+          },
+        );
+
+        // Re-validate after acquiring lock (another process may have grouped them)
+        const stillEligible = eligibleBookings.filter(
+          (b) => b.status === TripBookingStatus.CHECKED_IN && b.group === null,
+        );
+
+        if (stillEligible.length < this.minGroupSize) {
+          this.logger.debug(
+            `Trip ${trip.id}: Not enough eligible bookings after lock (${stillEligible.length})`,
+          );
+          result.usersNotGrouped = stillEligible.length;
+          return;
+        }
+
+        // Group bookings by identical itineraries
+        const itineraryGroups = this.groupByItinerary(stillEligible);
+
+        this.logger.log(
+          `Trip ${trip.id}: Processing ${itineraryGroups.length} itinerary groups with ${stillEligible.length} bookings`,
+        );
+
+        // Form groups within each itinerary group
+        for (const itineraryGroup of itineraryGroups) {
+          const groupResults = await this.formGroupsFromItineraryGroup(
+            txEm,
+            trip,
+            itineraryGroup,
+          );
+          result.groupsFormed += groupResults.groupsFormed;
+          result.usersGrouped += groupResults.usersGrouped;
+          result.usersNotGrouped += groupResults.usersNotGrouped;
+          result.failedGroupsNoSteward += groupResults.failedGroupsNoSteward;
+          result.failedGroupsTooSmall += groupResults.failedGroupsTooSmall;
+        }
+      });
+    } catch (error) {
+      this.logger.error(
+        `[ERROR] Transaction failed for trip ${trip.id}`,
+        error instanceof Error ? error.stack : error,
       );
-      result.usersNotGrouped = eligibleBookings.length;
-      return result;
-    }
-
-    // Group bookings by identical itineraries
-    const itineraryGroups = this.groupByItinerary(eligibleBookings);
-
-    this.logger.log(
-      `Trip ${trip.id}: Found ${itineraryGroups.length} distinct itinerary groups among ${eligibleBookings.length} bookings`,
-    );
-
-    // Form groups within each itinerary group
-    for (const itineraryGroup of itineraryGroups) {
-      const groupResults = await this.formGroupsFromItineraryGroup(
-        trip,
-        itineraryGroup,
-      );
-      result.groupsFormed += groupResults.groupsFormed;
-      result.usersGrouped += groupResults.usersGrouped;
-      result.usersNotGrouped += groupResults.usersNotGrouped;
-      result.failedGroupsNoSteward += groupResults.failedGroupsNoSteward;
-      result.failedGroupsTooSmall += groupResults.failedGroupsTooSmall;
+      // Don't re-throw - we want to continue processing other trips
     }
 
     return result;
@@ -237,6 +324,8 @@ export class GroupFormationService {
   /**
    * Group bookings by their itinerary hash (set of trip IDs).
    * Users with identical itineraries (same set of trips) will be grouped together.
+   *
+   * Hash computation is deterministic: trip IDs are sorted alphabetically.
    */
   private groupByItinerary(bookings: TripBooking[]): ItineraryGroup[] {
     const groupMap = new Map<string, ItineraryGroup>();
@@ -265,29 +354,36 @@ export class GroupFormationService {
   }
 
   /**
-   * Compute a hash representing the user's complete itinerary (set of trip IDs).
-   * If the booking has no itinerary, use just the current trip ID.
+   * Compute a deterministic hash representing the user's complete itinerary.
+   *
+   * Algorithm:
+   * 1. Get all trip IDs from the itinerary's bookings
+   * 2. Sort alphabetically for consistent hashing
+   * 3. Join with pipe separator
+   *
+   * If no itinerary, returns just the current trip ID.
    */
   private computeItineraryHash(booking: TripBooking): string {
     if (!booking.itinerary || !booking.itinerary.tripBookings.isInitialized()) {
       // No itinerary or not loaded - just use the single trip
-      return booking.trip.id;
+      return `single:${booking.trip.id}`;
     }
 
     // Get all trip IDs from the itinerary's bookings, sorted for consistent hashing
     const tripIds = booking.itinerary.tripBookings
       .getItems()
       .map((tb) => tb.trip.id)
-      .sort();
+      .sort(); // Alphabetical sort for determinism
 
-    return tripIds.join('|');
+    return `multi:${tripIds.join('|')}`;
   }
 
   /**
    * Form travel groups from a set of bookings with identical itineraries.
-   * Splits into groups of 2-5 with steward prioritization.
+   * Splits into groups of minSize-maxSize with steward prioritization.
    */
   private async formGroupsFromItineraryGroup(
+    txEm: EntityManager,
     trip: Trip,
     itineraryGroup: ItineraryGroup,
   ): Promise<{
@@ -308,11 +404,12 @@ export class GroupFormationService {
     const { bookings, stewardCandidates } = itineraryGroup;
 
     // Not enough people to form a group
-    if (bookings.length < MIN_GROUP_SIZE) {
+    if (bookings.length < this.minGroupSize) {
       result.usersNotGrouped = bookings.length;
       result.failedGroupsTooSmall = 1;
       this.logger.debug(
-        `Itinerary group ${itineraryGroup.itineraryHash}: Only ${bookings.length} users, need at least ${MIN_GROUP_SIZE}`,
+        `[METRICS] Itinerary ${itineraryGroup.itineraryHash}: ` +
+          `${bookings.length} users < minSize ${this.minGroupSize}`,
       );
       return result;
     }
@@ -321,10 +418,11 @@ export class GroupFormationService {
     if (stewardCandidates.length === 0) {
       result.usersNotGrouped = bookings.length;
       result.failedGroupsNoSteward = Math.ceil(
-        bookings.length / MAX_GROUP_SIZE,
+        bookings.length / this.maxGroupSize,
       );
       this.logger.warn(
-        `Itinerary group ${itineraryGroup.itineraryHash}: No steward candidates among ${bookings.length} users. Failing groups.`,
+        `[METRICS] Steward shortage: itinerary=${itineraryGroup.itineraryHash}, ` +
+          `users=${bookings.length}, potentialGroups=${result.failedGroupsNoSteward}`,
       );
       return result;
     }
@@ -332,18 +430,22 @@ export class GroupFormationService {
     // Apply the grouping algorithm
     const groups = this.splitIntoGroups(bookings, stewardCandidates);
 
-    // Persist each group
+    // Persist each group within the transaction
     for (const groupBookings of groups) {
       const steward = this.selectSteward(groupBookings, stewardCandidates);
 
       if (!steward) {
-        // This shouldn't happen given our earlier check, but handle it defensively
+        // This shouldn't happen given our earlier check, but handle defensively
         result.usersNotGrouped += groupBookings.length;
         result.failedGroupsNoSteward++;
+        this.logger.warn(
+          `[WARNING] No steward found for group in itinerary ${itineraryGroup.itineraryHash}`,
+        );
         continue;
       }
 
       const travelGroup = await this.createTravelGroup(
+        txEm,
         trip,
         steward.user,
         groupBookings,
@@ -361,11 +463,17 @@ export class GroupFormationService {
   }
 
   /**
-   * Split bookings into groups of 2-5 people.
+   * Split bookings into groups of minSize-maxSize people.
+   *
    * Algorithm:
-   * 1. Calculate how many groups we can form
-   * 2. Distribute users as evenly as possible across groups
-   * 3. Ensure each group has at least one steward candidate
+   * 1. Calculate how many groups we can form (limited by steward count)
+   * 2. Each group starts with one steward
+   * 3. Distribute remaining users evenly
+   * 4. Filter out any groups below minimum size
+   *
+   * Remainder handling:
+   * - Users who can't fit into a valid group remain ungrouped
+   * - They will be picked up in the next run if more users check in
    */
   private splitIntoGroups(
     bookings: TripBooking[],
@@ -374,18 +482,15 @@ export class GroupFormationService {
     const n = bookings.length;
 
     // Calculate optimal number of groups
-    // We want groups of 2-5, and we need at least as many groups as steward candidates allow
-    // (since each group needs a steward)
-    const minGroupsForSize = Math.ceil(n / MAX_GROUP_SIZE);
-    const maxGroupsForSize = Math.floor(n / MIN_GROUP_SIZE);
+    const minGroupsForSize = Math.ceil(n / this.maxGroupSize);
+    const maxGroupsForSize = Math.floor(n / this.minGroupSize);
     const maxGroupsForStewards = stewardCandidates.length;
 
     // The number of groups we can actually form
     const numGroups = Math.min(maxGroupsForSize, maxGroupsForStewards);
 
     if (numGroups < minGroupsForSize) {
-      // Can't form valid groups (not enough stewards for the minimum number of groups needed)
-      // This situation is handled by the caller
+      // Can't form valid groups (not enough stewards)
       return [];
     }
 
@@ -405,8 +510,7 @@ export class GroupFormationService {
 
     // Distribute remaining steward candidates (if more stewards than groups)
     for (let i = numGroups; i < stewardCandidates.length; i++) {
-      // Add extra stewards to groups that have room
-      const targetGroup = groups.find((g) => g.length < MAX_GROUP_SIZE);
+      const targetGroup = groups.find((g) => g.length < this.maxGroupSize);
       if (targetGroup) {
         targetGroup.push(stewardCandidates[i]);
       }
@@ -415,64 +519,61 @@ export class GroupFormationService {
     // Distribute non-steward bookings evenly
     let groupIndex = 0;
     for (const booking of nonStewards) {
-      // Find the next group that has room
       let attempts = 0;
       while (
-        groups[groupIndex].length >= MAX_GROUP_SIZE &&
+        groups[groupIndex].length >= this.maxGroupSize &&
         attempts < numGroups
       ) {
         groupIndex = (groupIndex + 1) % numGroups;
         attempts++;
       }
 
-      if (groups[groupIndex].length < MAX_GROUP_SIZE) {
+      if (groups[groupIndex].length < this.maxGroupSize) {
         groups[groupIndex].push(booking);
         groupIndex = (groupIndex + 1) % numGroups;
       }
-      // If all groups are full, this booking can't be placed (shouldn't happen with our math)
+      // If all groups are full, this booking can't be placed
     }
 
     // Filter out any groups that ended up below minimum size
-    return groups.filter((g) => g.length >= MIN_GROUP_SIZE);
+    return groups.filter((g) => g.length >= this.minGroupSize);
   }
 
   /**
    * Select a steward for the group.
-   * Prefers users who explicitly want to steward.
+   * Returns the first steward candidate found in the group.
    */
   private selectSteward(
     groupBookings: TripBooking[],
     stewardCandidates: TripBooking[],
   ): TripBooking | null {
     const candidateIds = new Set(stewardCandidates.map((c) => c.id));
-
-    // Find a steward candidate within this group
-    const steward = groupBookings.find((b) => candidateIds.has(b.id));
-
-    return steward || null;
+    return groupBookings.find((b) => candidateIds.has(b.id)) ?? null;
   }
 
   /**
    * Create a TravelGroup entity and update all bookings to reference it.
+   * All operations happen within the provided transaction.
    */
   private async createTravelGroup(
+    txEm: EntityManager,
     trip: Trip,
     steward: User,
     bookings: TripBooking[],
   ): Promise<TravelGroup | null> {
     try {
       // Get the next group number for this trip
-      const existingGroupCount = await this.travelGroupRepository.count({
-        trip,
+      const existingGroupCount = await txEm.count(TravelGroup, {
+        trip: { id: trip.id },
       });
       const groupNumber = existingGroupCount + 1;
 
       // Create the travel group
-      const travelGroup = this.travelGroupRepository.create({
+      const travelGroup = txEm.create(TravelGroup, {
         groupNumber,
         status: TravelGroupStatus.FORMING,
-        trip,
-        steward,
+        trip: txEm.getReference(Trip, trip.id),
+        steward: txEm.getReference(User, steward.id),
       });
 
       // Update all bookings to reference this group and update their status
@@ -481,36 +582,41 @@ export class GroupFormationService {
         booking.status = TripBookingStatus.GROUPED;
       }
 
-      // Persist everything in a single transaction
-      await this.em.persistAndFlush([travelGroup, ...bookings]);
+      // Persist within the transaction
+      txEm.persist(travelGroup);
+      for (const booking of bookings) {
+        txEm.persist(booking);
+      }
 
       this.logger.log(
-        `Created TravelGroup #${groupNumber} for trip ${trip.id} with ${bookings.length} members, steward: ${steward.id}`,
+        `[CREATED] TravelGroup #${groupNumber} for trip ${trip.id}: ` +
+          `members=${bookings.length}, steward=${steward.id}`,
       );
 
       return travelGroup;
     } catch (error) {
       this.logger.error(
-        `Failed to create travel group for trip ${trip.id}`,
-        error,
+        `[ERROR] Failed to create travel group for trip ${trip.id}`,
+        error instanceof Error ? error.stack : error,
       );
       return null;
     }
   }
 
   /**
-   * Convert a Date to GTFS time string format (HH:MM:SS).
-   * Note: GTFS times can exceed 24:00:00 for overnight trips.
+   * Convert a Date to GTFS time string format (HH:MM:SS) using UTC.
+   * This ensures consistent behavior regardless of server timezone.
    */
-  private toGTFSTimeString(date: Date): string {
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const seconds = date.getSeconds().toString().padStart(2, '0');
+  private toGTFSTimeStringUTC(date: Date): string {
+    const hours = date.getUTCHours().toString().padStart(2, '0');
+    const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+    const seconds = date.getUTCSeconds().toString().padStart(2, '0');
     return `${hours}:${minutes}:${seconds}`;
   }
 
   /**
    * Convert a Date to Metrolinx service ID format (YYYYMMDD).
+   * Uses local date since service IDs are typically based on local dates.
    */
   private toServiceIdFormat(date: Date): string {
     const year = date.getFullYear();

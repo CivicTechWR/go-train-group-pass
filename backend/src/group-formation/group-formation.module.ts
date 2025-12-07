@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { ConfigModule } from '@nestjs/config';
 import { GroupFormationService } from './group-formation.service';
 import { GroupFormationController } from './group-formation.controller';
 import { GroupFormationScheduler } from './group-formation.scheduler';
@@ -10,6 +11,7 @@ import { AuthModule } from '../modules/auth/auth.module';
 @Module({
   imports: [
     ScheduleModule.forRoot(),
+    ConfigModule,
     MikroOrmModule.forFeature([
       Trip,
       TripBooking,

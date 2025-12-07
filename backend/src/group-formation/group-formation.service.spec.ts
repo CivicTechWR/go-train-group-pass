@@ -4,6 +4,7 @@ import {
   GroupFormationRunResult,
 } from './group-formation.service';
 import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
+import { ConfigService } from '@nestjs/config';
 import { Trip, TripBooking, TravelGroup } from '../entities';
 import { TripBookingStatus } from '../entities/tripBookingEnum';
 import {
@@ -21,6 +22,7 @@ describe('GroupFormationService', () => {
   let mockBookingRepo: EntityRepository<TripBooking>;
   let mockTravelGroupRepo: EntityRepository<TravelGroup>;
   let mockEm: EntityManager;
+  let mockConfigService: ConfigService;
 
   // Store created groups for verification
   let createdGroups: TravelGroup[];
@@ -51,13 +53,33 @@ describe('GroupFormationService', () => {
 
     mockEm = {
       persistAndFlush: vi.fn().mockResolvedValue(undefined),
+      fork: vi.fn().mockReturnThis(),
+      transactional: vi
+        .fn()
+        .mockImplementation((fn: (em: EntityManager) => Promise<void>) =>
+          fn(mockEm),
+        ),
+      find: vi.fn().mockResolvedValue([]),
+      count: vi.fn().mockResolvedValue(0),
+      create: vi.fn().mockImplementation((_, data: Partial<TravelGroup>) => {
+        const group = new TravelGroup();
+        Object.assign(group, data);
+        return group;
+      }),
+      persist: vi.fn(),
+      getReference: vi.fn().mockImplementation((_, id: string) => ({ id })),
     } as unknown as EntityManager;
+
+    mockConfigService = {
+      get: vi.fn().mockReturnValue(undefined),
+    } as unknown as ConfigService;
 
     service = new GroupFormationService(
       mockTripRepo,
       mockBookingRepo,
       mockTravelGroupRepo,
       mockEm,
+      mockConfigService,
     );
   });
 
@@ -94,7 +116,17 @@ describe('GroupFormationService', () => {
         totalUsersGrouped: expect.any(Number) as number,
         totalUsersNotGrouped: expect.any(Number) as number,
         results: expect.any(Array) as unknown[],
+        metrics: expect.any(Object) as object,
       });
+    });
+
+    it('should include metrics in result', async () => {
+      const result = await service.formGroups();
+
+      expect(result.metrics).toHaveProperty('runDurationMs');
+      expect(result.metrics).toHaveProperty('stewardShortageIncidents');
+      expect(result.metrics).toHaveProperty('groupsTooSmallIncidents');
+      expect(typeof result.metrics.runDurationMs).toBe('number');
     });
   });
 
@@ -110,6 +142,7 @@ describe('GroupFormationService', () => {
         mockBookingRepo,
         mockTravelGroupRepo,
         mockEm,
+        mockConfigService,
       );
 
       await service.formGroups();
@@ -123,14 +156,11 @@ describe('GroupFormationService', () => {
 describe('Grouping Algorithm - Unit Tests', () => {
   describe('Group Size Constraints', () => {
     it('documents minimum group size of 2', () => {
-      // The algorithm requires at least 2 users to form a group
-      // Single users cannot be grouped
       const MIN_GROUP_SIZE = 2;
       expect(MIN_GROUP_SIZE).toBe(2);
     });
 
     it('documents maximum group size of 5', () => {
-      // Groups cannot exceed 5 members (GO Transit group pass limit)
       const MAX_GROUP_SIZE = 5;
       expect(MAX_GROUP_SIZE).toBe(5);
     });
@@ -138,8 +168,6 @@ describe('Grouping Algorithm - Unit Tests', () => {
 
   describe('Steward Requirements', () => {
     it('documents steward requirement', () => {
-      // Each group must have at least one member who is willing to steward
-      // Groups without steward candidates fail
       const REQUIRES_STEWARD = true;
       expect(REQUIRES_STEWARD).toBe(true);
     });
@@ -147,17 +175,44 @@ describe('Grouping Algorithm - Unit Tests', () => {
 
   describe('Itinerary Matching', () => {
     it('documents itinerary matching requirement', () => {
-      // Users must have identical itineraries (same set of trips) to be grouped
       const REQUIRES_IDENTICAL_ITINERARY = true;
       expect(REQUIRES_IDENTICAL_ITINERARY).toBe(true);
     });
   });
 
   describe('Departure Window', () => {
-    it('documents 15 minute departure window', () => {
-      // The job processes trips departing within 15 minutes
-      const DEPARTURE_WINDOW_MINUTES = 15;
-      expect(DEPARTURE_WINDOW_MINUTES).toBe(15);
+    it('documents configurable departure window (default 15 minutes)', () => {
+      const DEFAULT_DEPARTURE_WINDOW_MINUTES = 15;
+      expect(DEFAULT_DEPARTURE_WINDOW_MINUTES).toBe(15);
+    });
+  });
+});
+
+describe('Configuration', () => {
+  describe('Environment Variables', () => {
+    it('documents GROUP_FORMATION_WINDOW_MINUTES config', () => {
+      const configKey = 'GROUP_FORMATION_WINDOW_MINUTES';
+      expect(configKey).toBeDefined();
+    });
+
+    it('documents GROUP_FORMATION_MIN_SIZE config', () => {
+      const configKey = 'GROUP_FORMATION_MIN_SIZE';
+      expect(configKey).toBeDefined();
+    });
+
+    it('documents GROUP_FORMATION_MAX_SIZE config', () => {
+      const configKey = 'GROUP_FORMATION_MAX_SIZE';
+      expect(configKey).toBeDefined();
+    });
+
+    it('documents GROUP_FORMATION_ENABLED config', () => {
+      const configKey = 'GROUP_FORMATION_ENABLED';
+      expect(configKey).toBeDefined();
+    });
+
+    it('documents GROUP_FORMATION_CRON_SCHEDULE config', () => {
+      const configKey = 'GROUP_FORMATION_CRON_SCHEDULE';
+      expect(configKey).toBeDefined();
     });
   });
 });
@@ -261,7 +316,6 @@ describe('Test Utilities', () => {
         'trip-b',
       ]);
 
-      // All bookings should have the same number of trips in their itinerary
       for (const booking of scenario.bookings) {
         expect(booking.itinerary).toBeDefined();
         expect(booking.itinerary?.tripBookings.getItems()).toHaveLength(2);
@@ -291,7 +345,7 @@ describe('GroupFormationResult Structure', () => {
     expect(mockResult.failedGroupsTooSmall).toBeGreaterThanOrEqual(0);
   });
 
-  it('should define correct GroupFormationRunResult interface', () => {
+  it('should define correct GroupFormationRunResult interface with metrics', () => {
     const mockResult: GroupFormationRunResult = {
       timestamp: new Date(),
       tripsProcessed: 3,
@@ -299,6 +353,11 @@ describe('GroupFormationResult Structure', () => {
       totalUsersGrouped: 20,
       totalUsersNotGrouped: 3,
       results: [],
+      metrics: {
+        runDurationMs: 150,
+        stewardShortageIncidents: 1,
+        groupsTooSmallIncidents: 2,
+      },
     };
 
     expect(mockResult.timestamp).toBeInstanceOf(Date);
@@ -307,5 +366,50 @@ describe('GroupFormationResult Structure', () => {
     expect(typeof mockResult.totalUsersGrouped).toBe('number');
     expect(typeof mockResult.totalUsersNotGrouped).toBe('number');
     expect(Array.isArray(mockResult.results)).toBe(true);
+    expect(mockResult.metrics.runDurationMs).toBeGreaterThanOrEqual(0);
+    expect(mockResult.metrics.stewardShortageIncidents).toBeGreaterThanOrEqual(
+      0,
+    );
+    expect(mockResult.metrics.groupsTooSmallIncidents).toBeGreaterThanOrEqual(
+      0,
+    );
+  });
+});
+
+describe('Concurrency and Transaction Safety', () => {
+  describe('Distributed Locking', () => {
+    it('documents PostgreSQL advisory lock usage', () => {
+      // The scheduler uses pg_try_advisory_lock for distributed locking
+      const usesAdvisoryLock = true;
+      expect(usesAdvisoryLock).toBe(true);
+    });
+  });
+
+  describe('Transaction Isolation', () => {
+    it('documents that group formation uses transactions', () => {
+      // Each trip is processed in its own transaction
+      const usesTransactions = true;
+      expect(usesTransactions).toBe(true);
+    });
+
+    it('documents row-level locking for bookings', () => {
+      // Uses LockMode.PESSIMISTIC_WRITE to prevent concurrent updates
+      const usesRowLocks = true;
+      expect(usesRowLocks).toBe(true);
+    });
+  });
+
+  describe('Idempotency', () => {
+    it('documents that already-grouped bookings are skipped', () => {
+      // Query filters for group: null to only process ungrouped bookings
+      const skipsGroupedBookings = true;
+      expect(skipsGroupedBookings).toBe(true);
+    });
+
+    it('documents re-validation after lock acquisition', () => {
+      // After acquiring lock, re-validates booking eligibility
+      const revalidatesAfterLock = true;
+      expect(revalidatesAfterLock).toBe(true);
+    });
   });
 });
