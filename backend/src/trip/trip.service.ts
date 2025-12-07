@@ -5,6 +5,7 @@ import { GTFSStopTime, GTFSTrip, Trip } from '../entities';
 import { gtfsDateStringToDate } from '../utils/gtfsDateStringToDate';
 import { GTFSTimeString } from 'src/utils/isGTFSTimeString';
 import { fromZonedTime } from 'date-fns-tz';
+import { getDateTimeFromServiceIdGTFSTimeString } from 'src/utils/getDateTimeFromServiceIdGTFSTimeString';
 
 @Injectable()
 export class TripService {
@@ -53,9 +54,12 @@ export class TripService {
       throw new Error('Trip and stop times do not belong to the same trip');
     }
     const date = gtfsDateStringToDate(gtfsTrip.serviceId);
-    const arrivalTime = this.combineDateAndTime(date, destStopTime.arrivalTime);
-    const departureTime = this.combineDateAndTime(
-      date,
+    const arrivalTime = getDateTimeFromServiceIdGTFSTimeString(
+      gtfsTrip.serviceId,
+      destStopTime.arrivalTime,
+    );
+    const departureTime = getDateTimeFromServiceIdGTFSTimeString(
+      gtfsTrip.serviceId,
       originStopTime.departureTime,
     );
     const trip = this.tripRepo.create({

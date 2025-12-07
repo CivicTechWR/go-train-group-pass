@@ -11,6 +11,7 @@ import { ResponseSerializeInterceptor } from './common/interceptors/response.int
 import { ItinerariesModule } from './itineraries/itineraries.module';
 import { TripModule } from './trip/trip.module';
 import { TripBookingModule } from './trip-booking/trip-booking.module';
+import { TripScheduleModule } from './trip-schedule/trip-schedule.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { TripBookingModule } from './trip-booking/trip-booking.module';
     ItinerariesModule,
     TripModule,
     TripBookingModule,
+    TripScheduleModule,
   ],
   controllers: [AppController],
   providers: [

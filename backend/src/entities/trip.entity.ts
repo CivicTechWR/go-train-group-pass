@@ -30,6 +30,7 @@ export class Trip extends BaseEntity {
   @ManyToOne(() => GTFSStopTime)
   destinationStopTime!: GTFSStopTime;
 
+  //I guess a trip can have multiple dates, for this specific purpose they are only ever on the same day. Could consider refactoring if we want to support group passes that aren't based off the day like the original use case
   @Property({ type: 'date' })
   date: Date;
 
