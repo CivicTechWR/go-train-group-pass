@@ -11,7 +11,13 @@ import { ResponseSerializeInterceptor } from './common/interceptors/response.int
 import { TripScheduleModule } from './trip-schedule/trip-schedule.module';
 
 @Module({
-  imports: [AppConfigModule, OrmModule, AuthModule, GtfsModule, TripScheduleModule],
+  imports: [
+    AppConfigModule,
+    OrmModule,
+    AuthModule,
+    GtfsModule,
+    TripScheduleModule,
+  ],
   controllers: [AppController],
   providers: [
     AppService,
