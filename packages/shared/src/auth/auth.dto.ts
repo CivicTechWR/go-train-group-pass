@@ -1,23 +1,33 @@
 import { createZodDto } from 'nestjs-zod';
 import {
-  SignUpDtoSchema,
-  SignInDtoSchema,
+  SignUpInputSchema,
+  SignInInputSchema,
   RefreshTokenSchema,
-  PasswordResetRequestSchema,
-  PasswordUpdateSchema,
-  PasswordResetSchema,
+  PasswordResetInputSchema,
+  PasswordUpdateInputSchema,
+  PasswordResetResponseSchema,
+  AuthResponseSchema,
+  UserSchema,
 } from './auth.schemas';
 
-export class SignUpDto extends createZodDto(SignUpDtoSchema) { }
+export class SignUpInputDto extends createZodDto(SignUpInputSchema) {}
 
-export class SignInDto extends createZodDto(SignInDtoSchema) { }
+export class SignInInputDto extends createZodDto(SignInInputSchema) {}
 
-export class RefreshTokenDto extends createZodDto(RefreshTokenSchema) { }
+export class RefreshTokenDto extends createZodDto(RefreshTokenSchema) {}
 
-export class PasswordResetRequestDto extends createZodDto(
-  PasswordResetRequestSchema
-) { }
+export class PasswordResetInputDto extends createZodDto(
+  PasswordResetInputSchema,
+) {}
 
-export class PasswordUpdateDto extends createZodDto(PasswordUpdateSchema) { }
+export class PasswordUpdateInputDto extends createZodDto(
+  PasswordUpdateInputSchema,
+) {}
 
-export class PasswordResetDto extends createZodDto(PasswordResetSchema) { }
+export class PasswordResetResponseDto extends createZodDto(
+  PasswordResetResponseSchema,
+) {}
+
+export class AuthResponseDto extends createZodDto(AuthResponseSchema) {}
+
+export class UserDto extends createZodDto(UserSchema) {}

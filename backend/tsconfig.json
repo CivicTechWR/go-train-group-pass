@@ -21,6 +21,16 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "types": ["vitest/globals"]
+    "types": [
+      "vitest/globals"
+    ],
+    "paths": {
+      "@go-train-group-pass/shared": [
+        "../packages/shared/src"
+      ],
+      "@go-train-group-pass/shared/*": [
+        "../packages/shared/src/*"
+      ]
+    }
   }
 }
