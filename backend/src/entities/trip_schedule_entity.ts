@@ -60,8 +60,8 @@ export class TripSchedule {
   date!: string;
 
   @Property()
-  startStopTimeId: string;
+  startStopTimeId!: string;
 
   @Property()
-  endStopTimeId: string;
+  endStopTimeId!: string;
 }
