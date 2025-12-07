@@ -1,7 +1,7 @@
-import { Entity, Property, PrimaryKey, ManyToOne } from '@mikro-orm/core';
+import { Entity, Property } from '@mikro-orm/core';
 
 @Entity({
-    expression: `
+  expression: `
     SELECT
       t.id as "tripId",
       r.id as "routeId",
@@ -27,39 +27,39 @@ import { Entity, Property, PrimaryKey, ManyToOne } from '@mikro-orm/core';
   `,
 })
 export class TripSchedule {
-    @Property()
-    tripId!: string;
+  @Property()
+  tripId!: string;
 
-    @Property()
-    routeId!: string;
+  @Property()
+  routeId!: string;
 
-    @Property()
-    routeShortName!: string;
+  @Property()
+  routeShortName!: string;
 
-    @Property()
-    routeLongName!: string;
+  @Property()
+  routeLongName!: string;
 
-    @Property()
-    departureTime!: string;
+  @Property()
+  departureTime!: string;
 
-    @Property()
-    arrivalTime!: string;
+  @Property()
+  arrivalTime!: string;
 
-    @Property()
-    serviceId!: string;
+  @Property()
+  serviceId!: string;
 
-    @Property()
-    startStopName!: string;
+  @Property()
+  startStopName!: string;
 
-    @Property()
-    endStopName!: string;
- 
-    @Property()
-    date!: string;
+  @Property()
+  endStopName!: string;
 
-    @Property()
-    startStopTimeId: string;
+  @Property()
+  date!: string;
 
-    @Property()
-    endStopTimeId: string;
+  @Property()
+  startStopTimeId: string;
+
+  @Property()
+  endStopTimeId: string;
 }

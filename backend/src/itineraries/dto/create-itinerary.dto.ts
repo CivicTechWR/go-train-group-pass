@@ -2,9 +2,9 @@ import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
 const ItinerarySegmentSchema = z.object({
-  originStopId: z.uuid(),
-  destStopId: z.uuid(),
-  gtfsTripId: z.uuid(),
+  originStopTimeId: z.string(),
+  destStopTimeId: z.string(),
+  gtfsTripId: z.string(),
 });
 
 const CreateItinerarySchema = z.object({

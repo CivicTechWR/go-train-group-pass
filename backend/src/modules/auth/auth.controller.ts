@@ -7,11 +7,7 @@ import {
   HttpCode,
   HttpStatus,
   UnauthorizedException,
-  UseGuards,
-  Req,
 } from '@nestjs/common';
-import { FastifyRequest } from 'fastify';
-import { AuthGuard } from './auth.guard';
 import {
   ApiTags,
   ApiOperation,
@@ -36,7 +32,7 @@ import { Serialize } from '../../common/decorators/serialize.decorator';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly  authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
   @ApiOperation({ summary: 'Register a new user' })
@@ -62,7 +58,6 @@ export class AuthController {
   }
 
   @Get('me')
-  @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user profile' })
   @ApiResponse({
@@ -70,6 +65,12 @@ export class AuthController {
     description: 'Current user profile',
     type: UserDto,
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @Serialize(UserSchema)
+  async getCurrentUser(@Headers('authorization') authorization?: string) {
+    const token = this.extractToken(authorization);
+    return this.authService.getUserFromToken(token);
+  }
 
   @Post('refresh')
   @ApiOperation({ summary: 'Refresh access token' })

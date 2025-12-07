@@ -9,9 +9,7 @@ import { TripBookingModule } from 'src/trip-booking/trip-booking.module';
 
 @Module({
   imports: [
-    MikroOrmModule.forFeature([
-      Itinerary,
-    ]),
+    MikroOrmModule.forFeature([Itinerary]),
     UsersModule,
     AuthModule,
     TripBookingModule,

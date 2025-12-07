@@ -4,8 +4,9 @@ import { EntityRepository, EntityManager } from '@mikro-orm/core';
 import { Itinerary } from '../entities/itinerary.entity';
 import { CreateItineraryDto } from './dto/create-itinerary.dto';
 import { ItineraryStatus } from '../entities/itineraryStatusEnum';
-import { TripBookingService } from 'src/trip-booking/trip-booking.service';
-import { UsersService } from 'src/users/users.service';
+import { TripBookingService } from '../trip-booking/trip-booking.service';
+import { UsersService } from '../users/users.service';
+import { ItineraryCreationResponseDto } from '@go-train-group-pass/shared';
 
 @Injectable()
 export class ItinerariesService {
@@ -20,19 +21,34 @@ export class ItinerariesService {
   async create(
     userId: string,
     createItineraryDto: CreateItineraryDto,
-  ): Promise<Itinerary> {
-    const user = await this.userService.findByAuthUserIdOrFail(userId);
+  ): Promise<ItineraryCreationResponseDto> {
+    const user = await this.userService.findById(userId);
     const tripBookings = await Promise.all(
       createItineraryDto.segments.map(async (segment, index) => {
         return await this.tripBookingService.create(
           userId,
           segment.gtfsTripId,
-          segment.originStopId,
-          segment.destStopId,
+          segment.originStopTimeId,
+          segment.destStopTimeId,
           index,
         );
       }),
     );
+
+    const existingItinerary = await this.itineraryRepo.findOne({
+      user,
+      tripBookings,
+    });
+
+    if (existingItinerary) {
+      return {
+        id: existingItinerary.id,
+        trips: tripBookings.map((tripBooking) =>
+          this.tripBookingService.getTripDetails(tripBooking),
+        ),
+        stewarding: existingItinerary.wantsToSteward,
+      };
+    }
 
     const itinerary = this.itineraryRepo.create({
       user,
@@ -41,6 +57,12 @@ export class ItinerariesService {
       status: ItineraryStatus.DRAFT,
     });
     await this.em.persistAndFlush(itinerary);
-    return itinerary;
+    return {
+      id: itinerary.id,
+      trips: tripBookings.map((tripBooking) =>
+        this.tripBookingService.getTripDetails(tripBooking),
+      ),
+      stewarding: itinerary.wantsToSteward,
+    };
   }
 }

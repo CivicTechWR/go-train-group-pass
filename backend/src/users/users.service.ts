@@ -26,6 +26,10 @@ export class UsersService {
     return user;
   }
 
+  async findById(id: string): Promise<User> {
+    return this.userRepository.findOneOrFail(id);
+  }
+
   /**
    * Find a user by their Supabase auth user ID
    */

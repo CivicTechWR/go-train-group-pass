@@ -14,7 +14,6 @@ import {
   GTFSStopTime,
   GTFSCalendarDate,
   GTFSFeedInfo,
-  TripSchedule,
 } from '../entities';
 import {
   CreateRequestContext,
@@ -537,5 +536,4 @@ export class GtfsService {
       await this.stopTimeRepository.insertMany(stopTimeEntities);
     }
   }
-
 }

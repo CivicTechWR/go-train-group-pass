@@ -1,36 +1,34 @@
 import { EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { TripBooking, User } from 'src/entities';
-import { TripService } from 'src/trip/trip.service';
-import { UserRepository } from 'src/users/users.repository';
-import { CreateTripBookingDto } from './dto/createTripBookingDto';
-import { TripBookingStatus } from 'src/entities/tripBookingEnum';
-
+import { TripBooking } from '../entities';
+import { TripService } from '../trip/trip.service';
+import { TripBookingStatus } from '../entities/tripBookingEnum';
+import { TripDetailsDto } from '@go-train-group-pass/shared';
+import { UsersService } from '../users/users.service';
 @Injectable()
 export class TripBookingService {
   constructor(
     @InjectRepository(TripBooking)
     private readonly tripBookingRepo: EntityRepository<TripBooking>,
-    @InjectRepository(User)
-    private readonly userRepo: UserRepository,
+    private readonly userService: UsersService,
     private readonly tripService: TripService,
-  ) { }
+  ) {}
   async create(
     userId: string,
     gtfsTripId: string,
-    originStopId: string,
-    destStopId: string,
+    originStopTimeId: string,
+    destStopTimeId: string,
     sequence?: number,
   ): Promise<TripBooking> {
-    const user = await this.userRepo.findOne(userId);
+    const user = await this.userService.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
     const trip = await this.tripService.findOrCreateTrip(
       gtfsTripId,
-      originStopId,
-      destStopId,
+      originStopTimeId,
+      destStopTimeId,
     );
     const existingTripBooking = await this.tripBookingRepo.findOne({
       user,
@@ -49,5 +47,14 @@ export class TripBookingService {
     });
     await this.tripBookingRepo.getEntityManager().persistAndFlush(tripBooking);
     return tripBooking;
+  }
+
+  getTripDetails(tripBooking: TripBooking): TripDetailsDto {
+    return {
+      orgStation: tripBooking.trip.originStopName,
+      destStation: tripBooking.trip.destinationStopName,
+      departureTime: tripBooking.trip.departureTime,
+      arrivalTime: tripBooking.trip.arrivalTime,
+    };
   }
 }
