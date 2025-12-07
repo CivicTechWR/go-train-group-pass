@@ -6,6 +6,7 @@ import { OrmModule } from './modules/orm.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { GtfsModule } from './gtfs/gtfs.module';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { GroupFormationModule } from './group-formation/group-formation.module';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { ResponseSerializeInterceptor } from './common/interceptors/response.interceptor';
 import { TripScheduleModule } from './trip-schedule/trip-schedule.module';
@@ -18,6 +19,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     AuthModule,
     GtfsModule,
     TripScheduleModule,
+    GroupFormationModule,
   ],
   controllers: [AppController],
   providers: [
