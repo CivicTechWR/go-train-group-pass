@@ -22,7 +22,7 @@ export default defineConfig({
   dbName: process.env.DB_NAME || 'postgres',
   extensions: [Migrator],
   highlighter: new SqlHighlighter(),
-  debug: false,
+  debug: true,
   logger: logFn,
   migrations: {
     path: './src/database/migrations',
