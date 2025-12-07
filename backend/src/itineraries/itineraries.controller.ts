@@ -17,7 +17,6 @@ import { FastifyRequest } from 'fastify';
 import { ItinerariesService } from './itineraries.service';
 import { CreateItineraryDto } from './itineraries.schemas';
 import { AuthGuard } from '../modules/auth/auth.guard';
-import { User } from '../entities/user.entity';
 
 interface RequestWithUser extends FastifyRequest {
   user?: {
@@ -55,12 +54,10 @@ export class ItinerariesController {
     @Req() request: RequestWithUser,
   ) {
     // The user is attached to the request by AuthGuard
-    // We need to pass the user reference to the service
-    const user = { id: request.user!.id } as User;
-
+    // Pass the user ID - the service will create a proper MikroORM reference
     const itinerary = await this.itinerariesService.create(
       createItineraryDto,
-      user,
+      request.user!.id,
     );
 
     return this.itinerariesService.formatItineraryResponse(itinerary);

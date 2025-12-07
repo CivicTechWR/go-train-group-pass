@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
-import { EntityManager } from '@mikro-orm/postgresql';
+import {
+  EntityManager,
+  UniqueConstraintViolationException,
+} from '@mikro-orm/postgresql';
 import { vi, describe, it, expect, beforeEach, Mock } from 'vitest';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ItinerariesService } from './itineraries.service';
@@ -33,16 +36,13 @@ describe('ItinerariesService', () => {
   let mockEntityManager: {
     persistAndFlush: Mock;
     refresh: Mock;
+    getReference: Mock;
+    clear: Mock;
   };
 
   // Mock data
-  const mockUser: User = {
-    id: 'user-123',
-    email: 'test@example.com',
-    name: 'Test User',
-    phoneNumber: '1234567890',
-    authUserId: 'auth-123',
-  } as User;
+  const mockUserId = 'user-123';
+  const mockUserRef = { id: mockUserId } as User;
 
   const mockGtfsTrip = {
     id: 'gtfs-trip-uuid',
@@ -108,6 +108,8 @@ describe('ItinerariesService', () => {
     mockEntityManager = {
       persistAndFlush: vi.fn(),
       refresh: vi.fn(),
+      getReference: vi.fn().mockReturnValue(mockUserRef),
+      clear: vi.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -164,7 +166,7 @@ describe('ItinerariesService', () => {
         id: 'itinerary-uuid',
         status: ItineraryStatus.DRAFT,
         wantsToSteward: true,
-        user: mockUser,
+        user: mockUserRef,
         tripBookings: {
           add: vi.fn(),
           getItems: vi.fn().mockReturnValue([
@@ -184,7 +186,7 @@ describe('ItinerariesService', () => {
         id: 'booking-uuid',
         sequence: 1,
         status: TripBookingStatus.PENDING,
-        user: mockUser,
+        user: mockUserRef,
         itinerary: mockItinerary,
         trip: mockTrip,
       };
@@ -202,10 +204,14 @@ describe('ItinerariesService', () => {
           ],
           wantsToSteward: true,
         },
-        mockUser,
+        mockUserId,
       );
 
       // Verify
+      expect(mockEntityManager.getReference).toHaveBeenCalledWith(
+        User,
+        mockUserId,
+      );
       expect(mockGtfsTripRepository.findOne).toHaveBeenCalledWith({
         trip_id: 'trip-001',
       });
@@ -213,13 +219,13 @@ describe('ItinerariesService', () => {
       expect(mockItineraryRepository.create).toHaveBeenCalledWith({
         status: ItineraryStatus.DRAFT,
         wantsToSteward: true,
-        user: mockUser,
+        user: mockUserRef,
       });
       expect(mockTripBookingRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           sequence: 1,
           status: TripBookingStatus.PENDING,
-          user: mockUser,
+          user: mockUserRef,
         }),
       );
       expect(mockEntityManager.persistAndFlush).toHaveBeenCalled();
@@ -238,7 +244,7 @@ describe('ItinerariesService', () => {
         id: 'itinerary-uuid',
         status: ItineraryStatus.DRAFT,
         wantsToSteward: false,
-        user: mockUser,
+        user: mockUserRef,
         tripBookings: {
           add: vi.fn(),
           getItems: vi.fn().mockReturnValue([]),
@@ -260,7 +266,7 @@ describe('ItinerariesService', () => {
           ],
           wantsToSteward: false,
         },
-        mockUser,
+        mockUserId,
       );
 
       // Verify trip was not created (reused existing)
@@ -282,7 +288,7 @@ describe('ItinerariesService', () => {
             ],
             wantsToSteward: false,
           },
-          mockUser,
+          mockUserId,
         ),
       ).rejects.toThrow(NotFoundException);
     });
@@ -303,7 +309,7 @@ describe('ItinerariesService', () => {
             ],
             wantsToSteward: false,
           },
-          mockUser,
+          mockUserId,
         ),
       ).rejects.toThrow(BadRequestException);
     });
@@ -326,7 +332,7 @@ describe('ItinerariesService', () => {
             ],
             wantsToSteward: false,
           },
-          mockUser,
+          mockUserId,
         ),
       ).rejects.toThrow(BadRequestException);
     });
@@ -352,7 +358,7 @@ describe('ItinerariesService', () => {
             ],
             wantsToSteward: false,
           },
-          mockUser,
+          mockUserId,
         ),
       ).rejects.toThrow(BadRequestException);
     });
@@ -390,7 +396,7 @@ describe('ItinerariesService', () => {
         id: 'itinerary-uuid',
         status: ItineraryStatus.DRAFT,
         wantsToSteward: true,
-        user: mockUser,
+        user: mockUserRef,
         tripBookings: {
           add: vi.fn(),
           getItems: vi.fn().mockReturnValue([]),
@@ -414,7 +420,7 @@ describe('ItinerariesService', () => {
           ],
           wantsToSteward: true,
         },
-        mockUser,
+        mockUserId,
       );
 
       // Verify two trips were created
@@ -428,6 +434,62 @@ describe('ItinerariesService', () => {
       expect(mockTripBookingRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({ sequence: 2 }),
       );
+    });
+
+    it('should handle race condition when creating Trip (unique constraint violation)', async () => {
+      // Setup mocks
+      mockGtfsTripRepository.findOne.mockResolvedValue(mockGtfsTrip);
+      mockStopTimeRepository.findOne
+        .mockResolvedValueOnce(mockOriginStopTime)
+        .mockResolvedValueOnce(mockDestStopTime);
+
+      // First findOne returns null, simulating race condition
+      // After constraint violation, second findOne returns the trip
+      mockTripRepository.findOne
+        .mockResolvedValueOnce(null) // Initial check
+        .mockResolvedValueOnce(mockTrip); // Retry after constraint violation
+
+      mockTripRepository.create.mockReturnValue(mockTrip);
+
+      // Simulate unique constraint violation on first persist
+      mockEntityManager.persistAndFlush.mockRejectedValueOnce(
+        new UniqueConstraintViolationException(new Error('unique violation')),
+      );
+
+      const mockItinerary = {
+        id: 'itinerary-uuid',
+        status: ItineraryStatus.DRAFT,
+        wantsToSteward: false,
+        user: mockUserRef,
+        tripBookings: {
+          add: vi.fn(),
+          getItems: vi.fn().mockReturnValue([]),
+        },
+        createdAt: new Date(),
+      };
+      mockItineraryRepository.create.mockReturnValue(mockItinerary);
+      mockTripBookingRepository.create.mockReturnValue({});
+
+      // Execute - should not throw
+      await service.create(
+        {
+          segments: [
+            {
+              originStopId: 'KIT',
+              destStopId: 'UN',
+              gtfsTripId: 'trip-001',
+            },
+          ],
+          wantsToSteward: false,
+        },
+        mockUserId,
+      );
+
+      // Verify entity manager was cleared after constraint violation
+      expect(mockEntityManager.clear).toHaveBeenCalled();
+
+      // Verify trip repository was queried again after violation
+      expect(mockTripRepository.findOne).toHaveBeenCalledTimes(2);
     });
   });
 

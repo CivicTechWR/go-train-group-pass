@@ -4,7 +4,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
+import {
+  EntityManager,
+  EntityRepository,
+  UniqueConstraintViolationException,
+} from '@mikro-orm/postgresql';
 import { Itinerary } from '../entities/itinerary.entity';
 import { Trip } from '../entities/trip.entity';
 import { TripBooking } from '../entities/trip_booking.entity';
@@ -38,8 +42,14 @@ export class ItinerariesService {
    * 3. Create the Itinerary entity
    * 4. Create TripBooking entities linked to the Itinerary
    */
-  async create(input: CreateItineraryInput, user: User): Promise<Itinerary> {
+  async create(
+    input: CreateItineraryInput,
+    userId: string,
+  ): Promise<Itinerary> {
     const { segments, wantsToSteward } = input;
+
+    // Get a proper MikroORM reference to the user entity
+    const userRef = this.em.getReference(User, userId);
 
     // Validate and resolve all segments first
     const resolvedSegments = await this.resolveSegments(segments);
@@ -48,7 +58,7 @@ export class ItinerariesService {
     const itinerary = this.itineraryRepository.create({
       status: ItineraryStatus.DRAFT,
       wantsToSteward,
-      user,
+      user: userRef,
     });
 
     // Create trip bookings for each segment
@@ -58,7 +68,7 @@ export class ItinerariesService {
       const tripBooking = this.tripBookingRepository.create({
         sequence: i + 1,
         status: TripBookingStatus.PENDING,
-        user,
+        user: userRef,
         itinerary,
         trip,
       });
@@ -153,30 +163,52 @@ export class ItinerariesService {
   /**
    * Find an existing Trip or create a new one.
    * Uses the unique constraint [gtfsTrip, originStopTime, destinationStopTime].
+   *
+   * Handles race conditions by catching unique constraint violations
+   * and retrying with a find operation.
    */
   private async findOrCreateTrip(
     gtfsTrip: GTFSTrip,
     originStopTime: GTFSStopTime,
     destinationStopTime: GTFSStopTime,
   ): Promise<Trip> {
-    // Try to find existing trip
-    let trip = await this.tripRepository.findOne({
+    // Try to find existing trip first
+    const existingTrip = await this.tripRepository.findOne({
       gtfsTrip,
       originStopTime,
       destinationStopTime,
     });
 
-    if (!trip) {
-      // Create new trip
-      trip = this.tripRepository.create({
+    if (existingTrip) {
+      return existingTrip;
+    }
+
+    // Try to create new trip, handling potential race condition
+    try {
+      const newTrip = this.tripRepository.create({
         gtfsTrip,
         originStopTime,
         destinationStopTime,
       });
-      await this.em.persistAndFlush(trip);
+      await this.em.persistAndFlush(newTrip);
+      return newTrip;
+    } catch (error) {
+      // If unique constraint violation, another request created the trip concurrently
+      // Clear the entity manager state and retry find
+      if (error instanceof UniqueConstraintViolationException) {
+        this.em.clear();
+        const concurrentTrip = await this.tripRepository.findOne({
+          gtfsTrip,
+          originStopTime,
+          destinationStopTime,
+        });
+        if (concurrentTrip) {
+          return concurrentTrip;
+        }
+      }
+      // Re-throw if it's a different error or trip still not found
+      throw error;
     }
-
-    return trip;
   }
 
   /**
