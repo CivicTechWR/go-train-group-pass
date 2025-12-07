@@ -30,12 +30,17 @@ export class TripBookingService {
       originStopTimeId,
       destStopTimeId,
     );
-    const existingTripBooking = await this.tripBookingRepo.findOne({
-      user,
-      trip,
-      status: TripBookingStatus.PENDING,
-      sequence,
-    });
+    const existingTripBooking = await this.tripBookingRepo.findOne(
+      {
+        user,
+        trip,
+        status: TripBookingStatus.PENDING,
+        sequence,
+      },
+      {
+        populate: ['trip', 'trip.originStopTime', 'trip.destinationStopTime'],
+      },
+    );
     if (existingTripBooking) {
       return existingTripBooking;
     }
@@ -55,6 +60,12 @@ export class TripBookingService {
       destStation: tripBooking.trip.destinationStopName,
       departureTime: tripBooking.trip.departureTime,
       arrivalTime: tripBooking.trip.arrivalTime,
+      routeShortName: tripBooking.trip.originStopTime.trip.route.routeShortName,
+      tripId: tripBooking.trip.id,
+      // The IDs are available on the related entities, but they might be wrapped in Reference wrappers,
+      // or just plain entities depending on loading strategy.
+      // Since we populated them in create, we access them directly.
+      // Assuming MikroORM 5/6 behavior where loaded relations are accessible.
     };
   }
 }
