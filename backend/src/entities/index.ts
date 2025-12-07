@@ -5,6 +5,7 @@ export * from './gtfs_route.entity';
 export * from './gtfs_stop.entity';
 export * from './gtfs_stop_times.entity';
 export * from './gtfs_trip.entity';
+export * from './trip_schedule.entity';
 export * from './user.entity';
 export * from './itinerary.entity';
 export * from './payment.entity';

@@ -6,6 +6,7 @@ import {
   OneToMany,
   Collection,
   Entity,
+  Unique,
 } from '@mikro-orm/core';
 import { randomUUID } from 'crypto';
 import { Itinerary } from './itinerary.entity';
@@ -17,6 +18,7 @@ import { TripBookingStatus } from './tripBookingEnum';
 import { BaseEntity } from './base';
 
 @Entity()
+@Unique({ properties: ['user', 'trip'] })
 export class TripBooking extends BaseEntity {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id: string = randomUUID();

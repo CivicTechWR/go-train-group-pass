@@ -1252,17 +1252,88 @@
           "primary": false,
           "nullable": false,
           "mappedType": "uuid"
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 0,
+          "mappedType": "date"
+        },
+        "origin_stop_name": {
+          "name": "origin_stop_name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "destination_stop_name": {
+          "name": "destination_stop_name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "route_short_name": {
+          "name": "route_short_name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "route_long_name": {
+          "name": "route_long_name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "departure_time": {
+          "name": "departure_time",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "arrival_time": {
+          "name": "arrival_time",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
         }
       },
       "name": "trip",
       "schema": "go-train-group-pass",
       "indexes": [
         {
-          "keyName": "trip_gtfs_trip_id_origin_stop_time_id_destination_59c37_unique",
+          "keyName": "trip_gtfs_trip_id_origin_stop_time_id_destination_e592d_unique",
           "columnNames": [
             "gtfs_trip_id",
             "origin_stop_time_id",
-            "destination_stop_time_id"
+            "destination_stop_time_id",
+            "date"
           ],
           "composite": true,
           "constraint": true,
@@ -1969,6 +2040,17 @@
           "constraint": false,
           "primary": false,
           "unique": false
+        },
+        {
+          "keyName": "trip_booking_user_id_trip_id_unique",
+          "columnNames": [
+            "user_id",
+            "trip_id"
+          ],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
         },
         {
           "keyName": "trip_booking_pkey",
