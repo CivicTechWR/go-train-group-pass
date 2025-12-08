@@ -9,7 +9,7 @@ import { UsersService } from '../users/users.service';
 import { TripBookingService } from '../trip-booking/trip-booking.service';
 import { CreateItineraryDto } from './dto/create-itinerary.dto';
 import { ItineraryStatus } from '../entities/itineraryStatusEnum';
-import { vi, type Mock } from 'vitest';
+import { vi, describe, it, expect, beforeEach, afterEach, Mock } from 'vitest';
 
 describe('ItinerariesService', () => {
   let service: ItinerariesService;
@@ -17,34 +17,42 @@ describe('ItinerariesService', () => {
     find: Mock;
     findOne: Mock;
     create: Mock;
+    getEntityManager: Mock<() => { persistAndFlush: Mock }>;
+    persist: Mock;
+    flush: Mock;
   };
   let em: { persistAndFlush: Mock };
   let usersService: { findByAuthUserIdOrFail: Mock; findById: Mock };
   let tripBookingService: { create: Mock; getTripDetails: Mock };
 
-  const mockRepository = {
-    find: vi.fn(),
-    findOne: vi.fn(),
-    create: vi.fn(),
-    persist: vi.fn(),
-    flush: vi.fn(),
-  };
-
-  const mockEm = {
-    persistAndFlush: vi.fn(),
-  };
-
-  const mockUsersService = {
-    findByAuthUserIdOrFail: vi.fn(),
-    findById: vi.fn(),
-  };
-
-  const mockTripBookingService = {
-    create: vi.fn(),
-    getTripDetails: vi.fn(),
-  };
-
   beforeEach(async () => {
+    // Reset mocks for each test
+    const mockEm = {
+      persistAndFlush: vi.fn(),
+    };
+
+    const mockRepository = {
+      find: vi.fn(),
+      findOne: vi.fn(),
+      create: vi.fn((data: Record<string, unknown>) => ({
+        ...data,
+        id: 'mock-id',
+      })),
+      persist: vi.fn(),
+      flush: vi.fn(),
+      getEntityManager: vi.fn().mockReturnValue(mockEm),
+    };
+
+    const mockUsersService = {
+      findByAuthUserIdOrFail: vi.fn(),
+      findById: vi.fn(),
+    };
+
+    const mockTripBookingService = {
+      create: vi.fn(),
+      getTripDetails: vi.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ItinerariesService,
@@ -107,22 +115,28 @@ describe('ItinerariesService', () => {
         arrivalTime: new Date(),
       },
     } as TripBooking;
-    const mockItinerary = {
-      id: 'itinerary-1',
-      wantsToSteward: true,
-    } as Itinerary;
+    // Use the mock logic from repository create or define here if needed,
+    // but the test expects service.create to return what we expect.
+    // The previous test manually mocked create logic.
+    // With current mockRepository.create implementation, it returns {...data, id: 'mock-id'}
+    // We should make sure we respect that or override if strictly needed.
 
     it('should create an itinerary with trip bookings', async () => {
-      mockUsersService.findById.mockResolvedValue(mockUser);
-      mockTripBookingService.create
+      usersService.findById.mockResolvedValue(mockUser);
+      tripBookingService.create
         .mockResolvedValueOnce(mockTripBooking1)
         .mockResolvedValueOnce(mockTripBooking2);
 
-      itineraryRepo.create.mockReturnValue(mockItinerary);
-
-      mockTripBookingService.getTripDetails
+      tripBookingService.getTripDetails
         .mockReturnValueOnce({ orgStation: 'A', destStation: 'B' })
         .mockReturnValueOnce({ orgStation: 'B', destStation: 'C' });
+
+      // Override the create mock implementation for this test to match what was there before
+      // or adapt expectations. The previous mock returned `mockItinerary` object.
+      // The new mock returns `{...data, id: 'mock-id'}`.
+      // Let's stick to the new mock behavior which is more realistic (dynamic return based on input)
+      // but we need to ensure the id matches what we expect or just expect any id.
+      // The old test expected ID 'itinerary-1'. The new mock returns 'mock-id'.
 
       const result = await service.create(userId, createItineraryDto);
 
@@ -150,10 +164,19 @@ describe('ItinerariesService', () => {
         status: ItineraryStatus.DRAFT,
       });
 
-      expect(em.persistAndFlush).toHaveBeenCalledWith(mockItinerary);
+      // The service.create function calls `this.em.persistAndFlush(itinerary)`
+      // In the old setup, `em` was mocked separately. In the new setup, `em` is also mocked.
+      // The expected object passed to persistAndFlush depends on what repo.create returned.
+      expect(em.persistAndFlush).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'mock-id',
+          user: mockUser,
+          status: ItineraryStatus.DRAFT,
+        }),
+      );
 
       expect(result).toEqual({
-        id: mockItinerary.id,
+        id: 'mock-id',
         trips: [
           { orgStation: 'A', destStation: 'B' },
           { orgStation: 'B', destStation: 'C' },

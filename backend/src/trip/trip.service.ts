@@ -1,6 +1,6 @@
 import { EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { GTFSStopTime, GTFSTrip, Trip } from '../entities';
 import { gtfsDateStringToDate } from '../utils/gtfsDateStringToDate';
 import { GTFSTimeString } from 'src/utils/isGTFSTimeString';
@@ -21,6 +21,7 @@ export class TripService {
     originStopTimeId: string,
     destStopTimeId: string,
   ): Promise<Trip> {
+    // Optimization: Check if trip exists to avoid expensive GTFS fetches
     const existingTrip = await this.tripRepo.findOne({
       gtfsTrip: gtfsTripId,
       originStopTime: originStopTimeId,
@@ -29,6 +30,7 @@ export class TripService {
     if (existingTrip) {
       return existingTrip;
     }
+
     const gtfsTrip = await this.gtfsTripRepo.findOneOrFail(gtfsTripId, {
       populate: ['route'],
     });
@@ -50,7 +52,9 @@ export class TripService {
       gtfsTrip.id !== originStopTime.trip.id ||
       gtfsTrip.id !== destStopTime.trip.id
     ) {
-      throw new Error('Trip and stop times do not belong to the same trip');
+      throw new BadRequestException(
+        'Trip and stop times do not belong to the same trip',
+      );
     }
     const date = gtfsDateStringToDate(gtfsTrip.serviceId);
     const arrivalTime = this.combineDateAndTime(date, destStopTime.arrivalTime);
@@ -58,20 +62,35 @@ export class TripService {
       date,
       originStopTime.departureTime,
     );
-    const trip = this.tripRepo.create({
-      gtfsTrip,
-      originStopTime,
-      destinationStopTime: destStopTime,
-      date,
-      originStopName: originStopTime.stop.stopName,
-      destinationStopName: destStopTime.stop.stopName,
-      routeShortName: gtfsTrip.route.routeShortName,
-      routeLongName: gtfsTrip.route.routeLongName,
-      departureTime: departureTime,
-      arrivalTime: arrivalTime,
-    });
-    await this.tripRepo.getEntityManager().persistAndFlush(trip);
-    return trip;
+
+    // Use upsert to handle race conditions where concurrent requests might try to create the same trip
+    // If the trip was created by another request between the findOne checks, this will return the existing one
+    // We can safely update/overwrite because the trip data is deterministic based on GTFS data
+    return await this.tripRepo.upsert(
+      {
+        gtfsTrip,
+        originStopTime,
+        destinationStopTime: destStopTime,
+        date,
+        originStopName: originStopTime.stop.stopName,
+        destinationStopName: destStopTime.stop.stopName,
+        routeShortName: gtfsTrip.route.routeShortName,
+        routeLongName: gtfsTrip.route.routeLongName,
+        departureTime: departureTime,
+        arrivalTime: arrivalTime,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        onConflictFields: [
+          'gtfsTrip',
+          'originStopTime',
+          'destinationStopTime',
+          'date',
+        ],
+        onConflictExcludeFields: ['id', 'createdAt'],
+      },
+    );
   }
   combineDateAndTime(date: Date, timeString: GTFSTimeString): Date {
     const [hours, minutes, seconds] = timeString.split(':').map(Number);

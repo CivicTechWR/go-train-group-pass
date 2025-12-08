@@ -30,28 +30,40 @@ export class TripBookingService {
       originStopTimeId,
       destStopTimeId,
     );
+
+    // Optimization: check existence first
     const existingTripBooking = await this.tripBookingRepo.findOne(
       {
         user,
         trip,
-        status: TripBookingStatus.PENDING,
         sequence,
       },
       {
-        populate: ['trip', 'trip.originStopTime', 'trip.destinationStopTime'],
+        populate: ['*'],
       },
     );
     if (existingTripBooking) {
       return existingTripBooking;
     }
-    const tripBooking = this.tripBookingRepo.create({
-      user,
-      trip,
-      status: TripBookingStatus.PENDING,
-      sequence,
-    });
-    await this.tripBookingRepo.getEntityManager().persistAndFlush(tripBooking);
-    return tripBooking;
+
+    // Use upsert to safe-guard against race conditions
+    // strictly use onConflictAction: 'ignore' so we don't reset the status of an existing booking
+    // e.g. if status is CONFIRMED, we don't want to set it back to PENDING by accident
+    return await this.tripBookingRepo.upsert(
+      {
+        user,
+        trip,
+        status: TripBookingStatus.PENDING,
+        sequence,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        onConflictAction: 'ignore',
+        onConflictFields: ['user', 'trip'],
+        onConflictExcludeFields: ['id', 'createdAt', 'status'],
+      },
+    );
   }
 
   getTripDetails(tripBooking: TripBooking): TripDetailsDto {
@@ -60,12 +72,8 @@ export class TripBookingService {
       destStation: tripBooking.trip.destinationStopName,
       departureTime: tripBooking.trip.departureTime,
       arrivalTime: tripBooking.trip.arrivalTime,
-      routeShortName: tripBooking.trip.originStopTime.trip.route.routeShortName,
+      routeShortName: tripBooking.trip.routeShortName,
       tripId: tripBooking.trip.id,
-      // The IDs are available on the related entities, but they might be wrapped in Reference wrappers,
-      // or just plain entities depending on loading strategy.
-      // Since we populated them in create, we access them directly.
-      // Assuming MikroORM 5/6 behavior where loaded relations are accessible.
     };
   }
 }
