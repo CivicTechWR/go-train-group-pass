@@ -29,12 +29,6 @@ export function Navbar() {
             {!loading && user && (
               <>
                 <Link
-                  href='/trips'
-                  className='text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
-                >
-                  Trips
-                </Link>
-                <Link
                   href='/itineraries'
                   className='text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
                 >
