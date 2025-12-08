@@ -46,30 +46,24 @@ export async function POST(request: NextRequest) {
     const nextResponse = NextResponse.json(authResponse);
 
     // Set access_token cookie
-    nextResponse.cookies.set(
-      'access_token',
-      authResponse.session.access_token,
-      {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: authResponse.session.expires_in,
-        path: '/',
-      }
-    );
+    // Default expires_in to 3600 seconds (1 hour) if not provided
+    const expiresIn = 3600;
+    nextResponse.cookies.set('access_token', authResponse.data.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: expiresIn,
+      path: '/',
+    });
 
     // Set refresh_token cookie
-    nextResponse.cookies.set(
-      'refresh_token',
-      authResponse.session.refresh_token,
-      {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7, // 7 days
-        path: '/',
-      }
-    );
+    nextResponse.cookies.set('refresh_token', authResponse.data.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/',
+    });
 
     // Prevent caching
     nextResponse.headers.set(

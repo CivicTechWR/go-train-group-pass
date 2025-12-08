@@ -21,14 +21,33 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(validatedData),
     });
 
-    const data = await response.json();
-
     if (!response.ok) {
+      const data = await response.json();
       return NextResponse.json(data, { status: response.status });
     }
 
+    // Backend signup returns void (201), so we need to automatically sign in the user
+    // to get the auth tokens and user data
+    const signInResponse = await fetch(`${BACKEND_URL}/auth/signin`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: validatedData.email,
+        password: validatedData.password,
+      }),
+    });
+
+    if (!signInResponse.ok) {
+      const errorData = await signInResponse.json();
+      return NextResponse.json(errorData, { status: signInResponse.status });
+    }
+
+    const signInData = await signInResponse.json();
+
     // Validate response schema
-    const parseResult = AuthResponseSchema.safeParse(data);
+    const parseResult = AuthResponseSchema.safeParse(signInData);
     if (!parseResult.success) {
       const zodError = parseResult.error;
       console.error('Backend response shape mismatch:', zodError.issues);
@@ -46,30 +65,24 @@ export async function POST(request: NextRequest) {
     const nextResponse = NextResponse.json(authResponse);
 
     // Set access_token cookie
-    nextResponse.cookies.set(
-      'access_token',
-      authResponse.session.access_token,
-      {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: authResponse.session.expires_in,
-        path: '/',
-      }
-    );
+    // Default expires_in to 3600 seconds (1 hour) if not provided
+    const expiresIn = 3600;
+    nextResponse.cookies.set('access_token', authResponse.data.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: expiresIn,
+      path: '/',
+    });
 
     // Set refresh_token cookie
-    nextResponse.cookies.set(
-      'refresh_token',
-      authResponse.session.refresh_token,
-      {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7, // 7 days
-        path: '/',
-      }
-    );
+    nextResponse.cookies.set('refresh_token', authResponse.data.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/',
+    });
 
     // Prevent caching
     nextResponse.headers.set(

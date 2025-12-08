@@ -61,23 +61,21 @@ export async function POST(request: NextRequest) {
     const nextResponse = NextResponse.json(refreshResponse);
 
     // Update access_token cookie
-    nextResponse.cookies.set(
-      'access_token',
-      refreshResponse.session.access_token,
-      {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: refreshResponse.session.expires_in,
-        path: '/',
-      }
-    );
+    // Default expires_in to 3600 seconds (1 hour) if not provided
+    const expiresIn = 3600;
+    nextResponse.cookies.set('access_token', refreshResponse.data.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: expiresIn,
+      path: '/',
+    });
 
     // Update refresh_token cookie if a new one is provided
-    if (refreshResponse.session.refresh_token) {
+    if (refreshResponse.data.refreshToken) {
       nextResponse.cookies.set(
         'refresh_token',
-        refreshResponse.session.refresh_token,
+        refreshResponse.data.refreshToken,
         {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',

@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = useCallback(
     async (data: SignUpInput): Promise<AuthResponse> => {
       const response = await apiPost<AuthResponse>('/auth/signup', data);
-      setUser(response.user);
+      setUser(response.data.user);
       return response;
     },
     []
@@ -62,10 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = useCallback(
     async (data: SignInInput): Promise<AuthResponse> => {
       const response = await apiPost<AuthResponse>('/auth/signin', data);
-      setUser({
-        ...response.user,
-        name: response.session.user.user_metadata.full_name ?? 'Anonymous',
-      });
+      setUser(response.data.user);
       return response;
     },
     []

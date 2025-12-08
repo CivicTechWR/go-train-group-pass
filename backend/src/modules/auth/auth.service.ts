@@ -1,18 +1,18 @@
 import {
-  Injectable,
-  UnauthorizedException,
-  BadRequestException,
-} from '@nestjs/common';
-import { SupabaseService } from './supabase.service';
-import { UsersService } from 'src/users/users.service';
-import {
-  SignUpInputDto,
-  SignInInputDto,
+  AuthResponseDto,
   PasswordResetInputDto,
   PasswordUpdateInputDto,
-  AuthResponseDto,
+  SignInInputDto,
+  SignUpInputDto,
   UserDto,
 } from '@go-train-group-pass/shared';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { UsersService } from 'src/users/users.service';
+import { SupabaseService } from './supabase.service';
 
 import { IAuthService } from './auth.interface';
 

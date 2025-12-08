@@ -32,8 +32,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(data, { status: response.status });
     }
 
+    const userData = data.data || data;
+
     // Validate response schema
-    const parseResult = UserSchema.safeParse(data);
+    const parseResult = UserSchema.safeParse(userData);
     if (!parseResult.success) {
       const zodError = parseResult.error;
       console.error('Backend response shape mismatch:', zodError.issues);
