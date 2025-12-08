@@ -14,6 +14,10 @@ export interface GroupFormationResult {
   usersGrouped: number;
   usersNotGrouped: number;
   failedNoSteward: number;
+  failureReason?:
+    | 'not_enough_bookings'
+    | 'no_steward_candidates'
+    | 'insufficient_stewards';
 }
 
 // Constants
@@ -110,6 +114,7 @@ export class GroupFormationService {
         `Trip ${trip.id}: Not enough eligible bookings (${eligibleBookings.length})`,
       );
       result.usersNotGrouped = eligibleBookings.length;
+      result.failureReason = 'not_enough_bookings';
       return result;
     }
 
@@ -131,6 +136,7 @@ export class GroupFormationService {
       result.usersGrouped += groupResult.usersGrouped;
       result.usersNotGrouped += groupResult.usersNotGrouped;
       result.failedNoSteward += groupResult.failedNoSteward;
+      result.failureReason ??= groupResult.failureReason;
     }
 
     return result;
@@ -198,8 +204,21 @@ export class GroupFormationService {
     usersGrouped: number;
     usersNotGrouped: number;
     failedNoSteward: number;
+    failureReason?:
+      | 'not_enough_bookings'
+      | 'no_steward_candidates'
+      | 'insufficient_stewards';
   }> {
-    const result = {
+    const result: {
+      groupsFormed: number;
+      usersGrouped: number;
+      usersNotGrouped: number;
+      failedNoSteward: number;
+      failureReason?:
+        | 'not_enough_bookings'
+        | 'no_steward_candidates'
+        | 'insufficient_stewards';
+    } = {
       groupsFormed: 0,
       usersGrouped: 0,
       usersNotGrouped: 0,
@@ -208,6 +227,7 @@ export class GroupFormationService {
 
     if (bookings.length < MIN_GROUP_SIZE) {
       result.usersNotGrouped = bookings.length;
+      result.failureReason = 'not_enough_bookings';
       return result;
     }
 
@@ -217,11 +237,19 @@ export class GroupFormationService {
       );
       result.usersNotGrouped = bookings.length;
       result.failedNoSteward = Math.ceil(bookings.length / MAX_GROUP_SIZE);
+      result.failureReason = 'no_steward_candidates';
       return result;
     }
 
     // Split into groups of 2-5
     const groups = this.splitIntoGroups(bookings, stewardCandidates);
+
+    if (groups.length === 0) {
+      result.usersNotGrouped = bookings.length;
+      result.failedNoSteward = Math.ceil(bookings.length / MAX_GROUP_SIZE);
+      result.failureReason = 'insufficient_stewards';
+      return result;
+    }
 
     for (const groupBookings of groups) {
       const steward = this.selectSteward(groupBookings, stewardCandidates);

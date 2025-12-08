@@ -6,6 +6,7 @@ import {
   UseGuards,
   Logger,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -59,6 +60,10 @@ export class GroupFormationController {
     status: 200,
     description: 'Group formation completed for the itinerary',
   })
+  @ApiResponse({
+    status: 400,
+    description: 'Not enough eligible bookings or stewards to form groups',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Itinerary not found' })
   async formGroupsForItinerary(
@@ -73,6 +78,17 @@ export class GroupFormationController {
       (sum, r) => sum + r.groupsFormed,
       0,
     );
+
+    if (totalGroupsFormed === 0) {
+      const reason =
+        results.find((r) => r.failureReason)?.failureReason ??
+        'not_enough_bookings';
+      throw new BadRequestException(
+        reason === 'no_steward_candidates' || reason === 'insufficient_stewards'
+          ? 'Cannot form groups: no available stewards for this itinerary'
+          : 'Cannot form groups: not enough eligible bookings',
+      );
+    }
     this.logger.log(
       `Group formation complete for itinerary ${itineraryId}: ${totalGroupsFormed} groups formed`,
     );
@@ -98,6 +114,10 @@ export class GroupFormationController {
     status: 200,
     description: 'Group formation completed for the trip',
   })
+  @ApiResponse({
+    status: 400,
+    description: 'Not enough eligible bookings or stewards to form groups',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Trip not found' })
   async formGroupsForTrip(
@@ -112,6 +132,15 @@ export class GroupFormationController {
     }
 
     const result = await this.groupFormationService.formGroupsForTrip(trip);
+
+    if (result.groupsFormed === 0) {
+      const reason = result.failureReason ?? 'not_enough_bookings';
+      throw new BadRequestException(
+        reason === 'no_steward_candidates' || reason === 'insufficient_stewards'
+          ? 'Cannot form groups: no available stewards for this trip'
+          : 'Cannot form groups: not enough eligible bookings',
+      );
+    }
 
     this.logger.log(
       `Group formation complete for trip ${tripId}: ${result.groupsFormed} groups formed`,
