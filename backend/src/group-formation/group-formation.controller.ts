@@ -5,8 +5,8 @@ import {
   Param,
   UseGuards,
   Logger,
-  NotFoundException,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -20,9 +20,11 @@ import {
   GroupFormationResult,
 } from './group-formation.service';
 import { AuthGuard } from '../modules/auth/auth.guard';
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/postgresql';
-import { Trip } from '../entities';
+import { Serialize } from '../common/decorators/serialize.decorator';
+import {
+  GroupFormationResponseSchema,
+  GroupFormationResultSchema,
+} from '@go-train-group-pass/shared';
 
 /**
  * Controller for group formation operations.
@@ -33,11 +35,7 @@ import { Trip } from '../entities';
 export class GroupFormationController {
   private readonly logger = new Logger(GroupFormationController.name);
 
-  constructor(
-    private readonly groupFormationService: GroupFormationService,
-    @InjectRepository(Trip)
-    private readonly tripRepository: EntityRepository<Trip>,
-  ) {}
+  constructor(private readonly groupFormationService: GroupFormationService) {}
 
   /**
    * Trigger group formation for a specific itinerary.
@@ -66,6 +64,7 @@ export class GroupFormationController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Itinerary not found' })
+  @Serialize(GroupFormationResponseSchema)
   async formGroupsForItinerary(
     @Param('itineraryId') itineraryId: string,
   ): Promise<{ results: GroupFormationResult[] }> {
@@ -120,33 +119,37 @@ export class GroupFormationController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Trip not found' })
+  @Serialize(GroupFormationResultSchema)
   async formGroupsForTrip(
     @Param('tripId') tripId: string,
   ): Promise<GroupFormationResult> {
     this.logger.log(`Group formation triggered for trip ${tripId}`);
 
-    const trip = await this.tripRepository.findOne({ id: tripId });
+    try {
+      const result =
+        await this.groupFormationService.formGroupsForTripById(tripId);
 
-    if (!trip) {
-      throw new NotFoundException(`Trip ${tripId} not found`);
-    }
+      if (result.groupsFormed === 0) {
+        const reason = result.failureReason ?? 'not_enough_bookings';
+        throw new BadRequestException(
+          reason === 'no_steward_candidates' ||
+          reason === 'insufficient_stewards'
+            ? 'Cannot form groups: no available stewards for this trip'
+            : 'Cannot form groups: not enough eligible bookings',
+        );
+      }
 
-    const result = await this.groupFormationService.formGroupsForTrip(trip);
-
-    if (result.groupsFormed === 0) {
-      const reason = result.failureReason ?? 'not_enough_bookings';
-      throw new BadRequestException(
-        reason === 'no_steward_candidates' || reason === 'insufficient_stewards'
-          ? 'Cannot form groups: no available stewards for this trip'
-          : 'Cannot form groups: not enough eligible bookings',
+      this.logger.log(
+        `Group formation complete for trip ${tripId}: ${result.groupsFormed} groups formed`,
       );
+
+      return result;
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('not found')) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
     }
-
-    this.logger.log(
-      `Group formation complete for trip ${tripId}: ${result.groupsFormed} groups formed`,
-    );
-
-    return result;
   }
 
   /**

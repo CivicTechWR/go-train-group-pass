@@ -143,6 +143,20 @@ export class GroupFormationService {
   }
 
   /**
+   * Form groups for a specific trip by its ID.
+   * Finds the trip and delegates to formGroupsForTrip.
+   */
+  async formGroupsForTripById(tripId: string): Promise<GroupFormationResult> {
+    const trip = await this.tripRepository.findOne({ id: tripId });
+
+    if (!trip) {
+      throw new Error(`Trip ${tripId} not found`);
+    }
+
+    return this.formGroupsForTrip(trip);
+  }
+
+  /**
    * Group bookings by their itinerary hash (set of trip IDs).
    * Users with identical itineraries will be grouped together.
    */
