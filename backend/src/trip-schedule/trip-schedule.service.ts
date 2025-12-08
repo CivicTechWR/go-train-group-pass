@@ -1,7 +1,7 @@
 import { TripScheduleDetailsDto } from '@go-train-group-pass/shared';
 import { EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { TripSchedule } from 'src/entities/trip_schedule_entity';
 import { getDateTimeFromServiceIdGTFSTimeString } from 'src/utils/getDateTimeFromServiceIdGTFSTimeString';
 
@@ -17,11 +17,11 @@ export class TripScheduleService {
     day: Date,
   ): Promise<TripScheduleDetailsDto[]> {
     const supportedTrips = ['Kitchener GO', 'Union Station GO'];
-    if (!supportedTrips.includes(orgStation)) {  
-        throw new BadRequestException('Orgigin station not supported');  
-    }  
-    if (!supportedTrips.includes(destStation)) {  
-        throw new BadRequestException('Destination station not supported');  
+    if (!supportedTrips.includes(orgStation)) {
+      throw new BadRequestException('Orgigin station not supported');
+    }
+    if (!supportedTrips.includes(destStation)) {
+      throw new BadRequestException('Destination station not supported');
     }
     // convert date to service id
     const year = day.getFullYear();
