@@ -14,7 +14,7 @@ export class TripScheduleService {
     @InjectRepository(TripSchedule)
     private readonly tripScheduleRepo: EntityRepository<TripSchedule>,
   ) {}
-  async getKIToUnionRoundTripSchedule(day: Date): Promise<RoundTripDto> {
+  public async getKIToUnionRoundTripSchedule(day: Date): Promise<RoundTripDto> {
     const departureTrips = await this.getTripSchedule(
       'Kitchener GO',
       'Union Station GO',
@@ -30,7 +30,7 @@ export class TripScheduleService {
       returnTrips,
     };
   }
-  async getTripSchedule(
+  public async getTripSchedule(
     orgStation: string,
     destStation: string,
     day: Date,

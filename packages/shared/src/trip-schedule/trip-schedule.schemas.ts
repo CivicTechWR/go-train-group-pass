@@ -20,3 +20,9 @@ export const RoundTripSchema = z.object({
 export const KitchenerUnionRoundTripScheduleInputSchema = z.object({
     date: z.iso.date(),
 });
+
+export const TripScheduleInputSchema = z.object({
+    orgStation: z.string(),
+    destStation: z.string(),
+    date: z.iso.date(),
+});
