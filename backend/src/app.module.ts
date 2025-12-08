@@ -8,10 +8,17 @@ import { GtfsModule } from './gtfs/gtfs.module';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { ResponseSerializeInterceptor } from './common/interceptors/response.interceptor';
+import { TripScheduleModule } from './trip-schedule/trip-schedule.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 @Module({
-  imports: [AppConfigModule, OrmModule, AuthModule, GtfsModule],
+  imports: [
+    AppConfigModule,
+    OrmModule,
+    AuthModule,
+    GtfsModule,
+    TripScheduleModule,
+  ],
   controllers: [AppController],
   providers: [
     AppService,
