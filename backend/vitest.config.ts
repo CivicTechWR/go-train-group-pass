@@ -10,6 +10,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
+      include: ['src/**/**controller.ts/**'],
       exclude: [
         'node_modules/**',
         'dist/**',
@@ -33,8 +34,11 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
-      '@go-train-group-pass/shared': resolve(__dirname, '../packages/shared/src'),
-      '@go-train-group-pass/shared/*': resolve(__dirname, '../packages/shared/src/*'),
+      'src': resolve(__dirname, './src'),
+      '@go-train-group-pass/shared': resolve(
+        __dirname,
+        '../packages/shared/src',
+      ),
     },
   },
 });
