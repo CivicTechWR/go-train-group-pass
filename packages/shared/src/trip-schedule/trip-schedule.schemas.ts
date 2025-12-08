@@ -12,7 +12,11 @@ export const TripScheduleDetailsSchema = z.object({
     }),
 });
 
-export const RoundTripSchema = z.array(TripScheduleDetailsSchema);
+export const RoundTripSchema = z.object({
+    departureTrips: z.array(TripScheduleDetailsSchema),
+    returnTrips: z.array(TripScheduleDetailsSchema),
+
+})
 export const KitchenerUnionRoundTripScheduleInputSchema = z.object({
     date: z.iso.date(),
 });

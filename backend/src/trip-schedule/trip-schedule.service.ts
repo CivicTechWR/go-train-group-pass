@@ -1,4 +1,7 @@
-import { TripScheduleDetailsDto } from '@go-train-group-pass/shared';
+import {
+  RoundTripDto,
+  TripScheduleDetailsDto,
+} from '@go-train-group-pass/shared';
 import { EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
@@ -11,6 +14,22 @@ export class TripScheduleService {
     @InjectRepository(TripSchedule)
     private readonly tripScheduleRepo: EntityRepository<TripSchedule>,
   ) {}
+  async getKIToUnionRoundTripSchedule(day: Date): Promise<RoundTripDto> {
+    const departureTrips = await this.getTripSchedule(
+      'Kitchener GO',
+      'Union Station GO',
+      day,
+    );
+    const returnTrips = await this.getTripSchedule(
+      'Union Station GO',
+      'Kitchener GO',
+      day,
+    );
+    return {
+      departureTrips,
+      returnTrips,
+    };
+  }
   async getTripSchedule(
     orgStation: string,
     destStation: string,

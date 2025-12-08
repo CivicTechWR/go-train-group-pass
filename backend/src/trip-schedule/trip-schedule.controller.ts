@@ -3,7 +3,12 @@ import {
   RoundTripSchema,
 } from '@go-train-group-pass/shared';
 import { Controller, Get, Query } from '@nestjs/common';
-import { ApiOperation, ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiOkResponse,
+  ApiTags,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { TripScheduleService } from './trip-schedule.service';
 import { Serialize } from 'src/common/decorators/serialize.decorator';
 
@@ -16,7 +21,7 @@ export class TripScheduleController {
   @ApiOperation({
     summary: 'Gets a round trip itinerary for Kitchener-Union given a date',
   })
-  @ApiBody({
+  @ApiQuery({
     type: KitchenerUnionRoundTripScheduleInputDto,
   })
   @ApiOkResponse({ description: 'Trip schedule for Kitchener-Union' })
@@ -25,9 +30,7 @@ export class TripScheduleController {
   async demoRoundTripKitchenerUnion(
     @Query() body: KitchenerUnionRoundTripScheduleInputDto,
   ) {
-    return this.tripScheduleService.getTripSchedule(
-      'Kitchener GO',
-      'Union Station GO',
+    return this.tripScheduleService.getKIToUnionRoundTripSchedule(
       new Date(body.date),
     );
   }
