@@ -1,114 +1,135 @@
-import { Controller, Post, Get, UseGuards, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Param,
+  UseGuards,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiParam,
 } from '@nestjs/swagger';
 import {
   GroupFormationService,
-  GroupFormationRunResult,
+  GroupFormationResult,
 } from './group-formation.service';
 import { AuthGuard } from '../modules/auth/auth.guard';
+import { InjectRepository } from '@mikro-orm/nestjs';
+import { EntityRepository } from '@mikro-orm/postgresql';
+import { Trip } from '../entities';
 
 /**
- * Controller for manually triggering group formation.
- * Provides endpoints for administrative or testing purposes.
- *
- * All endpoints are protected by authentication.
- * The trigger endpoint should be used sparingly as it performs database-intensive operations.
+ * Controller for group formation operations.
+ * Provides endpoints to trigger group formation for specific itineraries or trips.
  */
 @ApiTags('Group Formation')
 @Controller('group-formation')
 export class GroupFormationController {
   private readonly logger = new Logger(GroupFormationController.name);
 
-  constructor(private readonly groupFormationService: GroupFormationService) {}
+  constructor(
+    private readonly groupFormationService: GroupFormationService,
+    @InjectRepository(Trip)
+    private readonly tripRepository: EntityRepository<Trip>,
+  ) {}
 
   /**
-   * Manually trigger group formation.
-   * This endpoint is protected and requires authentication.
-   *
-   * Note: This performs the same operation as the scheduled cron job.
-   * Use sparingly to avoid overloading the database.
-   *
-   * POST /group-formation/trigger
+   * Trigger group formation for a specific itinerary.
+   * Should be called when it's time to lock in groups (e.g., 15 mins before departure).
    */
-  @Post('trigger')
+  @Post('itinerary/:itineraryId')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Manually trigger group formation for departing trips',
+    summary: 'Trigger group formation for a specific itinerary',
     description:
-      'Immediately runs the group formation algorithm for trips departing within the configured window. ' +
-      'Use sparingly as this is a database-intensive operation. ' +
-      'The same operation runs automatically via cron job every minute.',
+      'Forms groups for all trips in the specified itinerary. ' +
+      'Should be called at the appropriate time before departure.',
+  })
+  @ApiParam({
+    name: 'itineraryId',
+    description: 'The ID of the itinerary to form groups for',
   })
   @ApiResponse({
     status: 200,
-    description:
-      'Group formation completed successfully. Returns detailed results and metrics.',
+    description: 'Group formation completed for the itinerary',
   })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized - valid token required',
-  })
-  @ApiResponse({
-    status: 500,
-    description: 'Internal server error during group formation',
-  })
-  async triggerGroupFormation(): Promise<GroupFormationRunResult> {
-    this.logger.log('[API] Manual group formation triggered');
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Itinerary not found' })
+  async formGroupsForItinerary(
+    @Param('itineraryId') itineraryId: string,
+  ): Promise<{ results: GroupFormationResult[] }> {
+    this.logger.log(`Group formation triggered for itinerary ${itineraryId}`);
 
-    const result = await this.groupFormationService.formGroups();
+    const results =
+      await this.groupFormationService.formGroupsForItinerary(itineraryId);
+
+    const totalGroupsFormed = results.reduce(
+      (sum, r) => sum + r.groupsFormed,
+      0,
+    );
+    this.logger.log(
+      `Group formation complete for itinerary ${itineraryId}: ${totalGroupsFormed} groups formed`,
+    );
+
+    return { results };
+  }
+
+  /**
+   * Trigger group formation for a specific trip.
+   */
+  @Post('trip/:tripId')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Trigger group formation for a specific trip',
+    description: 'Forms groups for checked-in users on the specified trip.',
+  })
+  @ApiParam({
+    name: 'tripId',
+    description: 'The ID of the trip to form groups for',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Group formation completed for the trip',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Trip not found' })
+  async formGroupsForTrip(
+    @Param('tripId') tripId: string,
+  ): Promise<GroupFormationResult> {
+    this.logger.log(`Group formation triggered for trip ${tripId}`);
+
+    const trip = await this.tripRepository.findOne({ id: tripId });
+
+    if (!trip) {
+      throw new NotFoundException(`Trip ${tripId} not found`);
+    }
+
+    const result = await this.groupFormationService.formGroupsForTrip(trip);
 
     this.logger.log(
-      `[API] Manual group formation completed: ` +
-        `groups=${result.totalGroupsFormed}, ` +
-        `duration=${result.metrics.runDurationMs}ms`,
+      `Group formation complete for trip ${tripId}: ${result.groupsFormed} groups formed`,
     );
 
     return result;
   }
 
   /**
-   * Health check / status endpoint for group formation.
-   * Returns basic info about the service and configuration.
-   *
-   * GET /group-formation/status
+   * Health check / status endpoint.
    */
   @Get('status')
-  @ApiOperation({
-    summary: 'Get group formation service status',
-    description:
-      'Returns the current status of the group formation service including configuration info.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Service status and configuration',
-  })
-  getStatus(): {
-    status: string;
-    message: string;
-    info: {
-      schedulerEnabled: boolean;
-      cronSchedule: string;
-      departureWindowMinutes: number;
-      groupSizeRange: string;
-    };
-  } {
+  @ApiOperation({ summary: 'Get group formation service status' })
+  @ApiResponse({ status: 200, description: 'Service status' })
+  getStatus(): { status: string; message: string } {
     return {
       status: 'ok',
       message: 'Group formation service is running',
-      info: {
-        schedulerEnabled: process.env.GROUP_FORMATION_ENABLED !== 'false',
-        cronSchedule: process.env.GROUP_FORMATION_CRON_SCHEDULE ?? '* * * * *',
-        departureWindowMinutes: parseInt(
-          process.env.GROUP_FORMATION_WINDOW_MINUTES ?? '15',
-          10,
-        ),
-        groupSizeRange: `${process.env.GROUP_FORMATION_MIN_SIZE ?? '2'}-${process.env.GROUP_FORMATION_MAX_SIZE ?? '5'}`,
-      },
     };
   }
 }

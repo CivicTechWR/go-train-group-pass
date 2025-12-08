@@ -1,195 +1,195 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Cron } from '@nestjs/schedule';
-import { EntityManager } from '@mikro-orm/postgresql';
+import { Injectable, Logger } from '@nestjs/common';
+import { SchedulerRegistry } from '@nestjs/schedule';
+import { InjectRepository } from '@mikro-orm/nestjs';
+import { EntityRepository } from '@mikro-orm/postgresql';
+import { wrap } from '@mikro-orm/core';
+import { Trip, Itinerary } from '../entities';
 import { GroupFormationService } from './group-formation.service';
 
 /**
- * Scheduler that triggers group formation on a regular interval.
- * Runs every minute by default (configurable via GROUP_FORMATION_CRON_SCHEDULE).
+ * Configuration for group formation timing
+ */
+const FORMATION_LEAD_TIME_MINUTES = 15;
+
+/**
+ * Scheduler that triggers group formation at the right time.
  *
- * Features:
- * - Distributed locking to prevent concurrent runs across multiple instances
- * - Configurable schedule via environment variable
- * - Can be disabled via GROUP_FORMATION_ENABLED=false
+ * Instead of polling every minute, this schedules one-time jobs
+ * based on trip departure times when itineraries are created.
+ *
+ * Simplified for MVP - runs in single instance without distributed locking.
  */
 @Injectable()
-export class GroupFormationScheduler implements OnModuleInit {
+export class GroupFormationScheduler {
   private readonly logger = new Logger(GroupFormationScheduler.name);
-  private readonly processId: string;
-  private readonly enabled: boolean;
-  private readonly lockTimeoutSeconds: number;
 
-  // Local lock to prevent overlapping runs within the same process
-  private isLocallyRunning = false;
+  // Track scheduled jobs to avoid duplicates
+  private scheduledTrips = new Set<string>();
 
   constructor(
+    private readonly schedulerRegistry: SchedulerRegistry,
     private readonly groupFormationService: GroupFormationService,
-    private readonly configService: ConfigService,
-    private readonly em: EntityManager,
-  ) {
-    // Generate unique process ID for lock ownership
-    this.processId = `${process.pid}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+    @InjectRepository(Trip)
+    private readonly tripRepository: EntityRepository<Trip>,
+    @InjectRepository(Itinerary)
+    private readonly itineraryRepository: EntityRepository<Itinerary>,
+  ) {}
 
-    // Check if scheduler is enabled (default: true in production, can be disabled for tests)
-    const enabledConfig = this.configService.get<string>(
-      'GROUP_FORMATION_ENABLED',
+  /**
+   * Schedule group formation for an itinerary.
+   * Called when an itinerary is created or a user checks in.
+   *
+   * Schedules a one-time job for (departureTime - FORMATION_LEAD_TIME_MINUTES).
+   */
+  async scheduleForItinerary(itineraryId: string): Promise<void> {
+    const itinerary = await this.itineraryRepository.findOne(
+      { id: itineraryId },
+      {
+        populate: [
+          'tripBookings',
+          'tripBookings.trip',
+          'tripBookings.trip.originStopTime',
+          'tripBookings.trip.gtfsTrip',
+        ],
+      },
     );
-    this.enabled = enabledConfig !== 'false';
 
-    // Lock timeout in seconds (default: 5 minutes)
-    this.lockTimeoutSeconds =
-      this.configService.get<number>('GROUP_FORMATION_LOCK_TIMEOUT_SECONDS') ??
-      300;
-
-    if (!this.enabled) {
-      this.logger.warn(
-        'Group formation scheduler is DISABLED (GROUP_FORMATION_ENABLED=false)',
-      );
+    if (!itinerary) {
+      this.logger.warn(`Itinerary ${itineraryId} not found`);
+      return;
     }
-  }
 
-  onModuleInit(): void {
-    if (this.enabled) {
-      this.logger.log(
-        `Group formation scheduler initialized. ` +
-          `processId=${this.processId}, lockTimeout=${this.lockTimeoutSeconds}s`,
-      );
+    // Schedule for each trip in the itinerary
+    for (const booking of itinerary.tripBookings.getItems()) {
+      await this.scheduleForTrip(booking.trip);
     }
   }
 
   /**
-   * Cron job that runs every minute to form groups for departing trips.
-   *
-   * Uses distributed locking to ensure only one instance runs at a time.
-   * Note: The cron expression can be overridden via GROUP_FORMATION_CRON_SCHEDULE env var.
-   *
-   * Default: Every minute (* * * * *)
+   * Schedule group formation for a specific trip.
    */
-  @Cron(process.env.GROUP_FORMATION_CRON_SCHEDULE ?? '* * * * *')
-  async handleCron(): Promise<void> {
-    // Skip if disabled
-    if (!this.enabled) {
+  async scheduleForTrip(trip: Trip): Promise<void> {
+    const jobName = `group-formation-${trip.id}`;
+
+    // Skip if already scheduled
+    if (this.scheduledTrips.has(trip.id)) {
+      this.logger.debug(`Trip ${trip.id} already scheduled`);
       return;
     }
 
-    // Prevent local overlapping runs
-    if (this.isLocallyRunning) {
-      this.logger.debug('Group formation already running locally, skipping');
+    // Get departure time from trip
+    const departureTime = this.getTripDepartureTime(trip);
+    if (!departureTime) {
+      this.logger.warn(`Trip ${trip.id} has no valid departure time`);
       return;
     }
 
-    this.isLocallyRunning = true;
+    // Calculate when to run (departureTime - lead time)
+    const formationTime = new Date(
+      departureTime.getTime() - FORMATION_LEAD_TIME_MINUTES * 60 * 1000,
+    );
+    const now = new Date();
 
+    // If formation time has passed, run immediately
+    if (formationTime <= now) {
+      this.logger.log(`Trip ${trip.id}: Formation time passed, running now`);
+      await this.runGroupFormation(trip.id);
+      return;
+    }
+
+    // Schedule for the future
+    const delayMs = formationTime.getTime() - now.getTime();
+
+    const timeout = setTimeout(() => {
+      void this.runGroupFormation(trip.id);
+    }, delayMs);
+
+    // Register with NestJS scheduler registry
+    this.schedulerRegistry.addTimeout(jobName, timeout);
+    this.scheduledTrips.add(trip.id);
+
+    this.logger.log(
+      `Scheduled group formation for trip ${trip.id} at ${formationTime.toISOString()} ` +
+        `(in ${Math.round(delayMs / 60000)} minutes)`,
+    );
+  }
+
+  /**
+   * Get the departure time as a Date for a trip.
+   * Combines the trip date (from serviceId) with departure time (from originStopTime).
+   */
+  private getTripDepartureTime(trip: Trip): Date | null {
+    // Ensure originStopTime is loaded
+    if (!wrap(trip.originStopTime).isInitialized()) {
+      this.logger.debug(`Trip ${trip.id}: originStopTime not loaded`);
+      return null;
+    }
+
+    // Get the trip date
+    const tripDate = trip.date;
+    if (!tripDate) {
+      this.logger.debug(`Trip ${trip.id}: no date available`);
+      return null;
+    }
+
+    // Parse GTFS time (HH:MM:SS)
+    const timeStr = trip.originStopTime.departureTime;
+    const [hours, minutes, seconds] = timeStr.split(':').map(Number);
+
+    // Create departure date
+    const departureDate = new Date(tripDate);
+    departureDate.setHours(hours, minutes, seconds, 0);
+
+    return departureDate;
+  }
+
+  /**
+   * Cancel scheduled group formation for a trip.
+   */
+  cancelForTrip(tripId: string): void {
+    const jobName = `group-formation-${tripId}`;
+
+    if (this.schedulerRegistry.doesExist('timeout', jobName)) {
+      this.schedulerRegistry.deleteTimeout(jobName);
+      this.scheduledTrips.delete(tripId);
+      this.logger.log(`Cancelled group formation for trip ${tripId}`);
+    }
+  }
+
+  /**
+   * Run group formation for a trip.
+   */
+  private async runGroupFormation(tripId: string): Promise<void> {
     try {
-      // Try to acquire distributed lock
-      const lockAcquired = await this.acquireDistributedLock();
+      this.logger.log(`Running group formation for trip ${tripId}`);
 
-      if (!lockAcquired) {
-        this.logger.debug(
-          'Could not acquire distributed lock, another instance is running',
-        );
+      const trip = await this.tripRepository.findOne({ id: tripId });
+      if (!trip) {
+        this.logger.error(`Trip ${tripId} not found`);
         return;
       }
 
-      this.logger.log('[CRON] Starting scheduled group formation job');
+      const result = await this.groupFormationService.formGroupsForTrip(trip);
 
-      try {
-        const result = await this.groupFormationService.formGroups();
-
-        if (result.tripsProcessed > 0) {
-          this.logger.log(
-            `[CRON] Job completed: ` +
-              `trips=${result.tripsProcessed}, ` +
-              `groups=${result.totalGroupsFormed}, ` +
-              `users=${result.totalUsersGrouped}, ` +
-              `duration=${result.metrics.runDurationMs}ms`,
-          );
-        } else {
-          this.logger.debug('[CRON] Job completed: no trips to process');
-        }
-      } finally {
-        // Release the lock
-        await this.releaseDistributedLock();
-      }
+      this.logger.log(
+        `Group formation complete for trip ${tripId}: ` +
+          `${result.groupsFormed} groups, ${result.usersGrouped} users grouped`,
+      );
     } catch (error) {
       this.logger.error(
-        '[CRON] Scheduled group formation job failed',
+        `Group formation failed for trip ${tripId}`,
         error instanceof Error ? error.stack : error,
       );
     } finally {
-      this.isLocallyRunning = false;
+      // Clean up
+      this.scheduledTrips.delete(tripId);
     }
   }
 
   /**
-   * Attempt to acquire a distributed lock using the database.
-   * Returns true if lock was acquired, false otherwise.
-   *
-   * Uses PostgreSQL advisory locks for atomicity.
+   * Get list of currently scheduled trips.
    */
-  private async acquireDistributedLock(): Promise<boolean> {
-    const lockName = 'group_formation_job';
-    const now = new Date();
-    const expiresAt = new Date(now.getTime() + this.lockTimeoutSeconds * 1000);
-
-    try {
-      // Use PostgreSQL advisory lock for atomic lock acquisition
-      // pg_try_advisory_lock returns true if lock acquired, false if already held
-      const lockId = this.hashStringToNumber(lockName);
-
-      const result = await this.em.execute<[{ pg_try_advisory_lock: boolean }]>(
-        `SELECT pg_try_advisory_lock(${lockId}) as pg_try_advisory_lock`,
-      );
-
-      const acquired = result[0]?.pg_try_advisory_lock === true;
-
-      if (acquired) {
-        this.logger.debug(
-          `Acquired distributed lock: lockId=${lockId}, expires=${expiresAt.toISOString()}`,
-        );
-      }
-
-      return acquired;
-    } catch (error) {
-      this.logger.error(
-        'Failed to acquire distributed lock',
-        error instanceof Error ? error.message : error,
-      );
-      return false;
-    }
-  }
-
-  /**
-   * Release the distributed lock.
-   */
-  private async releaseDistributedLock(): Promise<void> {
-    const lockName = 'group_formation_job';
-    const lockId = this.hashStringToNumber(lockName);
-
-    try {
-      await this.em.execute(`SELECT pg_advisory_unlock(${lockId})`);
-      this.logger.debug(`Released distributed lock: lockId=${lockId}`);
-    } catch (error) {
-      this.logger.error(
-        'Failed to release distributed lock',
-        error instanceof Error ? error.message : error,
-      );
-    }
-  }
-
-  /**
-   * Convert a string to a stable number for use as PostgreSQL advisory lock ID.
-   * Uses a simple hash function.
-   */
-  private hashStringToNumber(str: string): number {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32-bit integer
-    }
-    // Ensure positive number within PostgreSQL bigint range
-    return Math.abs(hash);
+  getScheduledTrips(): string[] {
+    return Array.from(this.scheduledTrips);
   }
 }

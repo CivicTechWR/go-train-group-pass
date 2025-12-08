@@ -1,4 +1,4 @@
-export * from './group-formation.module';
-export * from './group-formation.service';
-export * from './group-formation.controller';
-export * from './group-formation.scheduler';
+export { GroupFormationModule } from './group-formation.module';
+export { GroupFormationService } from './group-formation.service';
+export { GroupFormationScheduler } from './group-formation.scheduler';
+export { GroupFormationController } from './group-formation.controller';
