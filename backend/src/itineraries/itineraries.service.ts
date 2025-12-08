@@ -29,7 +29,7 @@ export class ItinerariesService {
           segment.gtfsTripId,
           segment.originStopTimeId,
           segment.destStopTimeId,
-          index,
+          index + 1, // sequence starts from 1
         );
       }),
     );

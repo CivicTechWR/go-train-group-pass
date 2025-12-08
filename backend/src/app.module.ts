@@ -26,6 +26,13 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     TripScheduleModule,
   ],
   controllers: [AppController],
+  exports: [
+    AppService,
+    ItinerariesModule,
+    TripModule,
+    TripBookingModule,
+    TripScheduleModule,
+  ],
   providers: [
     AppService,
     {
