@@ -16,117 +16,6 @@
           "default": "gen_random_uuid()",
           "mappedType": "uuid"
         },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamptz",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 6,
-          "mappedType": "datetime"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamptz",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 6,
-          "mappedType": "datetime"
-        },
-        "agency_id": {
-          "name": "agency_id",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "agency_name": {
-          "name": "agency_name",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "agency_url": {
-          "name": "agency_url",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "agency_timezone": {
-          "name": "agency_timezone",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "agency_lang": {
-          "name": "agency_lang",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "agency_phone": {
-          "name": "agency_phone",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "length": 255,
-          "mappedType": "string"
-        }
-      },
-      "name": "agency",
-      "schema": "go-train-group-pass",
-      "indexes": [
-        {
-          "keyName": "agency_pkey",
-          "columnNames": [
-            "id"
-          ],
-          "composite": false,
-          "constraint": true,
-          "primary": true,
-          "unique": true
-        }
-      ],
-      "checks": [],
-      "foreignKeys": {},
-      "nativeEnums": {}
-    },
-    {
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "default": "gen_random_uuid()",
-          "mappedType": "uuid"
-        },
         "feed_publisher_name": {
           "name": "feed_publisher_name",
           "type": "varchar(255)",
@@ -186,11 +75,31 @@
           "nullable": false,
           "length": 255,
           "mappedType": "string"
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
         }
       },
       "name": "gtfs_feed_info",
       "schema": "go-train-group-pass",
       "indexes": [
+        {
+          "keyName": "gtfs_feed_info_feed_version_unique",
+          "columnNames": [
+            "feed_version"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
         {
           "keyName": "gtfs_feed_info_pkey",
           "columnNames": [
@@ -291,6 +200,17 @@
           "unique": false
         },
         {
+          "keyName": "gtfs_calendar_dates_service_id_gtfsfeed_info_id_unique",
+          "columnNames": [
+            "service_id",
+            "gtfsfeed_info_id"
+          ],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
           "keyName": "gtfs_calendar_dates_pkey",
           "columnNames": [
             "id"
@@ -313,6 +233,152 @@
             "id"
           ],
           "referencedTableName": "go-train-group-pass.gtfs_feed_info",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "gen_random_uuid()",
+          "mappedType": "uuid"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "agency_id": {
+          "name": "agency_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "agency_name": {
+          "name": "agency_name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "agency_url": {
+          "name": "agency_url",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "agency_timezone": {
+          "name": "agency_timezone",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "agency_lang": {
+          "name": "agency_lang",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "agency_phone": {
+          "name": "agency_phone",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "gtfsfeed_info_id": {
+          "name": "gtfsfeed_info_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        }
+      },
+      "name": "agency",
+      "schema": "go-train-group-pass",
+      "indexes": [
+        {
+          "keyName": "agency_agency_id_gtfsfeed_info_id_unique",
+          "columnNames": [
+            "agency_id",
+            "gtfsfeed_info_id"
+          ],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "agency_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "agency_gtfsfeed_info_id_foreign": {
+          "constraintName": "agency_gtfsfeed_info_id_foreign",
+          "columnNames": [
+            "gtfsfeed_info_id"
+          ],
+          "localTableName": "go-train-group-pass.agency",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.gtfs_feed_info",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -452,6 +518,17 @@
       "schema": "go-train-group-pass",
       "indexes": [
         {
+          "keyName": "gtfs_routes_route_id_gtfsfeed_info_id_unique",
+          "columnNames": [
+            "route_id",
+            "gtfsfeed_info_id"
+          ],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
           "keyName": "gtfs_routes_pkey",
           "columnNames": [
             "id"
@@ -487,6 +564,7 @@
             "id"
           ],
           "referencedTableName": "go-train-group-pass.gtfs_feed_info",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -524,8 +602,8 @@
           "length": 6,
           "mappedType": "datetime"
         },
-        "stopid": {
-          "name": "stopid",
+        "stop_id": {
+          "name": "stop_id",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
@@ -638,6 +716,17 @@
       "schema": "go-train-group-pass",
       "indexes": [
         {
+          "keyName": "gtfs_stops_stop_id_gtfsfeed_info_id_unique",
+          "columnNames": [
+            "stop_id",
+            "gtfsfeed_info_id"
+          ],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
           "keyName": "gtfs_stops_pkey",
           "columnNames": [
             "id"
@@ -660,6 +749,7 @@
             "id"
           ],
           "referencedTableName": "go-train-group-pass.gtfs_feed_info",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -707,14 +797,15 @@
           "length": 255,
           "mappedType": "string"
         },
-        "calendar_date_id": {
-          "name": "calendar_date_id",
-          "type": "uuid",
+        "service_id": {
+          "name": "service_id",
+          "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "mappedType": "uuid"
+          "length": 255,
+          "mappedType": "string"
         },
         "trip_headsign": {
           "name": "trip_headsign",
@@ -806,9 +897,9 @@
       "schema": "go-train-group-pass",
       "indexes": [
         {
-          "keyName": "idx_trips_calendar_date",
+          "keyName": "idx_trips_service_id",
           "columnNames": [
-            "calendar_date_id"
+            "service_id"
           ],
           "composite": false,
           "constraint": false,
@@ -826,6 +917,17 @@
           "unique": false
         },
         {
+          "keyName": "gtfs_trips_trip_id_gtfsfeed_info_id_unique",
+          "columnNames": [
+            "trip_id",
+            "gtfsfeed_info_id"
+          ],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
           "keyName": "gtfs_trips_pkey",
           "columnNames": [
             "id"
@@ -838,18 +940,6 @@
       ],
       "checks": [],
       "foreignKeys": {
-        "gtfs_trips_calendar_date_id_foreign": {
-          "constraintName": "gtfs_trips_calendar_date_id_foreign",
-          "columnNames": [
-            "calendar_date_id"
-          ],
-          "localTableName": "go-train-group-pass.gtfs_trips",
-          "referencedColumnNames": [
-            "id"
-          ],
-          "referencedTableName": "go-train-group-pass.gtfs_calendar_dates",
-          "updateRule": "cascade"
-        },
         "gtfs_trips_route_id_foreign": {
           "constraintName": "gtfs_trips_route_id_foreign",
           "columnNames": [
@@ -872,6 +962,7 @@
             "id"
           ],
           "referencedTableName": "go-train-group-pass.gtfs_feed_info",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -908,16 +999,6 @@
           "nullable": false,
           "length": 6,
           "mappedType": "datetime"
-        },
-        "stop_time_id": {
-          "name": "stop_time_id",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
         },
         "stop_sequence": {
           "name": "stop_sequence",
@@ -1049,6 +1130,18 @@
           "unique": false
         },
         {
+          "keyName": "gtfs_stop_times_trip_id_stop_sequence_gtfsfeed_info_id_unique",
+          "columnNames": [
+            "trip_id",
+            "stop_sequence",
+            "gtfsfeed_info_id"
+          ],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
           "keyName": "gtfs_stop_times_pkey",
           "columnNames": [
             "id"
@@ -1095,6 +1188,134 @@
             "id"
           ],
           "referencedTableName": "go-train-group-pass.gtfs_feed_info",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "gen_random_uuid()",
+          "mappedType": "uuid"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "gtfs_trip_id": {
+          "name": "gtfs_trip_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        },
+        "origin_stop_time_id": {
+          "name": "origin_stop_time_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        },
+        "destination_stop_time_id": {
+          "name": "destination_stop_time_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        }
+      },
+      "name": "trip",
+      "schema": "go-train-group-pass",
+      "indexes": [
+        {
+          "keyName": "trip_gtfs_trip_id_origin_stop_time_id_destination_59c37_unique",
+          "columnNames": [
+            "gtfs_trip_id",
+            "origin_stop_time_id",
+            "destination_stop_time_id"
+          ],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "trip_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "trip_gtfs_trip_id_foreign": {
+          "constraintName": "trip_gtfs_trip_id_foreign",
+          "columnNames": [
+            "gtfs_trip_id"
+          ],
+          "localTableName": "go-train-group-pass.trip",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.gtfs_trips",
+          "updateRule": "cascade"
+        },
+        "trip_origin_stop_time_id_foreign": {
+          "constraintName": "trip_origin_stop_time_id_foreign",
+          "columnNames": [
+            "origin_stop_time_id"
+          ],
+          "localTableName": "go-train-group-pass.trip",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.gtfs_stop_times",
+          "updateRule": "cascade"
+        },
+        "trip_destination_stop_time_id_foreign": {
+          "constraintName": "trip_destination_stop_time_id_foreign",
+          "columnNames": [
+            "destination_stop_time_id"
+          ],
+          "localTableName": "go-train-group-pass.trip",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.gtfs_stop_times",
           "updateRule": "cascade"
         }
       },
@@ -1158,7 +1379,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": true,
+          "nullable": false,
           "length": 20,
           "mappedType": "string"
         },
@@ -1197,6 +1418,16 @@
         },
         {
           "columnNames": [
+            "phone_number"
+          ],
+          "composite": false,
+          "keyName": "users_phone_number_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": [
             "auth_user_id"
           ],
           "composite": false,
@@ -1218,6 +1449,1251 @@
       ],
       "checks": [],
       "foreignKeys": {},
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "gen_random_uuid()",
+          "mappedType": "uuid"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "group_number": {
+          "name": "group_number",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "finalized_at": {
+          "name": "finalized_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "'forming'",
+          "enumItems": [
+            "forming",
+            "finalized",
+            "departed",
+            "completed"
+          ],
+          "mappedType": "enum"
+        },
+        "trip_id": {
+          "name": "trip_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        },
+        "steward_id": {
+          "name": "steward_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        }
+      },
+      "name": "travel_group",
+      "schema": "go-train-group-pass",
+      "indexes": [
+        {
+          "columnNames": [
+            "trip_id"
+          ],
+          "composite": false,
+          "keyName": "travel_group_trip_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "steward_id"
+          ],
+          "composite": false,
+          "keyName": "travel_group_steward_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "travel_group_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "travel_group_trip_id_foreign": {
+          "constraintName": "travel_group_trip_id_foreign",
+          "columnNames": [
+            "trip_id"
+          ],
+          "localTableName": "go-train-group-pass.travel_group",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.trip",
+          "updateRule": "cascade"
+        },
+        "travel_group_steward_id_foreign": {
+          "constraintName": "travel_group_steward_id_foreign",
+          "columnNames": [
+            "steward_id"
+          ],
+          "localTableName": "go-train-group-pass.travel_group",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.users",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "gen_random_uuid()",
+          "mappedType": "uuid"
+        },
+        "from_state": {
+          "name": "from_state",
+          "type": "smallint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "enum"
+        },
+        "to_state": {
+          "name": "to_state",
+          "type": "smallint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "enum"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "travel_group_id": {
+          "name": "travel_group_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        }
+      },
+      "name": "travel_group_status_log",
+      "schema": "go-train-group-pass",
+      "indexes": [
+        {
+          "keyName": "travel_group_status_log_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "travel_group_status_log_travel_group_id_foreign": {
+          "constraintName": "travel_group_status_log_travel_group_id_foreign",
+          "columnNames": [
+            "travel_group_id"
+          ],
+          "localTableName": "go-train-group-pass.travel_group_status_log",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.travel_group",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "gen_random_uuid()",
+          "mappedType": "uuid"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "'draft'",
+          "enumItems": [
+            "draft",
+            "confirmed",
+            "in_progress",
+            "completed",
+            "cancelled"
+          ],
+          "mappedType": "enum"
+        },
+        "wants_to_steward": {
+          "name": "wants_to_steward",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        }
+      },
+      "name": "itinerary",
+      "schema": "go-train-group-pass",
+      "indexes": [
+        {
+          "columnNames": [
+            "user_id"
+          ],
+          "composite": false,
+          "keyName": "itinerary_user_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "itinerary_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "itinerary_user_id_foreign": {
+          "constraintName": "itinerary_user_id_foreign",
+          "columnNames": [
+            "user_id"
+          ],
+          "localTableName": "go-train-group-pass.itinerary",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.users",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "gen_random_uuid()",
+          "mappedType": "uuid"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "sequence": {
+          "name": "sequence",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "checked_in_at": {
+          "name": "checked_in_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "'pending'",
+          "enumItems": [
+            "pending",
+            "checked_in",
+            "grouped",
+            "completed",
+            "no_show",
+            "cancelled"
+          ],
+          "mappedType": "enum"
+        },
+        "is_confirmed_by_steward": {
+          "name": "is_confirmed_by_steward",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "confirmed_at": {
+          "name": "confirmed_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "member_present": {
+          "name": "member_present",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        },
+        "itinerary_id": {
+          "name": "itinerary_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "uuid"
+        },
+        "trip_id": {
+          "name": "trip_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        },
+        "group_id": {
+          "name": "group_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "uuid"
+        }
+      },
+      "name": "trip_booking",
+      "schema": "go-train-group-pass",
+      "indexes": [
+        {
+          "columnNames": [
+            "user_id"
+          ],
+          "composite": false,
+          "keyName": "trip_booking_user_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "itinerary_id"
+          ],
+          "composite": false,
+          "keyName": "trip_booking_itinerary_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "trip_id"
+          ],
+          "composite": false,
+          "keyName": "trip_booking_trip_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "group_id"
+          ],
+          "composite": false,
+          "keyName": "trip_booking_group_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "trip_booking_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "trip_booking_user_id_foreign": {
+          "constraintName": "trip_booking_user_id_foreign",
+          "columnNames": [
+            "user_id"
+          ],
+          "localTableName": "go-train-group-pass.trip_booking",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.users",
+          "updateRule": "cascade"
+        },
+        "trip_booking_itinerary_id_foreign": {
+          "constraintName": "trip_booking_itinerary_id_foreign",
+          "columnNames": [
+            "itinerary_id"
+          ],
+          "localTableName": "go-train-group-pass.trip_booking",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.itinerary",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        },
+        "trip_booking_trip_id_foreign": {
+          "constraintName": "trip_booking_trip_id_foreign",
+          "columnNames": [
+            "trip_id"
+          ],
+          "localTableName": "go-train-group-pass.trip_booking",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.trip",
+          "updateRule": "cascade"
+        },
+        "trip_booking_group_id_foreign": {
+          "constraintName": "trip_booking_group_id_foreign",
+          "columnNames": [
+            "group_id"
+          ],
+          "localTableName": "go-train-group-pass.trip_booking",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.travel_group",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "gen_random_uuid()",
+          "mappedType": "uuid"
+        },
+        "from_state": {
+          "name": "from_state",
+          "type": "smallint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "enum"
+        },
+        "to_state": {
+          "name": "to_state",
+          "type": "smallint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "enum"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "trip_booking_id": {
+          "name": "trip_booking_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        }
+      },
+      "name": "trip_booking_status_log",
+      "schema": "go-train-group-pass",
+      "indexes": [
+        {
+          "keyName": "trip_booking_status_log_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "trip_booking_status_log_trip_booking_id_foreign": {
+          "constraintName": "trip_booking_status_log_trip_booking_id_foreign",
+          "columnNames": [
+            "trip_booking_id"
+          ],
+          "localTableName": "go-train-group-pass.trip_booking_status_log",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.trip_booking",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "gen_random_uuid()",
+          "mappedType": "uuid"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "total_amount": {
+          "name": "total_amount",
+          "type": "numeric(10,2)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "precision": 10,
+          "scale": 2,
+          "mappedType": "decimal"
+        },
+        "group_size": {
+          "name": "group_size",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "purchased_at": {
+          "name": "purchased_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "ticket_image_url": {
+          "name": "ticket_image_url",
+          "type": "varchar(500)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 500,
+          "mappedType": "string"
+        },
+        "group_id": {
+          "name": "group_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        },
+        "steward_trip_booking_id": {
+          "name": "steward_trip_booking_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        }
+      },
+      "name": "ticket_purchase",
+      "schema": "go-train-group-pass",
+      "indexes": [
+        {
+          "columnNames": [
+            "group_id"
+          ],
+          "composite": false,
+          "keyName": "ticket_purchase_group_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "steward_trip_booking_id"
+          ],
+          "composite": false,
+          "keyName": "ticket_purchase_steward_trip_booking_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "ticket_purchase_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "ticket_purchase_group_id_foreign": {
+          "constraintName": "ticket_purchase_group_id_foreign",
+          "columnNames": [
+            "group_id"
+          ],
+          "localTableName": "go-train-group-pass.ticket_purchase",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.travel_group",
+          "updateRule": "cascade"
+        },
+        "ticket_purchase_steward_trip_booking_id_foreign": {
+          "constraintName": "ticket_purchase_steward_trip_booking_id_foreign",
+          "columnNames": [
+            "steward_trip_booking_id"
+          ],
+          "localTableName": "go-train-group-pass.ticket_purchase",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.trip_booking",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "gen_random_uuid()",
+          "mappedType": "uuid"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "amount_owed": {
+          "name": "amount_owed",
+          "type": "numeric(10,2)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "precision": 10,
+          "scale": 2,
+          "mappedType": "decimal"
+        },
+        "is_paid": {
+          "name": "is_paid",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "marked_paid_at": {
+          "name": "marked_paid_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "trip_booking_id": {
+          "name": "trip_booking_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        },
+        "ticket_purchase_id": {
+          "name": "ticket_purchase_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "uuid"
+        },
+        "marked_paid_by_id": {
+          "name": "marked_paid_by_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "uuid"
+        },
+        "paid_by_user_id": {
+          "name": "paid_by_user_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "uuid"
+        }
+      },
+      "name": "payment",
+      "schema": "go-train-group-pass",
+      "indexes": [
+        {
+          "columnNames": [
+            "trip_booking_id"
+          ],
+          "composite": false,
+          "keyName": "payment_trip_booking_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "ticket_purchase_id"
+          ],
+          "composite": false,
+          "keyName": "payment_ticket_purchase_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "marked_paid_by_id"
+          ],
+          "composite": false,
+          "keyName": "payment_marked_paid_by_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "paid_by_user_id"
+          ],
+          "composite": false,
+          "keyName": "payment_paid_by_user_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "payment_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "payment_trip_booking_id_foreign": {
+          "constraintName": "payment_trip_booking_id_foreign",
+          "columnNames": [
+            "trip_booking_id"
+          ],
+          "localTableName": "go-train-group-pass.payment",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.trip_booking",
+          "updateRule": "cascade"
+        },
+        "payment_ticket_purchase_id_foreign": {
+          "constraintName": "payment_ticket_purchase_id_foreign",
+          "columnNames": [
+            "ticket_purchase_id"
+          ],
+          "localTableName": "go-train-group-pass.payment",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.ticket_purchase",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        },
+        "payment_marked_paid_by_id_foreign": {
+          "constraintName": "payment_marked_paid_by_id_foreign",
+          "columnNames": [
+            "marked_paid_by_id"
+          ],
+          "localTableName": "go-train-group-pass.payment",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.users",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        },
+        "payment_paid_by_user_id_foreign": {
+          "constraintName": "payment_paid_by_user_id_foreign",
+          "columnNames": [
+            "paid_by_user_id"
+          ],
+          "localTableName": "go-train-group-pass.payment",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.users",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "gen_random_uuid()",
+          "mappedType": "uuid"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "calculation_version": {
+          "name": "calculation_version",
+          "type": "varchar(50)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 50,
+          "mappedType": "string"
+        },
+        "total_ticket_cost": {
+          "name": "total_ticket_cost",
+          "type": "numeric(10,2)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "precision": 10,
+          "scale": 2,
+          "mappedType": "decimal"
+        },
+        "group_size": {
+          "name": "group_size",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "base_amount": {
+          "name": "base_amount",
+          "type": "numeric(10,2)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "precision": 10,
+          "scale": 2,
+          "mappedType": "decimal"
+        },
+        "payment_id": {
+          "name": "payment_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        }
+      },
+      "name": "payment_calculation",
+      "schema": "go-train-group-pass",
+      "indexes": [
+        {
+          "columnNames": [
+            "payment_id"
+          ],
+          "composite": false,
+          "keyName": "payment_calculation_payment_id_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "payment_calculation_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "payment_calculation_payment_id_foreign": {
+          "constraintName": "payment_calculation_payment_id_foreign",
+          "columnNames": [
+            "payment_id"
+          ],
+          "localTableName": "go-train-group-pass.payment_calculation",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.payment",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "gen_random_uuid()",
+          "mappedType": "uuid"
+        },
+        "from_state": {
+          "name": "from_state",
+          "type": "smallint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "enum"
+        },
+        "to_state": {
+          "name": "to_state",
+          "type": "smallint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "enum"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "itinerary_id": {
+          "name": "itinerary_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        }
+      },
+      "name": "itinerary_status_log",
+      "schema": "go-train-group-pass",
+      "indexes": [
+        {
+          "keyName": "itinerary_status_log_itinerary_id_index",
+          "columnNames": [
+            "itinerary_id"
+          ],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "itinerary_status_log_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "itinerary_status_log_itinerary_id_foreign": {
+          "constraintName": "itinerary_status_log_itinerary_id_foreign",
+          "columnNames": [
+            "itinerary_id"
+          ],
+          "localTableName": "go-train-group-pass.itinerary_status_log",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "go-train-group-pass.itinerary",
+          "updateRule": "cascade"
+        }
+      },
       "nativeEnums": {}
     }
   ],

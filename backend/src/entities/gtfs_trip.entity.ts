@@ -6,8 +6,9 @@ import {
   OneToMany,
   Collection,
   Index,
+  Unique,
 } from '@mikro-orm/core';
-import { GTFSCalendarDate, GTFSStopTime } from '.';
+import { GTFSStopTime } from '.';
 import { GTFSRoute } from './gtfs_route.entity';
 import { BaseEntity } from './base';
 import { randomUUID } from 'crypto';
@@ -15,7 +16,8 @@ import { GTFSFeedInfo } from './gtfs_feed_info.entity';
 
 @Entity({ tableName: 'gtfs_trips' })
 @Index({ name: 'idx_trips_route', properties: ['route'] })
-@Index({ name: 'idx_trips_calendar_date', properties: ['calendarDate'] })
+@Index({ name: 'idx_trips_service_id', properties: ['serviceId'] })
+@Unique({ properties: ['trip_id', 'GTFSFeedInfo'] })
 export class GTFSTrip extends BaseEntity {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id: string = randomUUID();
@@ -23,8 +25,8 @@ export class GTFSTrip extends BaseEntity {
   @Property()
   trip_id!: string;
 
-  @ManyToOne(() => GTFSCalendarDate)
-  calendarDate!: GTFSCalendarDate;
+  @Property()
+  serviceId!: string;
 
   @Property({ nullable: true })
   tripHeadsign?: string;
@@ -53,6 +55,6 @@ export class GTFSTrip extends BaseEntity {
   @OneToMany(() => GTFSStopTime, (stopTime) => stopTime.trip)
   stopTimes = new Collection<GTFSStopTime>(this);
 
-  @ManyToOne(() => GTFSFeedInfo)
+  @ManyToOne(() => GTFSFeedInfo, { deleteRule: 'cascade' })
   GTFSFeedInfo!: GTFSFeedInfo;
 }

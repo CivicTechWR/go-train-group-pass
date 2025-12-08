@@ -72,3 +72,4 @@ playwright-report/
 test-results/
 
 .vscode/
+dist/

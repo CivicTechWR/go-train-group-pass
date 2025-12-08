@@ -16,13 +16,18 @@ import {
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import {
-  SignUpDto,
-  SignInDto,
+  SignUpInputDto,
+  SignInInputDto,
   RefreshTokenDto,
-  PasswordResetRequestDto,
-  PasswordUpdateDto,
-  PasswordResetDto,
-} from './dto/auth.dto';
+  PasswordResetInputDto,
+  PasswordUpdateInputDto,
+  PasswordResetResponseDto,
+  AuthResponseDto,
+  UserDto,
+  AuthResponseSchema,
+  UserSchema,
+} from '@go-train-group-pass/shared';
+import { Serialize } from '../../common/decorators/serialize.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -34,32 +39,34 @@ export class AuthController {
   @ApiResponse({ status: 201, description: 'User successfully registered' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @HttpCode(HttpStatus.CREATED)
-  async signUp(@Body() body: SignUpDto) {
+  async signUp(@Body() body: SignUpInputDto) {
     return this.authService.signUp(body);
   }
 
   @Post('signin')
   @ApiOperation({ summary: 'Sign in a user' })
-  @ApiResponse({ status: 200, description: 'User successfully signed in' })
+  @ApiResponse({
+    status: 200,
+    description: 'User successfully signed in',
+    type: AuthResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @HttpCode(HttpStatus.OK)
-  async signIn(@Body() body: SignInDto) {
+  @Serialize(AuthResponseSchema)
+  async signIn(@Body() body: SignInInputDto) {
     return this.authService.signIn(body);
-  }
-
-  @Post('signout')
-  @ApiOperation({ summary: 'Sign out current user' })
-  @ApiResponse({ status: 200, description: 'User successfully signed out' })
-  @HttpCode(HttpStatus.OK)
-  async signOut() {
-    return this.authService.signOut();
   }
 
   @Get('me')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user profile' })
-  @ApiResponse({ status: 200, description: 'Current user profile' })
+  @ApiResponse({
+    status: 200,
+    description: 'Current user profile',
+    type: UserDto,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @Serialize(UserSchema)
   async getCurrentUser(@Headers('authorization') authorization?: string) {
     const token = this.extractToken(authorization);
     return this.authService.getUserFromToken(token);
@@ -67,9 +74,14 @@ export class AuthController {
 
   @Post('refresh')
   @ApiOperation({ summary: 'Refresh access token' })
-  @ApiResponse({ status: 200, description: 'Token successfully refreshed' })
+  @ApiResponse({
+    status: 200,
+    description: 'Token successfully refreshed',
+    type: AuthResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @HttpCode(HttpStatus.OK)
+  @Serialize(AuthResponseSchema)
   async refreshToken(@Body() body: RefreshTokenDto) {
     return this.authService.refreshToken(body.refreshToken);
   }
@@ -79,8 +91,9 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Password reset email sent' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @HttpCode(HttpStatus.OK)
-  async requestPasswordReset(@Body() body: PasswordResetRequestDto) {
-    return this.authService.requestPasswordReset(body.email);
+  async requestPasswordReset(@Body() body: PasswordResetInputDto) {
+    await this.authService.requestPasswordReset(body);
+    return { message: 'Password reset email sent', invalid: 'invalid' };
   }
 
   @Post('password/update')
@@ -92,10 +105,11 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async updatePassword(
     @Headers('authorization') authorization: string | undefined,
-    @Body() body: PasswordUpdateDto,
-  ) {
+    @Body() body: PasswordUpdateInputDto,
+  ): Promise<{ message: string }> {
     const token = this.extractToken(authorization);
-    return this.authService.updatePassword(token, body.newPassword);
+    await this.authService.updatePassword(token, body);
+    return { message: 'Password updated successfully' };
   }
 
   @Post('password/reset')
@@ -104,8 +118,9 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(HttpStatus.OK)
-  async resetPassword(@Body() body: PasswordResetDto) {
-    return this.authService.resetPassword(body.recoveryToken, body.newPassword);
+  async resetPassword(@Body() body: PasswordResetResponseDto) {
+    await this.authService.resetPassword(body.recoveryToken, body.newPassword);
+    return { message: 'Password successfully reset' };
   }
 
   private extractToken(authorization?: string): string {

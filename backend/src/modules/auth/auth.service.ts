@@ -4,11 +4,20 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { SupabaseService } from './supabase.service';
-import { UsersService } from '../users/users.service';
-import { SignUpDto, SignInDto, parseUserMetadata } from './auth.schemas';
+import { UsersService } from 'src/users/users.service';
+import {
+  SignUpInputDto,
+  SignInInputDto,
+  PasswordResetInputDto,
+  PasswordUpdateInputDto,
+  AuthResponseDto,
+  UserDto,
+} from '@go-train-group-pass/shared';
+
+import { IAuthService } from './auth.interface';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements IAuthService {
   constructor(
     private readonly supabaseService: SupabaseService,
     private readonly usersService: UsersService,
@@ -17,13 +26,15 @@ export class AuthService {
   /**
    * Sign up a new user using Supabase Auth and create a user record in our database
    */
-  async signUp(signUpDto: SignUpDto) {
-    const { email, password, fullName, phoneNumber } = signUpDto;
+  async signUp(signUpInput: SignUpInputDto): Promise<void> {
+    const { email, password, fullName, phoneNumber } = signUpInput;
 
     if (!fullName) {
       throw new BadRequestException('Full name is required');
     }
-
+    if (!phoneNumber) {
+      throw new BadRequestException('Phone number is required');
+    }
     const { data: authData, error: authError } =
       await this.supabaseService.auth.signUp({
         email,
@@ -43,24 +54,20 @@ export class AuthService {
     if (!authData.user) {
       throw new BadRequestException('Failed to create user');
     }
-    // Create user in our database
-    const user = await this.usersService.create({
+
+    await this.usersService.create({
       email,
       authUserId: authData.user.id,
       name: fullName,
       phoneNumber,
     });
 
-    return {
-      user: this.usersService.formatUserResponse(user),
-      session: authData.session,
-    };
+    return;
   }
 
-  async signIn(signInDto: SignInDto) {
+  async signIn(signInDto: SignInInputDto): Promise<AuthResponseDto> {
     const { email, password } = signInDto;
 
-    // Authenticate with Supabase
     const { data: authData, error: authError } =
       await this.supabaseService.auth.signInWithPassword({
         email,
@@ -73,76 +80,28 @@ export class AuthService {
       );
     }
 
-    const userMetadata = parseUserMetadata(authData.user.user_metadata);
+    const user = await this.usersService.findByAuthUserIdOrFail(
+      authData.user.id,
+    );
 
-    if (!authData.user.email) {
-      throw new UnauthorizedException('Email is required');
-    }
-
-    // Find or create user in our database
-    const user = await this.usersService.findOrCreate({
-      email: authData.user.email,
-      authUserId: authData.user.id,
-      name: userMetadata.full_name,
-      phoneNumber: userMetadata.phone_number,
-    });
-
-    // Update last sign in time
     await this.usersService.updateLastSignIn(user.id);
 
     return {
-      user: this.usersService.formatUserResponse(user),
-      session: authData.session,
+      accessToken: authData.session.access_token,
+      refreshToken: authData.session.refresh_token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        phoneNumber: user.phoneNumber,
+      },
     };
   }
 
-  async signOut() {
-    const { error } = await this.supabaseService.auth.signOut();
-
-    if (error) {
-      throw new UnauthorizedException(error.message);
-    }
-
-    return { message: 'Signed out successfully' };
-  }
-
-  async getUserFromToken(accessToken: string) {
-    const {
-      data: { user: authUser },
-      error,
-    } = await this.supabaseService.auth.getUser(accessToken);
-
-    if (error || !authUser) {
-      throw new UnauthorizedException('Invalid or expired token');
-    }
-
-    const user = await this.usersService.findByAuthUserId(authUser.id);
-
-    if (!user) {
-      throw new UnauthorizedException('User not found');
-    }
-
-    return this.usersService.formatUserResponse(user);
-  }
-
-  /**
-   * Refresh the access token
-   */
-  async refreshToken(refreshToken: string) {
-    const { data, error } = await this.supabaseService.auth.refreshSession({
-      refresh_token: refreshToken,
-    });
-
-    if (error) {
-      throw new UnauthorizedException(error.message);
-    }
-
-    return {
-      session: data.session,
-    };
-  }
-
-  async requestPasswordReset(email: string) {
+  async requestPasswordReset(
+    passwordResetInfo: PasswordResetInputDto,
+  ): Promise<void> {
+    const { email } = passwordResetInfo;
     const frontendUrl = process.env.FRONTEND_URL;
     if (!frontendUrl) {
       throw new Error('FRONTEND_URL environment variable is not set');
@@ -159,11 +118,15 @@ export class AuthService {
       throw new BadRequestException(error.message);
     }
 
-    return { message: 'Password reset email sent' };
+    return;
   }
 
-  async updatePassword(accessToken: string, newPassword: string) {
-    // First verify the token
+  async updatePassword(
+    accessToken: string,
+    passwordUpdateInput: PasswordUpdateInputDto,
+  ): Promise<void> {
+    const { newPassword } = passwordUpdateInput;
+
     const {
       data: { user: authUser },
       error: userError,
@@ -173,7 +136,6 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired token');
     }
 
-    // Update password
     const { error } = await this.supabaseService.auth.updateUser({
       password: newPassword,
     });
@@ -182,10 +144,13 @@ export class AuthService {
       throw new BadRequestException(error.message);
     }
 
-    return { message: 'Password updated successfully' };
+    return;
   }
 
-  async resetPassword(recoveryToken: string, newPassword: string) {
+  async resetPassword(
+    recoveryToken: string,
+    newPassword: string,
+  ): Promise<void> {
     const {
       data: { user: authUser },
       error: userError,
@@ -204,6 +169,53 @@ export class AuthService {
       throw new BadRequestException(error.message);
     }
 
-    return { message: 'Password reset successfully' };
+    return;
+  }
+
+  async getUserFromToken(token: string): Promise<UserDto> {
+    const {
+      data: { user },
+      error,
+    } = await this.supabaseService.auth.getUser(token);
+
+    if (error || !user) {
+      throw new UnauthorizedException('Invalid token');
+    }
+
+    const localUser = await this.usersService.findByAuthUserIdOrFail(user.id);
+
+    return {
+      id: localUser.id,
+      email: localUser.email,
+      name: localUser.name,
+      phoneNumber: localUser.phoneNumber,
+    };
+  }
+
+  async refreshToken(refreshToken: string): Promise<AuthResponseDto> {
+    const { data, error } = await this.supabaseService.auth.refreshSession({
+      refresh_token: refreshToken,
+    });
+
+    if (error) {
+      throw new BadRequestException(error.message);
+    }
+
+    if (!data.session || !data.user) {
+      throw new BadRequestException('Failed to refresh session');
+    }
+
+    const user = await this.usersService.findByAuthUserIdOrFail(data.user?.id);
+
+    return {
+      accessToken: data.session.access_token,
+      refreshToken: data.session.refresh_token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        phoneNumber: user.phoneNumber,
+      },
+    };
   }
 }
