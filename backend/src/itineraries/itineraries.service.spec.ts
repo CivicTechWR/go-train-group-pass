@@ -7,7 +7,7 @@ import { TripBooking } from '../entities/trip_booking.entity';
 import { User } from '../entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { TripBookingService } from '../trip-booking/trip-booking.service';
-import { CreateItineraryDto } from './dto/create-itinerary.dto';
+import { CreateItineraryDto } from '@go-train-group-pass/shared';
 import { ItineraryStatus } from '../entities/itineraryStatusEnum';
 import { vi, describe, it, expect, beforeEach, afterEach, Mock } from 'vitest';
 

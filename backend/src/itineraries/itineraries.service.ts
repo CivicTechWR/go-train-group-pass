@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityRepository, Transactional } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Itinerary } from '../entities/itinerary.entity';
-import { CreateItineraryDto } from './dto/create-itinerary.dto';
+import { CreateItineraryDto } from '@go-train-group-pass/shared';
 import { ItineraryStatus } from '../entities/itineraryStatusEnum';
 import { TripBookingService } from '../trip-booking/trip-booking.service';
 import { UsersService } from '../users/users.service';
