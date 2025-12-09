@@ -1,7 +1,7 @@
-import { Logger } from '@nestjs/common';
-import { defineConfig } from '@mikro-orm/postgresql';
 import { Migrator } from '@mikro-orm/migrations';
+import { defineConfig } from '@mikro-orm/postgresql';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
+import { Logger } from '@nestjs/common';
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
 
@@ -11,6 +11,7 @@ const logFn = (message: string) => {
 };
 
 import * as entities from './entities';
+import { ItinerarySubscriber } from './subscribers/itinerary.subscriber';
 
 export default defineConfig({
   schema: 'go-train-group-pass',
@@ -33,6 +34,7 @@ export default defineConfig({
     path: './src/database/seeders',
   },
   entities: Object.values(entities),
+  subscribers: [ItinerarySubscriber],
   metadataCache: {
     enabled: true,
   },
