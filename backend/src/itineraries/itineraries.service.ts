@@ -5,12 +5,14 @@ import { Itinerary } from '../entities/itinerary.entity';
 import {
   CreateItineraryDto,
   ItineraryTravelInfoDto,
+  ExistingItinerariesDto,
 } from '@go-train-group-pass/shared';
 import { ItineraryStatus } from '../entities/itineraryStatusEnum';
 import { TripBookingService } from '../trip-booking/trip-booking.service';
 import { UsersService } from '../users/users.service';
 import { ItineraryCreationResponseDto } from '@go-train-group-pass/shared';
 import { TravelGroup } from 'src/entities';
+import { AggregatedItinerary } from 'src/entities';
 
 @Injectable()
 export class ItinerariesService {
@@ -19,6 +21,8 @@ export class ItinerariesService {
     private readonly itineraryRepo: EntityRepository<Itinerary>,
     @InjectRepository(TravelGroup)
     private readonly travelGroupRepo: EntityRepository<TravelGroup>,
+    @InjectRepository(AggregatedItinerary)
+    private readonly aggregatedItineraryRepo: EntityRepository<AggregatedItinerary>,
     private readonly userService: UsersService,
     private readonly tripBookingService: TripBookingService,
   ) {}
@@ -125,5 +129,13 @@ export class ItinerariesService {
     }
 
     return itineraryTravelInfo;
+  }
+  // demo only
+  async getExistingItineraries(): Promise<ExistingItinerariesDto> {
+    const aggregatedItineraries = await this.aggregatedItineraryRepo.findAll();
+    return aggregatedItineraries.map((aggregatedItinerary) => ({
+      userCount: aggregatedItinerary.userCount,
+      tripDetails: aggregatedItinerary.tripDetails,
+    }));
   }
 }

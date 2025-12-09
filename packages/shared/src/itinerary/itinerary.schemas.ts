@@ -30,3 +30,9 @@ export const ItineraryTravelInfoSchema = z.object({
   tripDetails: z.array(TripDetailsSchema),
   groupsFormed: z.boolean(),
 });
+export const ExistingItinerarySchema = z.object({
+  userCount: z.number(),
+  tripDetails: z.array(TripDetailsSchema),
+});
+
+export const ExistingItinerariesSchema = z.array(ExistingItinerarySchema);
