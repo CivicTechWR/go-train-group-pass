@@ -55,7 +55,7 @@ async function refreshAccessToken(): Promise<boolean> {
 async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {},
-  retryOn401 = true,
+  retryOn401 = true
 ): Promise<T> {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
@@ -108,16 +108,16 @@ async function apiRequest<T>(
  * GET request
  */
 export async function apiGet<T>(endpoint: string): Promise<T> {
-  return apiRequest<T>(endpoint, { method: 'GET' });
+  return apiRequest<T>(endpoint, {
+    method: 'GET',
+    cache: 'no-store', // Disable caching for GET requests
+  });
 }
 
 /**
  * POST request
  */
-export async function apiPost<T>(
-  endpoint: string,
-  data?: unknown,
-): Promise<T> {
+export async function apiPost<T>(endpoint: string, data?: unknown): Promise<T> {
   return apiRequest<T>(endpoint, {
     method: 'POST',
     body: data ? JSON.stringify(data) : undefined,
@@ -127,10 +127,7 @@ export async function apiPost<T>(
 /**
  * PUT request
  */
-export async function apiPut<T>(
-  endpoint: string,
-  data?: unknown,
-): Promise<T> {
+export async function apiPut<T>(endpoint: string, data?: unknown): Promise<T> {
   return apiRequest<T>(endpoint, {
     method: 'PUT',
     body: data ? JSON.stringify(data) : undefined,
@@ -143,4 +140,3 @@ export async function apiPut<T>(
 export async function apiDelete<T>(endpoint: string): Promise<T> {
   return apiRequest<T>(endpoint, { method: 'DELETE' });
 }
-

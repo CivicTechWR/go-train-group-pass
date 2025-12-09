@@ -17,3 +17,5 @@ export * from './gtfs-trip';
 // Itinerary schemas and types
 export * from './itinerary';
 
+// Trip schedule schemas and types
+export * from './trip-schedule';

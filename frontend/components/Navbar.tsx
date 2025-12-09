@@ -29,6 +29,12 @@ export function Navbar() {
             {!loading && user && (
               <>
                 <Link
+                  href='/book'
+                  className='text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
+                >
+                  Book Trip
+                </Link>
+                <Link
                   href='/itineraries'
                   className='text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
                 >
