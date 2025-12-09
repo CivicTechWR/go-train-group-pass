@@ -2,17 +2,23 @@ import { Injectable } from '@nestjs/common';
 import { EntityRepository, Transactional } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Itinerary } from '../entities/itinerary.entity';
-import { CreateItineraryDto } from '@go-train-group-pass/shared';
+import {
+  CreateItineraryDto,
+  ExistingItinerariesDto,
+} from '@go-train-group-pass/shared';
 import { ItineraryStatus } from '../entities/itineraryStatusEnum';
 import { TripBookingService } from '../trip-booking/trip-booking.service';
 import { UsersService } from '../users/users.service';
 import { ItineraryCreationResponseDto } from '@go-train-group-pass/shared';
+import { AggregatedItinerary } from 'src/entities';
 
 @Injectable()
 export class ItinerariesService {
   constructor(
     @InjectRepository(Itinerary)
     private readonly itineraryRepo: EntityRepository<Itinerary>,
+    @InjectRepository(AggregatedItinerary)
+    private readonly aggregatedItineraryRepo: EntityRepository<AggregatedItinerary>,
     private readonly userService: UsersService,
     private readonly tripBookingService: TripBookingService,
   ) {}
@@ -70,5 +76,14 @@ export class ItinerariesService {
       ),
       stewarding: itinerary.wantsToSteward,
     };
+  }
+
+  // demo only
+  async getExistingItineraries(): Promise<ExistingItinerariesDto> {
+    const aggregatedItineraries = await this.aggregatedItineraryRepo.findAll();
+    return aggregatedItineraries.map((aggregatedItinerary) => ({
+      userCount: aggregatedItinerary.userCount,
+      tripDetails: aggregatedItinerary.tripDetails,
+    }));
   }
 }

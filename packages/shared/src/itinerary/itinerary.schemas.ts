@@ -19,3 +19,9 @@ export const CreateItinerarySchema = z.object({
   wantsToSteward: z.boolean(),
 });
 
+export const ExistingItinerarySchema = z.object({
+  userCount: z.number(),
+  tripDetails: z.array(TripDetailsSchema),
+});
+
+export const ExistingItinerariesSchema = z.array(ExistingItinerarySchema);

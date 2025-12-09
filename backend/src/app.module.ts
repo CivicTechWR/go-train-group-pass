@@ -13,6 +13,7 @@ import { TripModule } from './trip/trip.module';
 import { TripBookingModule } from './trip-booking/trip-booking.module';
 import { TripScheduleModule } from './trip-schedule/trip-schedule.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { ItinerarySubscriber } from './subscribers/itinerary.subscriber';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
       provide: APP_PIPE,
       useClass: ZodValidationPipe,
     },
+    ItinerarySubscriber,
   ],
 })
 export class AppModule {}
