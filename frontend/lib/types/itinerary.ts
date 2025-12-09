@@ -20,14 +20,15 @@ export type CreateItineraryInput = z.infer<typeof CreateItinerarySchema>;
 /**
  * Schema for trip details in itinerary response
  * Matches TripDetailsSchema from shared package
+ * Uses coerce to handle date strings from backend (database returns dates as strings in JSON)
  */
 const TripDetailsSchema = z.object({
   tripId: z.string(),
   routeShortName: z.string(),
   orgStation: z.string(),
   destStation: z.string(),
-  departureTime: z.date(),
-  arrivalTime: z.date(),
+  departureTime: z.coerce.date(),
+  arrivalTime: z.coerce.date(),
 });
 
 /**

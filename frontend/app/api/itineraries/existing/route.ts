@@ -40,21 +40,10 @@ export async function GET(request: NextRequest) {
 
     const data = responseData.data || responseData;
 
-    const parseTripDetails = (trip: any) => ({
-      ...trip,
-      departureTime: new Date(trip.departureTime),
-      arrivalTime: new Date(trip.arrivalTime),
-    });
+    const parseResult = ExistingItinerariesSchema.safeParse(data);
 
-    const parsedData = (data || []).map((itinerary: any) => ({
-      ...itinerary,
-      tripDetails: (itinerary.tripDetails || []).map(parseTripDetails),
-    }));
-
-    const parseResult = ExistingItinerariesSchema.safeParse(parsedData);
     if (!parseResult.success) {
       const zodError = parseResult.error;
-      console.error('Backend response shape mismatch:', zodError.issues);
       return NextResponse.json(
         {
           message: 'Invalid response format from backend',
@@ -74,7 +63,6 @@ export async function GET(request: NextRequest) {
 
     return nextResponse;
   } catch (error) {
-    console.error('Error fetching existing itineraries:', error);
     return NextResponse.json(
       {
         message:
