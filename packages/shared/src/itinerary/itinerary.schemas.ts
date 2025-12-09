@@ -9,7 +9,7 @@ export const ItineraryResponseSchema = z.object({
 });
 
 export const ItineraryQueryParamsSchema = z.object({
-  id: z.string(),
+  id: z.uuid(),
 });
 export const ItineraryCreationResponseSchema = ItineraryResponseSchema;
 

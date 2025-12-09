@@ -88,7 +88,7 @@ export class ItinerariesService {
         id,
         user: { id: userId },
       },
-      { populate: ['tripBookings'] },
+      { populate: ['tripBookings', 'tripBookings.trip'] },
     );
     const tripBookings = itinerary.tripBookings.getItems();
     const tripIds = tripBookings.map((tripBooking) => tripBooking.trip.id);
@@ -96,7 +96,6 @@ export class ItinerariesService {
       tripDetails: tripBookings.map((booking) =>
         this.tripBookingService.getTripDetails(booking),
       ),
-      // demo data
       groupsFormed: false,
     };
     const travelGroup = await this.travelGroupRepo.findOne(
