@@ -24,3 +24,46 @@ export const ItinerarySchema = z.object({
 
 export type Itinerary = z.infer<typeof ItinerarySchema>;
 
+/**
+ * Schema for creating an itinerary
+ * Matches CreateItinerarySchema from shared package
+ */
+const ItinerarySegmentSchema = z.object({
+  originStopTimeId: z.string(),
+  destStopTimeId: z.string(),
+  gtfsTripId: z.string(),
+});
+
+export const CreateItinerarySchema = z.object({
+  segments: z.array(ItinerarySegmentSchema),
+  wantsToSteward: z.boolean(),
+});
+
+export type CreateItineraryInput = z.infer<typeof CreateItinerarySchema>;
+
+/**
+ * Schema for trip details in itinerary response
+ * Matches TripDetailsSchema from shared package
+ */
+const TripDetailsSchema = z.object({
+  tripId: z.string(),
+  routeShortName: z.string(),
+  orgStation: z.string(),
+  destStation: z.string(),
+  departureTime: z.date(),
+  arrivalTime: z.date(),
+});
+
+/**
+ * Schema for itinerary creation response
+ * Matches ItineraryCreationResponseSchema from shared package
+ */
+export const ItineraryCreationResponseSchema = z.object({
+  id: z.string(),
+  trips: z.array(TripDetailsSchema),
+  stewarding: z.boolean(),
+});
+
+export type ItineraryCreationResponse = z.infer<
+  typeof ItineraryCreationResponseSchema
+>;

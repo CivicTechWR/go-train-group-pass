@@ -15,6 +15,7 @@ import {
   FieldSet,
 } from '@/components/ui';
 import { Calendar } from '@/components/ui/calendar';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Popover,
   PopoverContent,
@@ -71,6 +72,7 @@ export function RoundTripForm({ onSubmit }: RoundTripFormProps) {
       destStation: '',
       selectedDeparture: null,
       selectedReturn: null,
+      wantsToSteward: false,
     },
   });
 
@@ -407,6 +409,36 @@ export function RoundTripForm({ onSubmit }: RoundTripFormProps) {
                   )}
                 </div>
               )}
+
+              {/* Wants to Steward Checkbox */}
+              <Controller
+                name='wantsToSteward'
+                control={control}
+                render={({ field }) => (
+                  <Field>
+                    <div className='flex items-center gap-2'>
+                      <Checkbox
+                        id={field.name}
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                      <FieldLabel
+                        htmlFor={field.name}
+                        className='cursor-pointer font-normal'
+                      >
+                        I want to steward this trip
+                      </FieldLabel>
+                    </div>
+                    <FieldError
+                      errors={
+                        errors.wantsToSteward
+                          ? [errors.wantsToSteward]
+                          : undefined
+                      }
+                    />
+                  </Field>
+                )}
+              />
             </FieldGroup>
           </FieldSet>
         </CardContent>

@@ -38,6 +38,7 @@ export const RoundTripFormSchema = z
     destStation: z.string().optional(),
     selectedDeparture: TripScheduleDetailsSchema.nullable(),
     selectedReturn: TripScheduleDetailsSchema.nullable(),
+    wantsToSteward: z.boolean().default(false),
   })
   .refine(data => data.date !== undefined, {
     message: 'Please select a travel date',
