@@ -6,6 +6,7 @@ import { GroupFormationController } from './group-formation.controller';
 import { GroupFormationScheduler } from './group-formation.scheduler';
 import { Trip, TripBooking, TravelGroup, Itinerary, User } from '../entities';
 import { AuthModule } from '../modules/auth/auth.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AuthModule } from '../modules/auth/auth.module';
       User,
     ]),
     AuthModule,
+    UsersModule,
   ],
   controllers: [GroupFormationController],
   providers: [GroupFormationService, GroupFormationScheduler],

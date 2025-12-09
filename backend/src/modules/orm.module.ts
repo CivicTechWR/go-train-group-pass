@@ -3,7 +3,6 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import config from '../mikro-orm.config';
 
 @Module({
-  imports: [MikroOrmModule.forRoot(config), MikroOrmModule.forFeature({})],
-  exports: [MikroOrmModule],
+  imports: [MikroOrmModule.forRoot(config)],
 })
 export class OrmModule {}
