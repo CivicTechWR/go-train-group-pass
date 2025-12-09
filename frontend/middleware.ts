@@ -126,9 +126,9 @@ export async function middleware(request: NextRequest) {
       if (refreshTokenValue) {
         const refreshResult = await refreshToken(refreshTokenValue);
         if (refreshResult) {
-          // Update cookies and redirect to protected page
+          // Update cookies and redirect to profile page
           const response = NextResponse.redirect(
-            new URL('/protected', request.url)
+            new URL('/profile', request.url)
           );
           response.cookies.set('access_token', refreshResult.accessToken, {
             httpOnly: true,
@@ -159,7 +159,7 @@ export async function middleware(request: NextRequest) {
     }
 
     if (isValid) {
-      return NextResponse.redirect(new URL('/protected', request.url));
+      return NextResponse.redirect(new URL('/profile', request.url));
     }
   }
 

@@ -57,7 +57,7 @@ export default function Home() {
 
         <div className='flex justify-center'>
           <Button asChild size='lg'>
-            <Link href='/protected'>Get Started</Link>
+            <Link href='/itineraries'>Get Started</Link>
           </Button>
         </div>
       </main>

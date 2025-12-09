@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-export default function ProtectedPage() {
+export default function ProfilePage() {
   const router = useRouter();
   const { user, signOut } = useAuth();
 
@@ -18,7 +18,7 @@ export default function ProtectedPage() {
 
   return (
     <div className='flex flex-col items-center justify-center h-screen gap-4'>
-      <h1 className='text-4xl font-bold'>Protected Route</h1>
+      <h1 className='text-4xl font-bold'>Profile Page</h1>
       <p className='text-lg'>Welcome, {user.name}!</p>
       <div className='flex gap-4'>
         <Button asChild variant='outline'>

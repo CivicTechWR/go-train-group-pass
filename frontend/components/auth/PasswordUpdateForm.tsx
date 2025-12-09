@@ -73,8 +73,8 @@ export function PasswordUpdateForm() {
           </CardDescription>
         </CardHeader>
         <CardFooter className='mt-0'>
-          <Button onClick={() => router.push('/protected')} className='w-full'>
-            Back to Protected Page
+          <Button onClick={() => router.push('/profile')} className='w-full'>
+            Back to Profile Page
           </Button>
         </CardFooter>
       </Card>

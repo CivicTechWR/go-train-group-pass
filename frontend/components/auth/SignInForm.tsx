@@ -45,7 +45,7 @@ export function SignInForm() {
   const onSubmit = async (data: SignInInput) => {
     try {
       await signIn(data);
-      router.push('/protected');
+      router.push('/profile');
     } catch (error) {
       setError('root', {
         type: 'manual',

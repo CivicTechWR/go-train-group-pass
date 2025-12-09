@@ -57,7 +57,7 @@ export function SignUpForm() {
       }
 
       await signUp(submitData);
-      router.push('/protected');
+      router.push('/profile');
     } catch (error) {
       setError('root', {
         type: 'manual',
