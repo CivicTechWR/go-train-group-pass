@@ -46,11 +46,16 @@ export class TravelGroup extends BaseEntity {
   steward: User;
 
   @OneToMany(() => TripBooking, (booking) => booking.group)
-  members = new Collection<TripBooking>(this);
+  tripBookings = new Collection<TripBooking>(this);
 
   @OneToMany(() => TicketPurchase, (purchase) => purchase.group)
   ticketPurchases = new Collection<TicketPurchase>(this);
 
   @OneToMany(() => TravelGroupStatusLog, (log) => log.travelGroup)
   statusLogs = new Collection<TravelGroupStatusLog>(this);
+
+  @Property({ persist: false })
+  get members(): User[] {
+    return this.tripBookings.getItems().map((booking) => booking.user);
+  }
 }
