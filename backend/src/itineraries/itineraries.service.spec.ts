@@ -11,24 +11,41 @@ import { CreateItineraryDto } from './dto/create-itinerary.dto';
 import { ItineraryStatus } from '../entities/itineraryStatusEnum';
 import { vi, describe, it, expect, beforeEach, afterEach, Mock } from 'vitest';
 
+// Mock the @Transactional decorator to be a passthrough
+vi.mock('@mikro-orm/core', async () => {
+  const actual = await vi.importActual('@mikro-orm/core');
+  return {
+    ...actual,
+    Transactional:
+      () =>
+      <T>(
+        target: object,
+        propertyKey: string | symbol,
+        descriptor: TypedPropertyDescriptor<T>,
+      ) =>
+        descriptor,
+  };
+});
+
 describe('ItinerariesService', () => {
   let service: ItinerariesService;
   let itineraryRepo: {
     find: Mock;
     findOne: Mock;
     create: Mock;
-    getEntityManager: Mock<() => { persistAndFlush: Mock }>;
+    getEntityManager: Mock<() => { persist: Mock; flush: Mock }>;
     persist: Mock;
     flush: Mock;
   };
-  let em: { persistAndFlush: Mock };
+  let em: { persist: Mock; flush: Mock };
   let usersService: { findByAuthUserIdOrFail: Mock; findById: Mock };
   let tripBookingService: { create: Mock; getTripDetails: Mock };
 
   beforeEach(async () => {
     // Reset mocks for each test
     const mockEm = {
-      persistAndFlush: vi.fn(),
+      persist: vi.fn(),
+      flush: vi.fn(),
     };
 
     const mockRepository = {
@@ -147,16 +164,17 @@ describe('ItinerariesService', () => {
         createItineraryDto.segments[0].gtfsTripId,
         createItineraryDto.segments[0].originStopTimeId,
         createItineraryDto.segments[0].destStopTimeId,
-        0,
+        1, // sequence
       );
       expect(tripBookingService.create).toHaveBeenCalledWith(
         userId,
         createItineraryDto.segments[1].gtfsTripId,
         createItineraryDto.segments[1].originStopTimeId,
         createItineraryDto.segments[1].destStopTimeId,
-        1,
+        2, // sequence
       );
 
+      // Verification of EM usage instead of Repo usage inside the transaction
       expect(itineraryRepo.create).toHaveBeenCalledWith({
         user: mockUser,
         tripBookings: [mockTripBooking1, mockTripBooking2],
@@ -167,7 +185,7 @@ describe('ItinerariesService', () => {
       // The service.create function calls `this.em.persistAndFlush(itinerary)`
       // In the old setup, `em` was mocked separately. In the new setup, `em` is also mocked.
       // The expected object passed to persistAndFlush depends on what repo.create returned.
-      expect(em.persistAndFlush).toHaveBeenCalledWith(
+      expect(em.persist).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'mock-id',
           user: mockUser,

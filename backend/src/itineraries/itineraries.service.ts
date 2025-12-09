@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { EntityRepository, Transactional } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/core';
 import { Itinerary } from '../entities/itinerary.entity';
 import { CreateItineraryDto } from './dto/create-itinerary.dto';
 import { ItineraryStatus } from '../entities/itineraryStatusEnum';
@@ -17,6 +17,7 @@ export class ItinerariesService {
     private readonly tripBookingService: TripBookingService,
   ) {}
 
+  @Transactional()
   async create(
     userId: string,
     createItineraryDto: CreateItineraryDto,
@@ -55,7 +56,13 @@ export class ItinerariesService {
       wantsToSteward: createItineraryDto.wantsToSteward,
       status: ItineraryStatus.DRAFT,
     });
-    await this.itineraryRepo.getEntityManager().persistAndFlush(itinerary);
+
+    // With @Transactional, explicit persist here will be flushed automatically at the end of the method
+    // But we usually need to persist it. flush is handled by the transaction commit.
+    // However, for the id to be generated if it's database-generated (SERIAL), we might need flush if we return it.
+    // But usually MikroORM flushes before commit.
+    this.itineraryRepo.getEntityManager().persist(itinerary);
+
     return {
       id: itinerary.id,
       trips: tripBookings.map((tripBooking) =>

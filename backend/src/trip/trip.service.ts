@@ -21,7 +21,6 @@ export class TripService {
     originStopTimeId: string,
     destStopTimeId: string,
   ): Promise<Trip> {
-    // Optimization: Check if trip exists to avoid expensive GTFS fetches
     const existingTrip = await this.tripRepo.findOne({
       gtfsTrip: gtfsTripId,
       originStopTime: originStopTimeId,
@@ -53,7 +52,7 @@ export class TripService {
       gtfsTrip.id !== destStopTime.trip.id
     ) {
       throw new BadRequestException(
-        'Trip and stop times do not belong to the same trip',
+        'Trip and/or stop times do not belong to the same trip',
       );
     }
     const date = gtfsDateStringToDate(gtfsTrip.serviceId);
