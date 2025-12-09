@@ -2,17 +2,23 @@ import { Injectable } from '@nestjs/common';
 import { EntityRepository, Transactional } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Itinerary } from '../entities/itinerary.entity';
-import { CreateItineraryDto } from '@go-train-group-pass/shared';
+import {
+  CreateItineraryDto,
+  ItineraryTravelInfoDto,
+} from '@go-train-group-pass/shared';
 import { ItineraryStatus } from '../entities/itineraryStatusEnum';
 import { TripBookingService } from '../trip-booking/trip-booking.service';
 import { UsersService } from '../users/users.service';
 import { ItineraryCreationResponseDto } from '@go-train-group-pass/shared';
+import { TravelGroup } from 'src/entities';
 
 @Injectable()
 export class ItinerariesService {
   constructor(
     @InjectRepository(Itinerary)
     private readonly itineraryRepo: EntityRepository<Itinerary>,
+    @InjectRepository(TravelGroup)
+    private readonly travelGroupRepo: EntityRepository<TravelGroup>,
     private readonly userService: UsersService,
     private readonly tripBookingService: TripBookingService,
   ) {}
@@ -70,5 +76,55 @@ export class ItinerariesService {
       ),
       stewarding: itinerary.wantsToSteward,
     };
+  }
+
+  // assuming that if a user is a steward of one trip they are a steward of all trips because of round trip demo use case
+  async getItineraryInfo(
+    userId: string,
+    id: string,
+  ): Promise<ItineraryTravelInfoDto> {
+    const itinerary = await this.itineraryRepo.findOneOrFail(
+      {
+        id,
+        user: { id: userId },
+      },
+      { populate: ['tripBookings'] },
+    );
+    const tripBookings = itinerary.tripBookings.getItems();
+    const tripIds = tripBookings.map((tripBooking) => tripBooking.trip.id);
+    const itineraryTravelInfo: ItineraryTravelInfoDto = {
+      tripDetails: tripBookings.map((booking) =>
+        this.tripBookingService.getTripDetails(booking),
+      ),
+      // demo data
+      groupsFormed: false,
+    };
+    const travelGroup = await this.travelGroupRepo.findOne(
+      {
+        trip: { id: { $in: tripIds } },
+      },
+      { populate: ['members', 'steward'] },
+    );
+
+    if (!travelGroup) {
+      return itineraryTravelInfo;
+    }
+
+    itineraryTravelInfo.steward = {
+      name: travelGroup.steward.name,
+      email: travelGroup.steward.email,
+      phoneNumber: travelGroup.steward.phoneNumber,
+    };
+    itineraryTravelInfo.groupsFormed = true;
+
+    if (travelGroup.steward.id === userId) {
+      itineraryTravelInfo.members = travelGroup.members.map((user) => ({
+        name: user.name,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+      }));
+    }
+
+    return itineraryTravelInfo;
   }
 }
