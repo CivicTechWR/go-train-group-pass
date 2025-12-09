@@ -3,8 +3,7 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { GTFSStopTime, GTFSTrip, Trip } from '../entities';
 import { gtfsDateStringToDate } from '../utils/gtfsDateStringToDate';
-import { GTFSTimeString } from 'src/utils/isGTFSTimeString';
-import { fromZonedTime } from 'date-fns-tz';
+import { getDateTimeFromServiceIdGTFSTimeString } from 'src/utils/getDateTimeFromServiceIdGTFSTimeString';
 
 @Injectable()
 export class TripService {
@@ -56,9 +55,12 @@ export class TripService {
       );
     }
     const date = gtfsDateStringToDate(gtfsTrip.serviceId);
-    const arrivalTime = this.combineDateAndTime(date, destStopTime.arrivalTime);
-    const departureTime = this.combineDateAndTime(
-      date,
+    const arrivalTime = getDateTimeFromServiceIdGTFSTimeString(
+      gtfsTrip.serviceId,
+      destStopTime.arrivalTime,
+    );
+    const departureTime = getDateTimeFromServiceIdGTFSTimeString(
+      gtfsTrip.serviceId,
       originStopTime.departureTime,
     );
 
@@ -90,28 +92,5 @@ export class TripService {
         onConflictExcludeFields: ['id', 'createdAt'],
       },
     );
-  }
-  combineDateAndTime(date: Date, timeString: GTFSTimeString): Date {
-    const [hours, minutes, seconds] = timeString.split(':').map(Number);
-
-    // GTFS times can exceed 24 hours (e.g., 25:30:00 meant 1:30 AM the next day)
-    const extraDays = Math.floor(hours / 24);
-    const normalizedHours = hours % 24;
-
-    const resultDate = new Date(date);
-    resultDate.setDate(resultDate.getDate() + extraDays);
-
-    const year = resultDate.getFullYear();
-    const month = String(resultDate.getMonth() + 1).padStart(2, '0');
-    const day = String(resultDate.getDate()).padStart(2, '0');
-    const hoursStr = String(normalizedHours).padStart(2, '0');
-    const minutesStr = String(minutes).padStart(2, '0');
-    const secondsStr = String(seconds).padStart(2, '0');
-
-    // Construct valid ISO string without timezone info
-    const isoString = `${year}-${month}-${day}T${hoursStr}:${minutesStr}:${secondsStr}`;
-
-    // Convert from Toronto time to UTC
-    return fromZonedTime(isoString, 'America/Toronto');
   }
 }
