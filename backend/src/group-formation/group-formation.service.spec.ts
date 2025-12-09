@@ -4,7 +4,13 @@ import {
   GroupFormationResult,
 } from './group-formation.service';
 import { EntityRepository } from '@mikro-orm/postgresql';
-import { Trip, TripBooking, TravelGroup, Itinerary } from '../entities';
+import {
+  Trip,
+  TripBooking,
+  TravelGroup,
+  Itinerary,
+  AggregatedItinerary,
+} from '../entities';
 import { TripBookingStatus } from '../entities/tripBookingEnum';
 import {
   createMockUser,
@@ -21,6 +27,7 @@ describe('GroupFormationService', () => {
   let mockBookingRepo: EntityRepository<TripBooking>;
   let mockTravelGroupRepo: EntityRepository<TravelGroup>;
   let mockItineraryRepo: EntityRepository<Itinerary>;
+  let mockAggregatedItineraryRepo: EntityRepository<AggregatedItinerary>;
 
   beforeEach(() => {
     resetCounters();
@@ -52,17 +59,29 @@ describe('GroupFormationService', () => {
       findOne: vi.fn().mockResolvedValue(null),
     } as unknown as EntityRepository<Itinerary>;
 
+    mockAggregatedItineraryRepo = {
+      find: vi.fn().mockResolvedValue([]),
+    } as unknown as EntityRepository<AggregatedItinerary>;
+
     service = new GroupFormationService(
       mockTripRepo,
       mockBookingRepo,
       mockTravelGroupRepo,
       mockItineraryRepo,
+      mockAggregatedItineraryRepo,
     );
   });
 
   describe('formGroupsForTrip', () => {
     it('should return empty result when not enough eligible bookings', async () => {
       const trip = createMockTrip();
+
+      // Mock finding a pattern
+      mockAggregatedItineraryRepo.find = vi.fn().mockResolvedValue([
+        {
+          itineraryIds: ['itinerary-1', 'itinerary-2'],
+        },
+      ]);
 
       // Mock: only 1 booking (less than min of 2)
       mockBookingRepo.find = vi

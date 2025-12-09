@@ -1,7 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
-import { Trip, TripBooking, TravelGroup, User, Itinerary } from '../entities';
+import {
+  Trip,
+  TripBooking,
+  TravelGroup,
+  User,
+  Itinerary,
+  AggregatedItinerary,
+} from '../entities';
 import { TripBookingStatus } from '../entities/tripBookingEnum';
 import { TravelGroupStatus } from '../entities/travelGroupEnum';
 
@@ -43,6 +50,8 @@ export class GroupFormationService {
     private readonly travelGroupRepository: EntityRepository<TravelGroup>,
     @InjectRepository(Itinerary)
     private readonly itineraryRepository: EntityRepository<Itinerary>,
+    @InjectRepository(AggregatedItinerary)
+    private readonly aggregatedItineraryRepository: EntityRepository<AggregatedItinerary>,
   ) {}
 
   /**
@@ -92,51 +101,70 @@ export class GroupFormationService {
       failedNoSteward: 0,
     };
 
-    // Query eligible bookings: CHECKED_IN and not yet grouped
-    const eligibleBookings = await this.tripBookingRepository.find(
-      {
-        trip: { id: trip.id },
-        status: TripBookingStatus.CHECKED_IN,
-        group: null,
-      },
-      {
-        populate: [
-          'user',
-          'itinerary',
-          'itinerary.tripBookings',
-          'itinerary.tripBookings.trip',
-        ],
-      },
-    );
-
-    if (eligibleBookings.length < MIN_GROUP_SIZE) {
-      this.logger.log(
-        `Trip ${trip.id}: Not enough eligible bookings (${eligibleBookings.length})`,
-      );
-      result.usersNotGrouped = eligibleBookings.length;
-      result.failureReason = 'not_enough_bookings';
-      return result;
-    }
-
-    // Group bookings by itinerary hash
-    const itineraryGroups = this.groupByItinerary(eligibleBookings);
+    // Find itinerary patterns including this trip
+    const itineraryPatterns = await this.aggregatedItineraryRepository.find({
+      tripSequence: { $like: `%${trip.id}%` },
+    });
 
     this.logger.log(
-      `Trip ${trip.id}: Found ${itineraryGroups.size} itinerary groups from ${eligibleBookings.length} bookings`,
+      `Trip ${trip.id}: Found ${itineraryPatterns.length} itinerary patterns`,
     );
 
-    // Form groups within each itinerary group
-    for (const [, group] of itineraryGroups) {
+    for (const pattern of itineraryPatterns) {
+      if (
+        !pattern.itineraryIds ||
+        pattern.itineraryIds.length < MIN_GROUP_SIZE
+      ) {
+        continue;
+      }
+
+      // Fetch eligible bookings for this pattern
+      const groupBookings = await this.tripBookingRepository.find(
+        {
+          trip: { id: trip.id },
+          status: TripBookingStatus.CHECKED_IN,
+          group: null,
+          itinerary: { id: { $in: pattern.itineraryIds } },
+        },
+        {
+          populate: [
+            'user',
+            'itinerary',
+            'itinerary.tripBookings',
+            'itinerary.tripBookings.trip',
+          ],
+        },
+      );
+
+      // Check if enough bookings for this specific trip + pattern
+      if (groupBookings.length < MIN_GROUP_SIZE) {
+        result.usersNotGrouped += groupBookings.length;
+        continue;
+      }
+
+      const stewardCandidates = groupBookings.filter(
+        (b) => b.itinerary?.wantsToSteward,
+      );
+
       const groupResult = await this.formGroupsFromBookings(
         trip,
-        group.bookings,
-        group.stewardCandidates,
+        groupBookings,
+        stewardCandidates,
       );
+
       result.groupsFormed += groupResult.groupsFormed;
       result.usersGrouped += groupResult.usersGrouped;
       result.usersNotGrouped += groupResult.usersNotGrouped;
       result.failedNoSteward += groupResult.failedNoSteward;
       result.failureReason ??= groupResult.failureReason;
+    }
+
+    if (
+      result.groupsFormed === 0 &&
+      result.usersNotGrouped > 0 &&
+      !result.failureReason
+    ) {
+      result.failureReason = 'not_enough_bookings';
     }
 
     return result;
@@ -154,56 +182,6 @@ export class GroupFormationService {
     }
 
     return this.formGroupsForTrip(trip);
-  }
-
-  /**
-   * Group bookings by their itinerary hash (set of trip IDs).
-   * Users with identical itineraries will be grouped together.
-   */
-  private groupByItinerary(
-    bookings: TripBooking[],
-  ): Map<
-    string,
-    { bookings: TripBooking[]; stewardCandidates: TripBooking[] }
-  > {
-    const groupMap = new Map<
-      string,
-      { bookings: TripBooking[]; stewardCandidates: TripBooking[] }
-    >();
-
-    for (const booking of bookings) {
-      const hash = this.computeItineraryHash(booking);
-
-      if (!groupMap.has(hash)) {
-        groupMap.set(hash, { bookings: [], stewardCandidates: [] });
-      }
-
-      const group = groupMap.get(hash)!;
-      group.bookings.push(booking);
-
-      if (booking.itinerary?.wantsToSteward) {
-        group.stewardCandidates.push(booking);
-      }
-    }
-
-    return groupMap;
-  }
-
-  /**
-   * Compute a deterministic hash for an itinerary.
-   * Returns sorted trip IDs joined by pipe.
-   */
-  private computeItineraryHash(booking: TripBooking): string {
-    if (!booking.itinerary || !booking.itinerary.tripBookings.isInitialized()) {
-      return `single:${booking.trip.id}`;
-    }
-
-    const tripIds = booking.itinerary.tripBookings
-      .getItems()
-      .map((tb) => tb.trip.id)
-      .sort();
-
-    return `multi:${tripIds.join('|')}`;
   }
 
   /**

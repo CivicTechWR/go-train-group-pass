@@ -4,3 +4,5 @@ export * from './trip-schedule/trip-schedule.dto';
 export * from './trip-schedule/trip-schedule.schemas';
 export * from './group-formation/group-formation.schemas';
 export * from './group-formation/group-formation.dto';
+export * from './trip/trip.schemas';
+export * from './trip/trip.dto';

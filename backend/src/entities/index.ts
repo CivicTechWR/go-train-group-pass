@@ -17,3 +17,4 @@ export * from './trip.entity';
 export * from './itinerary_status_log.entity';
 export * from './travel_group_status_log.entity';
 export * from './trip_schedule_entity';
+export * from './aggregated_itinerary.entity';
