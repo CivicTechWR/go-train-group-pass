@@ -4,7 +4,8 @@ import {
   GroupFormationResult,
 } from './group-formation.service';
 import { EntityRepository } from '@mikro-orm/postgresql';
-import { Trip, TripBooking, TravelGroup, Itinerary } from '../entities';
+import { Collection } from '@mikro-orm/core';
+import { Trip, TripBooking, TravelGroup, Itinerary, User } from '../entities';
 import { TripBookingStatus } from '../entities/tripBookingEnum';
 import {
   createMockUser,
@@ -100,6 +101,108 @@ describe('GroupFormationService', () => {
       const results = await service.formGroupsForItinerary('non-existent');
 
       expect(results).toEqual([]);
+    });
+
+    it('should create identical group compositions for every trip in itinerary', async () => {
+      const tripA = createMockTrip();
+      tripA.id = 'trip-A';
+      const tripB = createMockTrip();
+      tripB.id = 'trip-B';
+
+      const tripHash = 'hash-shared';
+
+      const stewardUser = createMockUser({ id: 'steward-1' });
+      const riderUser = createMockUser({ id: 'rider-1' });
+
+      const makeItinerary = (
+        id: string,
+        wantsToSteward: boolean,
+        user: User,
+      ) => {
+        const itinerary = new Itinerary();
+        itinerary.id = id;
+        itinerary.wantsToSteward = wantsToSteward;
+        itinerary.user = user;
+        itinerary.tripHash = tripHash;
+
+        const bookings = [tripA, tripB].map((trip, idx) => {
+          const booking = new TripBooking();
+          booking.id = `${id}-booking-${idx}`;
+          booking.trip = trip;
+          booking.user = user;
+          booking.itinerary = itinerary;
+          booking.status = TripBookingStatus.CHECKED_IN;
+          booking.group = undefined;
+          booking.sequence = idx;
+          return booking;
+        });
+
+        itinerary.tripBookings = {
+          isInitialized: () => true,
+          getItems: () => bookings,
+          get length() {
+            return bookings.length;
+          },
+        } as unknown as Collection<TripBooking>;
+
+        return { itinerary, bookings };
+      };
+
+      const stewardItinerary = makeItinerary(
+        'itinerary-steward',
+        true,
+        stewardUser,
+      );
+      const riderItinerary = makeItinerary('itinerary-rider', false, riderUser);
+
+      mockItineraryRepo.findOne = vi
+        .fn()
+        .mockResolvedValue(stewardItinerary.itinerary);
+      mockItineraryRepo.find = vi
+        .fn()
+        .mockResolvedValue([
+          stewardItinerary.itinerary,
+          riderItinerary.itinerary,
+        ]);
+
+      const persistAndFlushMock = vi.fn().mockResolvedValue(undefined);
+      mockTravelGroupRepo.count = vi.fn().mockResolvedValue(0);
+      mockTravelGroupRepo.create = vi
+        .fn()
+        .mockImplementation((data: Partial<TravelGroup>) => {
+          const group = new TravelGroup();
+          Object.assign(group, data);
+          return group;
+        });
+      mockTravelGroupRepo.getEntityManager = vi
+        .fn()
+        .mockReturnValue({ persistAndFlush: persistAndFlushMock });
+
+      const results = await service.formGroupsForItinerary(
+        stewardItinerary.itinerary.id,
+      );
+
+      expect(results).toHaveLength(2);
+      results.forEach((result) => {
+        expect(result.groupsFormed).toBe(1);
+        expect(result.usersGrouped).toBe(2);
+        expect(result.usersNotGrouped).toBe(0);
+        expect(result.failedNoSteward).toBe(0);
+      });
+
+      // Both trips should have grouped the same two users
+      const [stewardTripABooking, stewardTripBBooking] =
+        stewardItinerary.bookings;
+      const [riderTripABooking, riderTripBBooking] = riderItinerary.bookings;
+
+      expect(stewardTripABooking.group).toBe(riderTripABooking.group);
+      expect(stewardTripBBooking.group).toBe(riderTripBBooking.group);
+      expect(stewardTripABooking.status).toBe(TripBookingStatus.GROUPED);
+      expect(stewardTripBBooking.status).toBe(TripBookingStatus.GROUPED);
+      expect(riderTripABooking.status).toBe(TripBookingStatus.GROUPED);
+      expect(riderTripBBooking.status).toBe(TripBookingStatus.GROUPED);
+
+      expect(persistAndFlushMock).toHaveBeenCalledTimes(2);
     });
   });
 });
