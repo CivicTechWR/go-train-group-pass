@@ -10,6 +10,7 @@ import { ItinerariesModule } from './itineraries/itineraries.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AppConfigModule } from './modules/config.module';
 import { OrmModule } from './modules/orm.module';
+import { ItinerarySubscriber } from './subscribers/itinerary.subscriber';
 import { TripBookingModule } from './trip-booking/trip-booking.module';
 import { TripScheduleModule } from './trip-schedule/trip-schedule.module';
 import { TripModule } from './trip/trip.module';
@@ -47,6 +48,7 @@ import { TripModule } from './trip/trip.module';
       provide: APP_PIPE,
       useClass: ZodValidationPipe,
     },
+    ItinerarySubscriber,
   ],
 })
 export class AppModule {}
