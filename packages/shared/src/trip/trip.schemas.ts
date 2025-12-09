@@ -7,4 +7,5 @@ export const TripDetailsSchema = z.object({
     destStation: z.string(),
     departureTime: z.date(),
     arrivalTime: z.date(),
+    sequence: z.number().optional(),
 });
