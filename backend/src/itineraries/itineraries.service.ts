@@ -25,7 +25,7 @@ export class ItinerariesService {
     const user = await this.userService.findById(userId);
     const tripBookings = await Promise.all(
       createItineraryDto.segments.map(async (segment, index) => {
-        return await this.tripBookingService.create(
+        return await this.tripBookingService.findOrCreate(
           userId,
           segment.gtfsTripId,
           segment.originStopTimeId,

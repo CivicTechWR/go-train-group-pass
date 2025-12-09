@@ -45,12 +45,12 @@ describe('TripService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('findOrCreateTrip', () => {
+  describe('findOrCreate', () => {
     it('should return existing trip if found', async () => {
       const existingTrip = { id: 'trip-123' };
       mockRepository.findOne.mockResolvedValue(existingTrip);
 
-      const result = await service.findOrCreateTrip(
+      const result = await service.findOrCreate(
         'gtfs-trip-id',
         'origin-id',
         'dest-id',
@@ -95,7 +95,7 @@ describe('TripService', () => {
       const upsertedTrip = { id: 'new-trip-id' };
       mockRepository.upsert.mockResolvedValue(upsertedTrip);
 
-      const result = await service.findOrCreateTrip(
+      const result = await service.findOrCreate(
         'gtfs-trip-id',
         'origin-id',
         'dest-id',

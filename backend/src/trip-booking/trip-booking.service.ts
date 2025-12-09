@@ -14,7 +14,7 @@ export class TripBookingService {
     private readonly userService: UsersService,
     private readonly tripService: TripService,
   ) {}
-  async create(
+  async findOrCreate(
     userId: string,
     gtfsTripId: string,
     originStopTimeId: string,
@@ -25,7 +25,7 @@ export class TripBookingService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    const trip = await this.tripService.findOrCreateTrip(
+    const trip = await this.tripService.findOrCreate(
       gtfsTripId,
       originStopTimeId,
       destStopTimeId,

@@ -16,7 +16,7 @@ export class TripService {
     @InjectRepository(GTFSStopTime)
     private readonly gtfstopTimeRepo: EntityRepository<GTFSStopTime>,
   ) {}
-  async findOrCreateTrip(
+  async findOrCreate(
     gtfsTripId: string,
     originStopTimeId: string,
     destStopTimeId: string,

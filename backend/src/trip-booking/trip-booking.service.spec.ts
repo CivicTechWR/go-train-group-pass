@@ -25,7 +25,7 @@ describe('TripBookingService', () => {
   };
 
   const mockTripService = {
-    findOrCreateTrip: vi.fn(),
+    findOrCreate: vi.fn(),
   };
 
   beforeEach(async () => {
@@ -55,9 +55,9 @@ describe('TripBookingService', () => {
       const existingBooking = { id: 'booking-123' };
       mockTripBookingRepo.findOne.mockResolvedValue(existingBooking);
       mockUsersService.findById.mockResolvedValue({ id: 'user-123' });
-      mockTripService.findOrCreateTrip.mockResolvedValue({ id: 'trip-123' });
+      mockTripService.findOrCreate.mockResolvedValue({ id: 'trip-123' });
 
-      const result = await service.create(
+      const result = await service.findOrCreate(
         'user-123',
         'gtfs-trip-id',
         'origin-id',
@@ -74,12 +74,12 @@ describe('TripBookingService', () => {
       const user = { id: 'user-123' };
       const trip = { id: 'trip-123' };
       mockUsersService.findById.mockResolvedValue(user);
-      mockTripService.findOrCreateTrip.mockResolvedValue(trip);
+      mockTripService.findOrCreate.mockResolvedValue(trip);
 
       const upsertedBooking = { id: 'new-booking' };
       mockTripBookingRepo.upsert.mockResolvedValue(upsertedBooking);
 
-      const result = await service.create(
+      const result = await service.findOrCreate(
         'user-123',
         'gtfs-trip-id',
         'origin-id',
