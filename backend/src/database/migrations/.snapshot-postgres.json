@@ -1811,6 +1811,16 @@
           "default": "false",
           "mappedType": "boolean"
         },
+        "trip_hash": {
+          "name": "trip_hash",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
         "user_id": {
           "name": "user_id",
           "type": "uuid",
