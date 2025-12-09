@@ -1,12 +1,10 @@
 import {
   Controller,
   Post,
-  Get,
   Param,
   UseGuards,
   Logger,
   BadRequestException,
-  NotFoundException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -15,15 +13,13 @@ import {
   ApiBearerAuth,
   ApiParam,
 } from '@nestjs/swagger';
-import {
-  GroupFormationService,
-  GroupFormationResult,
-} from './group-formation.service';
+import { GroupFormationService } from './group-formation.service';
 import { AuthGuard } from '../modules/auth/auth.guard';
 import { Serialize } from '../common/decorators/serialize.decorator';
 import {
-  GroupFormationResponseSchema,
   GroupFormationResultSchema,
+  GroupFormationResultDto,
+  GroupFormationResultFailureReason,
 } from '@go-train-group-pass/shared';
 
 /**
@@ -64,104 +60,29 @@ export class GroupFormationController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Itinerary not found' })
-  @Serialize(GroupFormationResponseSchema)
+  @Serialize(GroupFormationResultSchema)
   async formGroupsForItinerary(
     @Param('itineraryId') itineraryId: string,
-  ): Promise<{ results: GroupFormationResult[] }> {
+  ): Promise<GroupFormationResultDto> {
     this.logger.log(`Group formation triggered for itinerary ${itineraryId}`);
 
     const results =
       await this.groupFormationService.formGroupsForItinerary(itineraryId);
 
-    const totalGroupsFormed = results.reduce(
-      (sum, r) => sum + r.groupsFormed,
-      0,
-    );
-
-    if (totalGroupsFormed === 0) {
-      const reason =
-        results.find((r) => r.failureReason)?.failureReason ??
-        'not_enough_bookings';
+    if (results.failureReason) {
       throw new BadRequestException(
-        reason === 'no_steward_candidates' || reason === 'insufficient_stewards'
+        results.failureReason ===
+          GroupFormationResultFailureReason.NO_STEWARD_CANDIDATE ||
+        results.failureReason ===
+          GroupFormationResultFailureReason.INSUFFICIENT_STEWARDS
           ? 'Cannot form groups: no available stewards for this itinerary'
           : 'Cannot form groups: not enough eligible bookings',
       );
     }
     this.logger.log(
-      `Group formation complete for itinerary ${itineraryId}: ${totalGroupsFormed} groups formed`,
+      `Group formation complete for itinerary ${itineraryId}: ${results.groupsFormed} groups formed`,
     );
 
-    return { results };
-  }
-
-  /**
-   * Trigger group formation for a specific trip.
-   */
-  @Post('trip/:tripId')
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({
-    summary: 'Trigger group formation for a specific trip',
-    description: 'Forms groups for checked-in users on the specified trip.',
-  })
-  @ApiParam({
-    name: 'tripId',
-    description: 'The ID of the trip to form groups for',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Group formation completed for the trip',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Not enough eligible bookings or stewards to form groups',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 404, description: 'Trip not found' })
-  @Serialize(GroupFormationResultSchema)
-  async formGroupsForTrip(
-    @Param('tripId') tripId: string,
-  ): Promise<GroupFormationResult> {
-    this.logger.log(`Group formation triggered for trip ${tripId}`);
-
-    try {
-      const result =
-        await this.groupFormationService.formGroupsForTripById(tripId);
-
-      if (result.groupsFormed === 0) {
-        const reason = result.failureReason ?? 'not_enough_bookings';
-        throw new BadRequestException(
-          reason === 'no_steward_candidates' ||
-          reason === 'insufficient_stewards'
-            ? 'Cannot form groups: no available stewards for this trip'
-            : 'Cannot form groups: not enough eligible bookings',
-        );
-      }
-
-      this.logger.log(
-        `Group formation complete for trip ${tripId}: ${result.groupsFormed} groups formed`,
-      );
-
-      return result;
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('not found')) {
-        throw new NotFoundException(error.message);
-      }
-      throw error;
-    }
-  }
-
-  /**
-   * Health check / status endpoint.
-   */
-  @Get('status')
-  @ApiOperation({ summary: 'Get group formation service status' })
-  @ApiResponse({ status: 200, description: 'Service status' })
-  getStatus(): { status: string; message: string } {
-    return {
-      status: 'ok',
-      message: 'Group formation service is running',
-    };
+    return results;
   }
 }

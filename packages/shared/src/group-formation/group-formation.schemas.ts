@@ -1,20 +1,16 @@
 import { z } from 'zod';
 
+export enum GroupFormationResultFailureReason {
+  NOT_ENOUGH_BOOKINGS = 'not_enough_bookings',
+  NO_STEWARD_CANDIDATE = 'no_steward_candidates',
+  INSUFFICIENT_STEWARDS = 'insufficient_stewards',
+}
 export const GroupFormationResultSchema = z.object({
-    tripId: z.string(),
     groupsFormed: z.number(),
     usersGrouped: z.number(),
     usersNotGrouped: z.number(),
-    failedNoSteward: z.number(),
+    stewardsNeeded: z.number(),
     failureReason: z
-        .enum([
-            'not_enough_bookings',
-            'no_steward_candidates',
-            'insufficient_stewards',
-        ])
+        .enum(GroupFormationResultFailureReason)
         .optional(),
-});
-
-export const GroupFormationResponseSchema = z.object({
-    results: z.array(GroupFormationResultSchema),
 });
