@@ -1,4 +1,11 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Request,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import { ItinerariesService } from './itineraries.service';
 import { AuthGuard } from '../modules/auth/auth.guard';
 import type { RequestWithUser } from '../modules/auth/auth.guard';
@@ -26,7 +33,7 @@ export class ItinerariesController {
     @Body() createItineraryDto: CreateItineraryDto,
   ) {
     if (!req.user) {
-      throw new Error('User not found');
+      throw new UnauthorizedException('User not found');
     }
     return this.itinerariesService.create(req.user.id, createItineraryDto);
   }
