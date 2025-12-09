@@ -4,14 +4,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { GroupFormationService } from './group-formation.service';
 import { GroupFormationController } from './group-formation.controller';
 import { GroupFormationScheduler } from './group-formation.scheduler';
-import {
-  Trip,
-  TripBooking,
-  TravelGroup,
-  Itinerary,
-  User,
-  AggregatedItinerary,
-} from '../entities';
+import { Trip, TripBooking, TravelGroup, Itinerary, User } from '../entities';
 import { AuthModule } from '../modules/auth/auth.module';
 
 @Module({
@@ -23,7 +16,6 @@ import { AuthModule } from '../modules/auth/auth.module';
       TravelGroup,
       Itinerary,
       User,
-      AggregatedItinerary,
     ]),
     AuthModule,
   ],

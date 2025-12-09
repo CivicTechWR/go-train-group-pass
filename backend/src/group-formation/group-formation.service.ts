@@ -1,16 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
-import {
-  Trip,
-  TripBooking,
-  TravelGroup,
-  User,
-  Itinerary,
-  AggregatedItinerary,
-} from '../entities';
+import { Trip, TripBooking, TravelGroup, User, Itinerary } from '../entities';
 import { TripBookingStatus } from '../entities/tripBookingEnum';
 import { TravelGroupStatus } from '../entities/travelGroupEnum';
+import { createHash } from 'crypto';
 
 /**
  * Result of group formation for a single trip
@@ -50,8 +44,6 @@ export class GroupFormationService {
     private readonly travelGroupRepository: EntityRepository<TravelGroup>,
     @InjectRepository(Itinerary)
     private readonly itineraryRepository: EntityRepository<Itinerary>,
-    @InjectRepository(AggregatedItinerary)
-    private readonly aggregatedItineraryRepository: EntityRepository<AggregatedItinerary>,
   ) {}
 
   /**
@@ -76,12 +68,20 @@ export class GroupFormationService {
       return [];
     }
 
+    const tripHash = itinerary.tripHash ?? this.computeTripHash(itinerary);
+    if (!tripHash) {
+      this.logger.warn(
+        `Itinerary ${itineraryId} missing trip hash; cannot group bookings`,
+      );
+      return [];
+    }
+
     const results: GroupFormationResult[] = [];
 
     // Process each trip in the itinerary
     for (const booking of itinerary.tripBookings.getItems()) {
       const trip = booking.trip;
-      const result = await this.formGroupsForTrip(trip);
+      const result = await this.formGroupsForTrip(trip, tripHash);
       results.push(result);
     }
 
@@ -92,7 +92,10 @@ export class GroupFormationService {
    * Form groups for a specific trip.
    * Groups users by matching itineraries.
    */
-  async formGroupsForTrip(trip: Trip): Promise<GroupFormationResult> {
+  async formGroupsForTrip(
+    trip: Trip,
+    requiredTripHash?: string,
+  ): Promise<GroupFormationResult> {
     const result: GroupFormationResult = {
       tripId: trip.id,
       groupsFormed: 0,
@@ -101,44 +104,46 @@ export class GroupFormationService {
       failedNoSteward: 0,
     };
 
-    // Find itinerary patterns including this trip
-    const itineraryPatterns = await this.aggregatedItineraryRepository.find({
-      tripSequence: { $like: `%${trip.id}%` },
-    });
-
-    this.logger.log(
-      `Trip ${trip.id}: Found ${itineraryPatterns.length} itinerary patterns`,
+    const eligibleBookings = await this.tripBookingRepository.find(
+      {
+        trip: { id: trip.id },
+        status: TripBookingStatus.CHECKED_IN,
+        group: null,
+        ...(requiredTripHash
+          ? { itinerary: { tripHash: requiredTripHash } }
+          : { itinerary: { tripHash: { $ne: null } } }),
+      },
+      {
+        populate: ['user', 'itinerary'],
+      },
     );
 
-    for (const pattern of itineraryPatterns) {
-      if (
-        !pattern.itineraryIds ||
-        pattern.itineraryIds.length < MIN_GROUP_SIZE
-      ) {
+    const bookingsByHash = new Map<string, TripBooking[]>();
+    let bookingsMissingHash = 0;
+
+    for (const booking of eligibleBookings) {
+      const hash = booking.itinerary?.tripHash;
+      if (!hash) {
+        bookingsMissingHash++;
         continue;
       }
+      if (requiredTripHash && hash !== requiredTripHash) {
+        continue;
+      }
+      const list = bookingsByHash.get(hash) ?? [];
+      list.push(booking);
+      bookingsByHash.set(hash, list);
+    }
 
-      // Fetch eligible bookings for this pattern
-      const groupBookings = await this.tripBookingRepository.find(
-        {
-          trip: { id: trip.id },
-          status: TripBookingStatus.CHECKED_IN,
-          group: null,
-          itinerary: { id: { $in: pattern.itineraryIds } },
-        },
-        {
-          populate: [
-            'user',
-            'itinerary',
-            'itinerary.tripBookings',
-            'itinerary.tripBookings.trip',
-          ],
-        },
-      );
+    this.logger.log(
+      `Trip ${trip.id}: processing ${bookingsByHash.size} itinerary group(s)` +
+        (requiredTripHash ? ` for hash ${requiredTripHash}` : ''),
+    );
 
-      // Check if enough bookings for this specific trip + pattern
+    for (const [, groupBookings] of bookingsByHash.entries()) {
       if (groupBookings.length < MIN_GROUP_SIZE) {
         result.usersNotGrouped += groupBookings.length;
+        result.failureReason ??= 'not_enough_bookings';
         continue;
       }
 
@@ -157,6 +162,14 @@ export class GroupFormationService {
       result.usersNotGrouped += groupResult.usersNotGrouped;
       result.failedNoSteward += groupResult.failedNoSteward;
       result.failureReason ??= groupResult.failureReason;
+    }
+
+    if (bookingsMissingHash > 0) {
+      result.usersNotGrouped += bookingsMissingHash;
+      result.failureReason ??= 'not_enough_bookings';
+      this.logger.warn(
+        `Trip ${trip.id}: ${bookingsMissingHash} eligible bookings missing trip hash`,
+      );
     }
 
     if (
@@ -365,5 +378,24 @@ export class GroupFormationService {
     );
 
     return travelGroup;
+  }
+
+  /**
+   * Compute a trip hash for an itinerary if one is missing.
+   */
+  private computeTripHash(itinerary: Itinerary): string | null {
+    if (
+      itinerary.tripBookings &&
+      itinerary.tripBookings.isInitialized() &&
+      itinerary.tripBookings.length > 0
+    ) {
+      const sortedBookings = itinerary.tripBookings
+        .getItems()
+        .slice()
+        .sort((a, b) => (a.sequence ?? 0) - (b.sequence ?? 0));
+      const tripIds = sortedBookings.map((b) => b.trip.id).join(',');
+      return createHash('md5').update(tripIds).digest('hex');
+    }
+    return null;
   }
 }

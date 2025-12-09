@@ -7,11 +7,11 @@ export class ItinerarySubscriber implements EventSubscriber<Itinerary> {
     return [Itinerary];
   }
 
-  async beforeCreate(args: EventArgs<Itinerary>): Promise<void> {
+  beforeCreate(args: EventArgs<Itinerary>): void {
     this.updateTripHash(args.entity);
   }
 
-  async beforeUpdate(args: EventArgs<Itinerary>): Promise<void> {
+  beforeUpdate(args: EventArgs<Itinerary>): void {
     this.updateTripHash(args.entity);
   }
 

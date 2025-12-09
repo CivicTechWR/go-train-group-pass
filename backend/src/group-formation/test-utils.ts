@@ -1,6 +1,7 @@
 import { Collection } from '@mikro-orm/core';
 import { Trip, TripBooking, Itinerary, User } from '../entities';
 import { TripBookingStatus } from '../entities/tripBookingEnum';
+import { createHash } from 'crypto';
 
 /**
  * Test utilities for group formation tests.
@@ -88,6 +89,9 @@ export function createMockItinerary(
   };
 
   itinerary.tripBookings = mockCollection as unknown as Collection<TripBooking>;
+
+  const tripIds = trips.map((t) => t.id).join(',');
+  itinerary.tripHash = createHash('md5').update(tripIds).digest('hex');
 
   return itinerary;
 }
