@@ -1,30 +1,6 @@
 import { z } from 'zod';
 
 /**
- * Schema for a single trip within an itinerary
- * Represents one leg of a journey in the itinerary sequence
- */
-export const ItineraryTripSchema = z.object({
-  departureTime: z.string().datetime(),
-  arrivalTime: z.string().datetime(),
-  orgStation: z.string(),
-  destStation: z.string(),
-});
-
-export type ItineraryTrip = z.infer<typeof ItineraryTripSchema>;
-
-/**
- * Schema for an itinerary
- * An itinerary represents a sequence of trips with interested users
- */
-export const ItinerarySchema = z.object({
-  trips: z.array(ItineraryTripSchema),
-  interestedUsersCount: z.number().int().min(0),
-});
-
-export type Itinerary = z.infer<typeof ItinerarySchema>;
-
-/**
  * Schema for creating an itinerary
  * Matches CreateItinerarySchema from shared package
  */
@@ -67,3 +43,22 @@ export const ItineraryCreationResponseSchema = z.object({
 export type ItineraryCreationResponse = z.infer<
   typeof ItineraryCreationResponseSchema
 >;
+
+/**
+ * Schema for existing itinerary from API
+ * Matches ExistingItinerarySchema from shared package
+ */
+export const ExistingItinerarySchema = z.object({
+  userCount: z.number(),
+  tripDetails: z.array(TripDetailsSchema),
+});
+
+export type ExistingItinerary = z.infer<typeof ExistingItinerarySchema>;
+
+/**
+ * Schema for array of existing itineraries
+ * Matches ExistingItinerariesSchema from shared package
+ */
+export const ExistingItinerariesSchema = z.array(ExistingItinerarySchema);
+
+export type ExistingItineraries = z.infer<typeof ExistingItinerariesSchema>;

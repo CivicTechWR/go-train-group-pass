@@ -1,7 +1,6 @@
 'use client';
 
 import { Separator } from '@/components/ui';
-import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -9,15 +8,38 @@ import {
   CardFooter,
   CardHeader,
 } from '@/components/ui/card';
-import { itineraryMock } from '@/lib/mock/itinerary-mock';
+import { apiGet } from '@/lib/api';
+import { ExistingItinerary } from '@/lib/types';
 import { getRelativeDateLabel } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ArrowRight, Calendar, MapPin, Users } from 'lucide-react';
-
-const MAX_TRIP_COUNT = 5;
+import { useEffect, useState } from 'react';
 
 export default function ItinerariesPage() {
-  const itineraries = itineraryMock;
+  const [itineraries, setItineraries] = useState<ExistingItinerary[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchItineraries = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const data = await apiGet<ExistingItinerary[]>('/itineraries/existing');
+        setItineraries(data);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : 'Failed to load itineraries. Please try again.';
+        setError(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchItineraries();
+  }, []);
 
   return (
     <div className='container mx-auto px-6 py-8 relative'>
@@ -28,7 +50,18 @@ export default function ItinerariesPage() {
         </p>
       </div>
 
-      {itineraries.length === 0 ? (
+      {isLoading ? (
+        <div className='text-center py-12'>
+          <p className='text-muted-foreground'>Loading itineraries...</p>
+        </div>
+      ) : error ? (
+        <div className='text-center py-12'>
+          <p className='text-destructive mb-4'>{error}</p>
+          <p className='text-sm text-muted-foreground'>
+            Please try refreshing the page
+          </p>
+        </div>
+      ) : itineraries.length === 0 ? (
         <div className='text-center py-12'>
           <p className='text-muted-foreground mb-4'>No itineraries yet</p>
           <p className='text-sm text-muted-foreground'>
@@ -47,14 +80,14 @@ export default function ItinerariesPage() {
                   <div className='flex-1'>
                     <CardDescription className='flex items-center gap-1 text-inherit dark:text-white'>
                       <Calendar className='h-4 w-4' />
-                      {itinerary.trips.length > 0 && (
+                      {itinerary.tripDetails.length > 0 && (
                         <>
                           {format(
-                            new Date(itinerary.trips[0].departureTime),
+                            itinerary.tripDetails[0].departureTime,
                             'yyyy-MM-dd'
                           )}{' '}
                           {getRelativeDateLabel(
-                            new Date(itinerary.trips[0].departureTime)
+                            itinerary.tripDetails[0].departureTime
                           )}
                         </>
                       )}
@@ -64,7 +97,7 @@ export default function ItinerariesPage() {
               </CardHeader>
               <CardContent className='flex-1'>
                 <div className='flex gap-4 flex-wrap items-start'>
-                  {itinerary.trips.flatMap((trip, tripIndex) =>
+                  {itinerary.tripDetails.flatMap((trip, tripIndex) =>
                     [
                       <div
                         key={`trip-${tripIndex}`}
@@ -90,17 +123,17 @@ export default function ItinerariesPage() {
                             <span>
                               Departs{' '}
                               <span className='font-semibold'>
-                                {format(new Date(trip.departureTime), 'h:mm a')}
+                                {format(trip.departureTime, 'h:mm a')}
                               </span>{' '}
                               • Arrives{' '}
                               <span className='font-semibold'>
-                                {format(new Date(trip.arrivalTime), 'h:mm a')}
+                                {format(trip.arrivalTime, 'h:mm a')}
                               </span>
                             </span>
                           </div>
                         </div>
                       </div>,
-                      tripIndex < itinerary.trips.length - 1 && (
+                      tripIndex < itinerary.tripDetails.length - 1 && (
                         <Separator
                           key={`separator-${tripIndex}`}
                           orientation='vertical'
@@ -115,26 +148,10 @@ export default function ItinerariesPage() {
                 <div className='flex items-center gap-2 flex-1'>
                   <Users className='h-4 w-4 text-muted-foreground' />
                   <span className='text-sm text-muted-foreground'>
-                    <span className='font-medium'>
-                      {itinerary.interestedUsersCount}
-                    </span>{' '}
+                    <span className='font-medium'>{itinerary.userCount}</span>{' '}
                     going
                   </span>
-                  <span className='text-sm text-muted-foreground'>•</span>
-                  <span className='text-sm text-muted-foreground'>
-                    <span className='font-medium'>
-                      {MAX_TRIP_COUNT - itinerary.interestedUsersCount}
-                    </span>{' '}
-                    spot
-                    {MAX_TRIP_COUNT - itinerary.interestedUsersCount !== 1
-                      ? 's'
-                      : ''}{' '}
-                    left
-                  </span>
                 </div>
-                {MAX_TRIP_COUNT - itinerary.interestedUsersCount > 0 && (
-                  <Button size='sm'>Join</Button>
-                )}
               </CardFooter>
             </Card>
           ))}
