@@ -29,17 +29,18 @@ export function Navbar() {
             {!loading && user && (
               <>
                 <Link
-                  href='/book'
-                  className='text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
-                >
-                  Book Trip
-                </Link>
-                <Link
                   href='/itineraries'
                   className='text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
                 >
                   Itineraries
                 </Link>
+                <Link
+                  href='/book'
+                  className='text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
+                >
+                  Book Trip
+                </Link>
+                <span className='text-muted-foreground'>•</span>
               </>
             )}
 
@@ -48,9 +49,12 @@ export function Navbar() {
               <div className='flex items-center gap-3'>
                 {user ? (
                   <>
-                    <span className='text-sm text-muted-foreground'>
+                    <Link
+                      href='/profile'
+                      className='text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
+                    >
                       {user.name}
-                    </span>
+                    </Link>
                     <Button
                       variant='outline'
                       size='sm'
