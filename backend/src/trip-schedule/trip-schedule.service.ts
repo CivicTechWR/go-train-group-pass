@@ -1,4 +1,7 @@
-import { TripScheduleDetailsDto } from '@go-train-group-pass/shared';
+import {
+  RoundTripDto,
+  TripScheduleDetailsDto,
+} from '@go-train-group-pass/shared';
 import { EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { BadRequestException, Injectable } from '@nestjs/common';
@@ -11,14 +14,30 @@ export class TripScheduleService {
     @InjectRepository(TripSchedule)
     private readonly tripScheduleRepo: EntityRepository<TripSchedule>,
   ) {}
-  async getTripSchedule(
+  public async getKIToUnionRoundTripSchedule(day: Date): Promise<RoundTripDto> {
+    const departureTrips = await this.getTripSchedule(
+      'Kitchener GO',
+      'Union Station GO',
+      day,
+    );
+    const returnTrips = await this.getTripSchedule(
+      'Union Station GO',
+      'Kitchener GO',
+      day,
+    );
+    return {
+      departureTrips,
+      returnTrips,
+    };
+  }
+  public async getTripSchedule(
     orgStation: string,
     destStation: string,
     day: Date,
   ): Promise<TripScheduleDetailsDto[]> {
     const supportedTrips = ['Kitchener GO', 'Union Station GO'];
     if (!supportedTrips.includes(orgStation)) {
-      throw new BadRequestException('Orgigin station not supported');
+      throw new BadRequestException('Origin station not supported');
     }
     if (!supportedTrips.includes(destStation)) {
       throw new BadRequestException('Destination station not supported');
