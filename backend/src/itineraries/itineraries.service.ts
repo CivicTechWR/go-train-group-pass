@@ -121,7 +121,7 @@ export class ItinerariesService {
     itineraryTravelInfo.groupsFormed = true;
 
     if (travelGroup.steward.id === userId) {
-      itineraryTravelInfo.members = travelGroup.members.map((user) => ({
+      itineraryTravelInfo.members = travelGroup.members().map((user) => ({
         name: user.name,
         email: user.email,
         phoneNumber: user.phoneNumber,

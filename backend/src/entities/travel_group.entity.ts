@@ -54,8 +54,8 @@ export class TravelGroup extends BaseEntity {
   @OneToMany(() => TravelGroupStatusLog, (log) => log.travelGroup)
   statusLogs = new Collection<TravelGroupStatusLog>(this);
 
-  @Property({ persist: false })
-  get members(): User[] {
+  @Property({name: 'members', persist: false})
+  members(): User[] {
     return this.tripBookings.getItems().map((booking) => booking.user);
   }
 }
