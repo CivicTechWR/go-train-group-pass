@@ -8,7 +8,7 @@ import { ItineraryTravelInfoSchema, ItineraryTravelInfo } from '@/lib/types';
 import ItineraryCard from '../ItineraryCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, User, ShieldCheck, Mail, Phone } from 'lucide-react';
+import { ArrowLeft, User, ShieldCheck, Mail, Phone, Plus } from 'lucide-react';
 
 export default function ItineraryDetailsPage() {
     const params = useParams();
@@ -71,8 +71,6 @@ export default function ItineraryDetailsPage() {
             <Button variant="ghost" className="mb-6" onClick={() => router.back()}>
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
             </Button>
-
-            <h1 className="text-3xl font-bold mb-8">Itinerary Details</h1>
 
             <div className="mb-8">
                 <ItineraryCard tripDetails={data.tripDetails} userCount={data.members?.length || (data.groupsFormed ? 2 : 1)} />

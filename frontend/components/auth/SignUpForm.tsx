@@ -22,6 +22,7 @@ import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Controller, useForm } from 'react-hook-form';
+import { parsePhoneNumber, isValidPhoneNumber } from 'libphonenumber-js';
 
 export function SignUpForm() {
   const { signUp } = useAuth();
@@ -46,14 +47,33 @@ export function SignUpForm() {
 
   const onSubmit = async (data: SignUpInput) => {
     try {
-      // Build data object (only include optional fields that have values)
+      // Transform phone number to E.164 format before submission
       const submitData: SignUpInput = {
         email: data.email,
         password: data.password,
         fullName: data.fullName,
       };
-      if (data.phoneNumber) {
-        submitData.phoneNumber = data.phoneNumber;
+
+      // Convert phone number to E.164 format if provided
+      if (data.phoneNumber && data.phoneNumber.trim() !== '') {
+        try {
+          // Try to parse with North American default (US/Canada)
+          const phoneNumber = parsePhoneNumber(data.phoneNumber, 'US');
+          submitData.phoneNumber = phoneNumber.format('E.164');
+        } catch (error) {
+          // If parsing with default country fails, try without (assumes international format)
+          try {
+            const phoneNumber = parsePhoneNumber(data.phoneNumber);
+            submitData.phoneNumber = phoneNumber.format('E.164');
+          } catch {
+            // If both fail, set error and don't submit
+            setError('phoneNumber', {
+              type: 'manual',
+              message: 'Invalid phone number format. Please enter a valid phone number.',
+            });
+            return;
+          }
+        }
       }
 
       await signUp(submitData);
@@ -181,7 +201,7 @@ export function SignUpForm() {
                         field.onChange(value === '' ? undefined : value);
                       }}
                       aria-invalid={fieldState.invalid}
-                      placeholder='+1234567890'
+                      placeholder='+1 234 567 8900 or 234-567-8900'
                     />
                     <FieldError
                       errors={
@@ -192,7 +212,7 @@ export function SignUpForm() {
                       }
                     />
                     <p className='mt-1 text-xs text-gray-600 dark:text-gray-400'>
-                      Format: +1234567890 (E.164)
+                      Enter with country code (e.g., +1 for US/Canada) or local format
                     </p>
                   </Field>
                 )}

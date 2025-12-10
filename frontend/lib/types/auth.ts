@@ -8,10 +8,18 @@ import {
 } from '@go-train-group-pass/shared/schemas';
 
 /**
- * Schema for sign up request
- * Matches backend SignUpDtoSchema
+ * Schema for sign up request - Frontend version (relaxed phone validation)
+ * The phone number will be transformed to E.164 format before submission
  */
-export const SignUpSchema = SignUpInputSchema;
+export const SignUpSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .max(72, 'Password must not exceed 72 characters'),
+  fullName: z.string().min(1, 'Full name must not be empty'),
+  phoneNumber: z.string().optional(),
+});
 
 export type SignUpInput = z.infer<typeof SignUpSchema>;
 
@@ -66,4 +74,3 @@ export type PasswordUpdateFormInput = z.infer<typeof PasswordUpdateFormSchema>;
 export const RefreshTokenSchema = SharedRefreshTokenSchema;
 
 export type RefreshTokenInput = z.infer<typeof RefreshTokenSchema>;
-
