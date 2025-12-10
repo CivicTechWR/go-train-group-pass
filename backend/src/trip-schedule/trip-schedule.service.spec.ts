@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { TripScheduleService } from './trip-schedule.service';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
-import { TripSchedule } from '../entities/trip_schedule_entity';
 import { BadRequestException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { TripSchedule } from '../entities/trip_schedule_entity';
+import { TripScheduleService } from './trip-schedule.service';
 
 describe('TripScheduleService', () => {
   let service: TripScheduleService;

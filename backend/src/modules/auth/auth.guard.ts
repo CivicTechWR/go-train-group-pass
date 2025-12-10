@@ -1,14 +1,14 @@
 import {
-  Injectable,
   CanActivate,
   ExecutionContext,
+  Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import { FastifyRequest } from 'fastify';
-import { SupabaseService } from './supabase.service';
 import { UsersService } from '../../users/users.service';
+import { SupabaseService } from './supabase.service';
 
-interface RequestWithUser extends FastifyRequest {
+export interface RequestWithUser extends FastifyRequest {
   user?: ReturnType<UsersService['formatUserResponse']>;
 }
 
