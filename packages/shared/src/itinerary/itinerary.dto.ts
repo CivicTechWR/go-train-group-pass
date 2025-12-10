@@ -6,5 +6,5 @@ export class CreateItineraryDto extends createZodDto(CreateItinerarySchema) { }
 export class ItineraryQueryParamsDto extends createZodDto(ItineraryQueryParamsSchema) { }
 export class ItineraryResponseDto extends createZodDto(ItineraryResponseSchema) { }
 export class ItineraryTravelInfoDto extends createZodDto(ItineraryTravelInfoSchema) { }
-export class ExistingItinerariesDto extends createZodDto(ExistingItinerariesSchema) { }
-export class ExistingItineraryDto extends createZodDto(ExistingItinerarySchema) { }
+export class ExistingItinerariesDto extends createZodDto(ExistingItinerariesSchema) {}
+export class ExistingItineraryDto extends createZodDto(ExistingItinerarySchema) {}

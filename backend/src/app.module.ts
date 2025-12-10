@@ -1,20 +1,20 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { AppConfigModule } from './modules/config.module';
-import { OrmModule } from './modules/orm.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { GtfsModule } from './gtfs/gtfs.module';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ResponseSerializeInterceptor } from './common/interceptors/response.interceptor';
+import { GtfsModule } from './gtfs/gtfs.module';
 import { ItinerariesModule } from './itineraries/itineraries.module';
-import { TripModule } from './trip/trip.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { AppConfigModule } from './modules/config.module';
+import { OrmModule } from './modules/orm.module';
+import { ItinerarySubscriber } from './subscribers/itinerary.subscriber';
 import { TripBookingModule } from './trip-booking/trip-booking.module';
 import { TripScheduleModule } from './trip-schedule/trip-schedule.module';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import { ItinerarySubscriber } from './subscribers/itinerary.subscriber';
 import { GroupFormationModule } from './group-formation';
+import { TripModule } from './trip/trip.module';
 
 @Module({
   imports: [

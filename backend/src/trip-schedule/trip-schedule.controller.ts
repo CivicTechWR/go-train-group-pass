@@ -5,13 +5,13 @@ import {
 } from '@go-train-group-pass/shared';
 import { Controller, Get, Query } from '@nestjs/common';
 import {
-  ApiOperation,
   ApiOkResponse,
-  ApiTags,
+  ApiOperation,
   ApiQuery,
+  ApiTags,
 } from '@nestjs/swagger';
-import { TripScheduleService } from './trip-schedule.service';
 import { Serialize } from 'src/common/decorators/serialize.decorator';
+import { TripScheduleService } from './trip-schedule.service';
 
 @Controller('trip-schedule')
 @ApiTags('Trip Schedule')
