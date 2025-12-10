@@ -6,6 +6,7 @@ import {
   CreateItineraryDto,
   ItineraryTravelInfoDto,
   ExistingItinerariesDto,
+  QuickViewItinerariesDto,
 } from '@go-train-group-pass/shared';
 import { ItineraryStatus } from '../entities/itineraryStatusEnum';
 import { TripBookingService } from '../trip-booking/trip-booking.service';
@@ -13,6 +14,7 @@ import { UsersService } from '../users/users.service';
 import { ItineraryCreationResponseDto } from '@go-train-group-pass/shared';
 import { TravelGroup } from 'src/entities';
 import { AggregatedItinerary } from 'src/entities';
+import { type TravelGroupMemberDto } from '@go-train-group-pass/shared';
 
 @Injectable()
 export class ItinerariesService {
@@ -65,6 +67,7 @@ export class ItinerariesService {
       tripBookings,
       wantsToSteward: createItineraryDto.wantsToSteward,
       status: ItineraryStatus.DRAFT,
+      tripHash: undefined,
     });
 
     // With @Transactional, explicit persist here will be flushed automatically at the end of the method
@@ -137,5 +140,78 @@ export class ItinerariesService {
       userCount: aggregatedItinerary.userCount,
       tripDetails: aggregatedItinerary.tripDetails,
     }));
+  }
+
+  async getQuickViewItineraries(
+    userId: string,
+  ): Promise<QuickViewItinerariesDto> {
+    const aggregatedItineraries = await this.aggregatedItineraryRepo.findAll();
+
+    if (aggregatedItineraries.length === 0) {
+      return [];
+    }
+
+    const aggregatedTripHashes = aggregatedItineraries.map(
+      (aggregatedItinerary) => aggregatedItinerary.id,
+    );
+
+    const userItineraries = await this.itineraryRepo.find({
+      user: { id: userId },
+      tripHash: { $in: aggregatedTripHashes },
+    });
+    const joinedTripHashes = new Set(
+      userItineraries.map((itinerary) => itinerary.tripHash).filter(Boolean),
+    );
+
+    const allTripIds = aggregatedItineraries.flatMap((aggregatedItinerary) =>
+      aggregatedItinerary.tripDetails.map((tripDetail) => tripDetail.tripId),
+    );
+
+    const travelGroups = await this.travelGroupRepo.find(
+      { trip: { id: { $in: allTripIds } } },
+      { populate: ['tripBookings.user', 'steward', 'trip'] },
+    );
+
+    const travelGroupsByTripId = new Map<string, TravelGroup[]>();
+    for (const group of travelGroups) {
+      const groupsForTrip = travelGroupsByTripId.get(group.trip.id) || [];
+      groupsForTrip.push(group);
+      travelGroupsByTripId.set(group.trip.id, groupsForTrip);
+    }
+
+    return aggregatedItineraries.map((aggregatedItinerary) => {
+      const tripIds = aggregatedItinerary.tripDetails.map(
+        (tripDetail) => tripDetail.tripId,
+      );
+      const groupsForItinerary = tripIds.flatMap(
+        (tripId) => travelGroupsByTripId.get(tripId) || [],
+      );
+
+      const stewardGroups = groupsForItinerary.filter(
+        (group) => group.steward?.id === userId,
+      );
+
+      const groupMembersMap = new Map<string, TravelGroupMemberDto>();
+
+      stewardGroups.forEach((group) => {
+        group.members().forEach((member) => {
+          if (!groupMembersMap.has(member.id)) {
+            groupMembersMap.set(member.id, {
+              name: member.name,
+              email: member.email,
+              phoneNumber: member.phoneNumber,
+            });
+          }
+        });
+      });
+
+      return {
+        id: aggregatedItinerary.id,
+        userCount: aggregatedItinerary.userCount,
+        groupMembers: Array.from(groupMembersMap.values()),
+        joined: joinedTripHashes.has(aggregatedItinerary.id),
+        groupFormed: groupsForItinerary.length > 0,
+      };
+    });
   }
 }

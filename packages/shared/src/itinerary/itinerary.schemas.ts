@@ -1,6 +1,9 @@
-import z from "zod";
-import { TripDetailsSchema } from "../trip/trip.schemas";
-import { StewardSchema, TravelGroupMemberSchema } from "../travel-group/travel-group.schemas";
+import z from 'zod';
+import { TripDetailsSchema } from '../trip/trip.schemas';
+import {
+  StewardSchema,
+  TravelGroupMemberSchema,
+} from '../travel-group/travel-group.schemas';
 
 export const ItineraryResponseSchema = z.object({
   id: z.string(),
@@ -36,3 +39,12 @@ export const ExistingItinerarySchema = z.object({
 });
 
 export const ExistingItinerariesSchema = z.array(ExistingItinerarySchema);
+
+export const QuickViewItinerarySchema = z.object({
+  id: z.string(),
+  userCount: z.number(),
+  groupMembers: z.array(TravelGroupMemberSchema),
+  joined: z.boolean(),
+  groupFormed: z.boolean(),
+});
+export const QuickViewItinerariesSchema = z.array(QuickViewItinerarySchema);
