@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 // Public routes that don't require authentication
-const publicRoutes = ['/', '/signin', '/signup', '/forgot-password'];
+const publicRoutes = ['/', '/signin', '/signup', '/forgot-password', '/itineraries'];
 
 async function validateToken(token: string): Promise<boolean> {
   try {

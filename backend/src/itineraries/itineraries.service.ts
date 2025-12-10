@@ -153,7 +153,7 @@ export class ItinerariesService {
   }
 
   async getQuickViewItineraries(
-    userId: string,
+    userId?: string,
   ): Promise<QuickViewItinerariesDto> {
     const aggregatedItineraries = await this.aggregatedItineraryRepo.findAll();
 
@@ -161,6 +161,17 @@ export class ItinerariesService {
       return {
         joinedItineraries: [],
         itinerariesToJoin: [],
+      };
+    }
+
+    if (!userId) {
+      return {
+        joinedItineraries: [],
+        itinerariesToJoin: aggregatedItineraries.map((aggregatedItinerary) => ({
+          userCount: aggregatedItinerary.userCount,
+          tripDetails: aggregatedItinerary.tripDetails,
+          tripSequence: aggregatedItinerary.tripSequence,
+        })),
       };
     }
 
@@ -290,7 +301,7 @@ export class ItinerariesService {
         trip.gtfsTrip.id,
         trip.originStopTime.id,
         trip.destinationStopTime.id,
-        tripIdSequenceMap[trip.gtfsTrip.id],
+        tripIdSequenceMap[trip.id],
       );
       tripBookings.push(tripBooking);
     }

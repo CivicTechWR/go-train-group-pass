@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { apiGet } from '@/lib/api';
+import { apiGet, apiPost } from '@/lib/api';
 import { ItineraryTravelInfoSchema, ItineraryTravelInfo } from '@/lib/types';
 
 import ItineraryCard from '../ItineraryCard';
@@ -16,6 +16,24 @@ export default function ItineraryDetailsPage() {
     const [data, setData] = useState<ItineraryTravelInfo | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isSimulating, setIsSimulating] = useState(false);
+
+    const handleSimulateFormation = async () => {
+        if (!params.id) return;
+        try {
+            setIsSimulating(true);
+            await apiPost('/group-formation', { itineraryId: params.id });
+            // Refresh data
+            const result = await apiGet<ItineraryTravelInfo>(`/itineraries?id=${params.id}`);
+            const parsed = ItineraryTravelInfoSchema.parse(result);
+            setData(parsed);
+        } catch (err) {
+            console.error('Failed to simulate group formation:', err);
+            // Optional: show error toast or message
+        } finally {
+            setIsSimulating(false);
+        }
+    };
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -38,7 +56,7 @@ export default function ItineraryDetailsPage() {
     if (isLoading) return <div className="p-8 text-center text-muted-foreground">Loading details...</div>;
     if (error || !data) return (
         <div className="container mx-auto px-4 py-8">
-            <Button variant="ghost" className="mb-6 pl-0 hover:pl-2 transition-all" onClick={() => router.back()}>
+            <Button variant="ghost" className="mb-6" onClick={() => router.back()}>
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
             </Button>
             <div className="p-8 text-center text-destructive">{error || 'Itinerary not found'}</div>
@@ -49,7 +67,7 @@ export default function ItineraryDetailsPage() {
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-4xl">
-            <Button variant="ghost" className="mb-6 pl-0 hover:pl-2 transition-all" onClick={() => router.back()}>
+            <Button variant="ghost" className="mb-6" onClick={() => router.back()}>
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
             </Button>
 
@@ -164,6 +182,28 @@ export default function ItineraryDetailsPage() {
                                     </div>
                                 ))}
                             </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Simulation Card */}
+                {!data.groupsFormed && (
+                    <Card className="border-dashed border-2">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-lg font-medium">Simulation</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex items-center justify-between gap-4 py-3">
+                            <p className="text-sm text-muted-foreground">
+                                In reality we will form group a specified time prior to train arrival.
+                            </p>
+                            <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={handleSimulateFormation}
+                                disabled={isSimulating}
+                            >
+                                {isSimulating ? 'Simulating...' : 'Simulate Group Formation'}
+                            </Button>
                         </CardContent>
                     </Card>
                 )}

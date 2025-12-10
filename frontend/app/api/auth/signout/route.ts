@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,
       },
+      body: '{}',
     });
 
     const data = await response.json();

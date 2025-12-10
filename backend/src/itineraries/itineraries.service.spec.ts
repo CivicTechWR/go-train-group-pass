@@ -4,6 +4,7 @@ import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { EntityManager } from '@mikro-orm/core';
 import { Itinerary } from '../entities/itinerary.entity';
 import { TripBooking } from '../entities/trip_booking.entity';
+import { Trip } from '../entities/trip.entity';
 import { User } from '../entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { TripBookingService } from '../trip-booking/trip-booking.service';
@@ -20,12 +21,12 @@ vi.mock('@mikro-orm/core', async () => {
     ...actual,
     Transactional:
       () =>
-      <T>(
-        target: object,
-        propertyKey: string | symbol,
-        descriptor: TypedPropertyDescriptor<T>,
-      ) =>
-        descriptor,
+        <T>(
+          target: object,
+          propertyKey: string | symbol,
+          descriptor: TypedPropertyDescriptor<T>,
+        ) =>
+          descriptor,
   };
 });
 
@@ -86,6 +87,7 @@ describe('ItinerariesService', () => {
           provide: getRepositoryToken(AggregatedItinerary),
           useValue: mockRepository,
         },
+        { provide: getRepositoryToken(Trip), useValue: mockRepository },
         { provide: UsersService, useValue: mockUsersService },
         { provide: TripBookingService, useValue: mockTripBookingService },
         { provide: EntityManager, useValue: mockEm },

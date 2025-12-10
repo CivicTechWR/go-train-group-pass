@@ -81,8 +81,9 @@ export class TripBookingService {
       arrivalTime: tripBooking.trip.arrivalTime,
       routeShortName: tripBooking.trip.routeShortName,
       tripId: tripBooking.trip.id,
-      sequence: tripBooking.sequence,
+      sequence: tripBooking.sequence ?? undefined,
       bookingId: tripBooking.id,
+      isCheckedIn: tripBooking.status === TripBookingStatus.CHECKED_IN,
     };
   }
 }

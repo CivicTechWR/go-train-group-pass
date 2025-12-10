@@ -45,7 +45,7 @@ export function SignInForm() {
   const onSubmit = async (data: SignInInput) => {
     try {
       await signIn(data);
-      router.push('/profile');
+      router.push('/itineraries');
     } catch (error) {
       setError('root', {
         type: 'manual',
@@ -87,7 +87,7 @@ export function SignInForm() {
                     <FieldError
                       errors={
                         fieldState.error &&
-                        (fieldState.isTouched || isSubmitted)
+                          (fieldState.isTouched || isSubmitted)
                           ? [fieldState.error]
                           : undefined
                       }
@@ -111,7 +111,7 @@ export function SignInForm() {
                     <FieldError
                       errors={
                         fieldState.error &&
-                        (fieldState.isTouched || isSubmitted)
+                          (fieldState.isTouched || isSubmitted)
                           ? [fieldState.error]
                           : undefined
                       }

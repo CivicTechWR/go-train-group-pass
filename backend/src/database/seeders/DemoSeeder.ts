@@ -12,6 +12,7 @@ import {
 import { ItineraryStatus } from '../../entities/itineraryStatusEnum';
 import { TripBookingStatus } from '../../entities/tripBookingEnum';
 import { faker } from '@faker-js/faker';
+import { createDateInTransitTimezone, createDateTimeInTransitTimezone } from '../../utils/date.utils';
 
 export class DemoSeeder extends Seeder {
   private generatedPhoneNumbers = new Set<string>();
@@ -21,7 +22,8 @@ export class DemoSeeder extends Seeder {
 
     // --- 1. Fixed Demo User (Jessica Liu) for Dec 11 ---
     console.log('--- Setting up Fixed Demo User (Dec 11) ---');
-    const demoDate = new Date('2025-12-11');
+    const dateString = '2025-12-11';
+    const demoDate = createDateInTransitTimezone(dateString);
     const demoServiceId = '20251211';
 
     const outboundTrip = await this.findTrip(
@@ -73,48 +75,68 @@ export class DemoSeeder extends Seeder {
 
     // --- 2. Random Itineraries for Dec 11 - Dec 18 ---
     console.log('--- Generating Random Itineraries (Dec 11 - Dec 18) ---');
-    const startDate = new Date('2025-12-11');
-    const endDate = new Date('2025-12-18');
 
-    // Iterate through dates properly
-    for (
-      let d = new Date(startDate);
-      d <= endDate;
-      d.setDate(d.getDate() + 1)
-    ) {
+    // We can use simple loop over days offset
+    const startDateStr = '2025-12-11';
+    const endDateStr = '2025-12-18';
+    const start = createDateInTransitTimezone(startDateStr);
+    const end = createDateInTransitTimezone(endDateStr);
+
+    // Calculate number of days
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    for (let i = 0; i <= diffDays; i++) {
+      // compute date by adding days to milliseconds to avoid local timezone mess with setDate
+      const d = new Date(start.getTime() + i * 24 * 60 * 60 * 1000);
+
       const dateStr = d.toISOString().split('T')[0];
       const serviceId = dateStr.replace(/-/g, '');
-      const currentDate = new Date(d); // Copy
 
-      const numItineraries = faker.number.int({ min: 1, max: 20 });
+      // Select 3 popular trip pairs for this day to enable high clustering (80% chance)
+      const popularTripPairs: { outbound: any; return: any }[] = [];
+      for (let k = 0; k < 3; k++) {
+        const trip = await this.findRandomTripPair(
+          em,
+          serviceId,
+          'Kitchener',
+          'Kitchener GO',
+          'Union Station GO',
+        );
+        if (trip) popularTripPairs.push(trip);
+      }
+
+      const numItineraries = faker.number.int({ min: 9, max: 20 });
       console.log(
         `Generating ${numItineraries} itineraries for ${dateStr} (ServiceId: ${serviceId})...`,
       );
 
-      // We pre-fetch valid trips for the day to avoid hitting DB too hard inside the loop if possible,
-      // but for variety we might want to query. findRandomTripPair does queries.
-      // Given the scale (20 loops), it's fine.
-
-      for (let i = 0; i < numItineraries; i++) {
+      for (let j = 0; j < numItineraries; j++) {
         try {
-          // Find a random valid trip pair for this day
-          const randomTripPair = await this.findRandomTripPair(
-            em,
-            serviceId,
-            'Kitchener',
-            'Kitchener GO',
-            'Union Station GO',
-          );
+          // 80% chance to pick a popular trip, 20% chance for random
+          let randomTripPair;
+          const usePopular = faker.datatype.boolean(0.8);
+
+          if (usePopular && popularTripPairs.length > 0) {
+            randomTripPair = faker.helpers.arrayElement(popularTripPairs);
+          } else {
+            randomTripPair = await this.findRandomTripPair(
+              em,
+              serviceId,
+              'Kitchener',
+              'Kitchener GO',
+              'Union Station GO',
+            );
+          }
 
           if (!randomTripPair) {
-            // console.warn(`Could not find a valid random trip pair for ${dateStr}, skipping itinerary ${i+1}`);
             continue;
           }
 
           const tripEntities = await this.ensureTripsExist(
             em,
             [randomTripPair.outbound, randomTripPair.return],
-            currentDate,
+            d,
           );
 
           const user = em.create(User, {
@@ -161,6 +183,10 @@ export class DemoSeeder extends Seeder {
       });
 
       if (!trip) {
+        // USE UTILS TO SET CORRECT TIMESTAMP
+        const departureTime = createDateTimeInTransitTimezone(date, originStopTime.departureTime);
+        const arrivalTime = createDateTimeInTransitTimezone(date, destinationStopTime.arrivalTime);
+
         trip = em.create(Trip, {
           gtfsTrip,
           originStopTime,
@@ -170,14 +196,8 @@ export class DemoSeeder extends Seeder {
           destinationStopName: destinationStopTime.stop.stopName,
           routeShortName: gtfsTrip.route.routeShortName,
           routeLongName: gtfsTrip.route.routeLongName,
-          departureTime: this.combineDateAndTime(
-            date,
-            originStopTime.departureTime,
-          ),
-          arrivalTime: this.combineDateAndTime(
-            date,
-            destinationStopTime.arrivalTime,
-          ),
+          departureTime,
+          arrivalTime,
         });
         em.persist(trip);
       }
@@ -413,13 +433,6 @@ export class DemoSeeder extends Seeder {
 
     em.persist(itinerary);
     em.persist(tripBookings);
-  }
-
-  private combineDateAndTime(date: Date, timeStr: string): Date {
-    const [hours, minutes, seconds] = timeStr.split(':').map(Number);
-    const newDate = new Date(date);
-    newDate.setHours(hours, minutes, seconds || 0);
-    return newDate;
   }
 
   private generateUniquePhoneNumber(): string {

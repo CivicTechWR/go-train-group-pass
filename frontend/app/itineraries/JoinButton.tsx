@@ -1,7 +1,9 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
 import { apiPost } from '@/lib/api';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 interface JoinButtonProps {
@@ -11,8 +13,15 @@ interface JoinButtonProps {
 
 export default function JoinButton({ tripSequence, stewardType }: JoinButtonProps) {
     const [isLoading, setIsLoading] = useState(false);
+    const { user } = useAuth();
+    const router = useRouter();
 
     const handleJoin = async () => {
+        if (!user) {
+            router.push('/signin');
+            return;
+        }
+
         setIsLoading(true);
         try {
             // Based on analysis, we are using tripSequence to join/create similar itinerary

@@ -2,7 +2,7 @@
 
 import { apiGet } from '@/lib/api';
 import { QuickViewItineraries, QuickViewItinerariesSchema } from '@/lib/types';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import ItineraryCard from './ItineraryCard';
 import JoinButton from './JoinButton';
 import Link from 'next/link';
@@ -78,12 +78,28 @@ export default function ItinerariesPage() {
     .filter(it => selectedDate && isSameDay(it.tripDetails[0].departureTime, selectedDate))
     .sort((a, b) => a.tripDetails[0].departureTime.getTime() - b.tripDetails[0].departureTime.getTime()) || [];
 
+  const buttonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+
+  useEffect(() => {
+    if (selectedDate && buttonRefs.current[selectedDate.toISOString()]) {
+      buttonRefs.current[selectedDate.toISOString()]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center'
+      });
+    }
+  }, [selectedDate]);
+
   return (
     <div className='container mx-auto px-4 md:px-6 py-4 md:py-8 relative'>
       <div className='mb-6 md:mb-8 text-center'>
-        <h1 className='text-3xl md:text-4xl font-bold mb-2'>Existing Itineraries</h1>
-        <p className='text-muted-foreground'>
-          View itineraries and see who else is interested in the same journey
+        <h1 className='text-3xl md:text-4xl font-bold mb-2'>Find Your Travel Group</h1>
+        <p className='text-muted-foreground max-w-2xl mx-auto'>
+          Find others to share a group pass with. We handle grouping and assigning stewards.
+          <br />
+          Currently supporting Kitchener (KI) ↔ Union round trips.
+          <br />
+          Coming soon: Payment tracking, ticket uploads, and more!
         </p>
       </div>
 
@@ -105,7 +121,7 @@ export default function ItinerariesPage() {
       ) : (
         <>
           {/* Date Tabs */}
-          <div className="flex overflow-x-auto pb-4 mb-6 gap-2 no-scrollbar justify-center md:justify-start">
+          <div className="flex overflow-x-auto pb-4 mb-6 gap-2 no-scrollbar md:justify-center">
             {availableDates.map((date) => {
               const isSelected = selectedDate && isSameDay(date, selectedDate);
               // Formatting: "Today, Dec 10" or "Fri, Dec 12"
@@ -122,6 +138,9 @@ export default function ItinerariesPage() {
               return (
                 <button
                   key={date.toISOString()}
+                  ref={(el) => {
+                    if (el) buttonRefs.current[date.toISOString()] = el;
+                  }}
                   onClick={() => handleDateSelect(date)}
                   className={cn(
                     "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
@@ -139,7 +158,7 @@ export default function ItinerariesPage() {
           <div className='space-y-12 mb-20'>
             {filteredJoinedItineraries.length > 0 && (
               <section>
-                <h2 className='text-2xl font-bold mb-4 md:mb-6 text-center md:text-left'>My Itineraries</h2>
+                <h2 className='text-2xl font-bold mb-4 md:mb-6 text-center'>My Itineraries</h2>
                 <div className='space-y-4 md:space-y-6'>
                   {filteredJoinedItineraries.map((itinerary) => (
                     <Link href={`/itineraries/${itinerary.itineraryId}`} key={itinerary.itineraryId} className="block transition-transform hover:scale-[1.01]">
@@ -155,7 +174,7 @@ export default function ItinerariesPage() {
 
             {filteredItinerariesToJoin.length > 0 && (
               <section>
-                <h2 className='text-2xl font-bold mb-4 md:mb-6 text-center md:text-left'>Other Itineraries</h2>
+                <h2 className='text-2xl font-bold mb-4 md:mb-6 text-center'>Other Itineraries</h2>
                 <div className='space-y-4 md:space-y-6'>
                   {filteredItinerariesToJoin.map((itinerary, index) => (
                     <ItineraryCard

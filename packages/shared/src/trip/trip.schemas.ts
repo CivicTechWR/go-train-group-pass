@@ -9,4 +9,5 @@ export const TripDetailsSchema = z.object({
     arrivalTime: z.coerce.date(),
     sequence: z.number().optional(),
     bookingId: z.string().optional(),
+    isCheckedIn: z.boolean().optional(),
 });

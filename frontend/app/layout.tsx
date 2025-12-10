@@ -27,14 +27,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en' className='dark' style={{ colorScheme: 'dark' }}>
+    <html lang='en' suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
       >
         <ThemeProvider
           attribute='class'
-          defaultTheme='dark'
-          enableSystem={false}
+          defaultTheme='system'
+          enableSystem
         >
           <AuthProvider>
             <Navbar />

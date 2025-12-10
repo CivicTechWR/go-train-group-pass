@@ -10,19 +10,17 @@ export async function GET(request: NextRequest) {
     try {
         const accessToken = request.cookies.get('access_token')?.value;
 
-        if (!accessToken) {
-            return NextResponse.json(
-                { message: 'Authorization required. Please sign in.' },
-                { status: 401 }
-            );
+        const headers: HeadersInit = {
+            'Content-Type': 'application/json',
+        };
+
+        if (accessToken) {
+            headers['Authorization'] = `Bearer ${accessToken}`;
         }
 
         const response = await fetch(`${BACKEND_URL}/itineraries/quick-view`, {
             method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${accessToken}`,
-            },
+            headers,
         });
 
         const responseData = await response.json();

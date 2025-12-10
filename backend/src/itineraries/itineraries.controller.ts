@@ -24,12 +24,13 @@ import {
   QuickViewItinerariesDto,
   QuickViewItinerariesSchema,
 } from '@go-train-group-pass/shared';
+import { Public } from '../common/decorators/public.decorator';
 
 @Controller('itineraries')
 @UseGuards(AuthGuard)
 @ApiTags('Itineraries')
 export class ItinerariesController {
-  constructor(private readonly itinerariesService: ItinerariesService) {}
+  constructor(private readonly itinerariesService: ItinerariesService) { }
 
   @Post()
   @ApiOperation({ summary: 'Create an itinerary' })
@@ -65,16 +66,14 @@ export class ItinerariesController {
   }
 
   @Get('quick-view')
+  @Public()
   @ApiOperation({ summary: 'Get quick view of all active itineraries' })
   @ApiOkResponse({ description: 'Quick view of active itineraries' })
   @Serialize(QuickViewItinerariesSchema)
   async getQuickViewItineraries(
     @Request() req: RequestWithUser,
   ): Promise<QuickViewItinerariesDto> {
-    if (!req.user) {
-      throw new UnauthorizedException('User not found');
-    }
-    return this.itinerariesService.getQuickViewItineraries(req.user.id);
+    return this.itinerariesService.getQuickViewItineraries(req.user?.id);
   }
 
   @Get('existing')
