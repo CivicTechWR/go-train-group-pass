@@ -7,7 +7,7 @@ import eslintNestJs from "@darraghor/eslint-plugin-nestjs-typed";
 
 export default tseslint.config(
   {
-    ignores: ['eslint.config.mjs', 'src/types/supabase.ts', 'src/database/migrations/**'],
+    ignores: ['eslint.config.mjs', 'src/types/supabase.ts', 'src/database/migrations/**', 'src/database/seeders/**'], 
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
