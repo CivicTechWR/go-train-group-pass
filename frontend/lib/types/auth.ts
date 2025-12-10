@@ -1,21 +1,17 @@
 import { z } from 'zod';
+import {
+  SignUpInputSchema,
+  SignInInputSchema,
+  PasswordResetInputSchema,
+  PasswordUpdateInputSchema,
+  RefreshTokenSchema as SharedRefreshTokenSchema,
+} from '@go-train-group-pass/shared/schemas';
 
 /**
  * Schema for sign up request
  * Matches backend SignUpDtoSchema
  */
-export const SignUpSchema = z.object({
-  email: z.email('Invalid email address'),
-  password: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(72, 'Password must not exceed 72 characters'),
-  fullName: z.string().min(1, 'Full name must not be empty'),
-  phoneNumber: z
-    .string()
-    .regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format (E.164)')
-    .optional(),
-});
+export const SignUpSchema = SignUpInputSchema;
 
 export type SignUpInput = z.infer<typeof SignUpSchema>;
 
@@ -23,10 +19,7 @@ export type SignUpInput = z.infer<typeof SignUpSchema>;
  * Schema for sign in request
  * Matches backend SignInDtoSchema
  */
-export const SignInSchema = z.object({
-  email: z.email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
-});
+export const SignInSchema = SignInInputSchema;
 
 export type SignInInput = z.infer<typeof SignInSchema>;
 
@@ -34,9 +27,7 @@ export type SignInInput = z.infer<typeof SignInSchema>;
  * Schema for password reset request
  * Matches backend PasswordResetRequestSchema
  */
-export const PasswordResetRequestSchema = z.object({
-  email: z.email('Invalid email address'),
-});
+export const PasswordResetRequestSchema = PasswordResetInputSchema;
 
 export type PasswordResetRequestInput = z.infer<
   typeof PasswordResetRequestSchema
@@ -46,12 +37,7 @@ export type PasswordResetRequestInput = z.infer<
  * Schema for password update request
  * Matches backend PasswordUpdateSchema
  */
-export const PasswordUpdateSchema = z.object({
-  newPassword: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(72, 'Password must not exceed 72 characters'),
-});
+export const PasswordUpdateSchema = PasswordUpdateInputSchema;
 
 export type PasswordUpdateInput = z.infer<typeof PasswordUpdateSchema>;
 
@@ -77,9 +63,7 @@ export type PasswordUpdateFormInput = z.infer<typeof PasswordUpdateFormSchema>;
  * Schema for refresh token request
  * Matches backend RefreshTokenSchema
  */
-export const RefreshTokenSchema = z.object({
-  refreshToken: z.string().min(1, 'Refresh token is required'),
-});
+export const RefreshTokenSchema = SharedRefreshTokenSchema;
 
 export type RefreshTokenInput = z.infer<typeof RefreshTokenSchema>;
 

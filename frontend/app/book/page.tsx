@@ -38,7 +38,7 @@ export default function BookPage() {
             data.selectedReturn.tripCreationMetaData.arrivalStopTimeId,
         },
       ],
-      wantsToSteward: data.wantsToSteward,
+      wantsToSteward: data.wantsToSteward ?? false,
     };
   };
 

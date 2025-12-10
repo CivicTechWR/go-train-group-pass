@@ -12,7 +12,7 @@ export const SignUpInputSchema = z.object({
     .min(8, 'Password must be at least 8 characters')
     .max(72, 'Password must not exceed 72 characters'),
   fullName: z.string().min(1, 'Full name must not be empty'),
-  phoneNumber: z.e164(),
+  phoneNumber: z.e164().optional(),
 });
 
 export const SignInInputSchema = z.object({

@@ -1,30 +1,21 @@
 import { z } from 'zod';
+import {
+  TripScheduleDetailsSchema as SharedTripScheduleDetailsSchema,
+  RoundTripSchema as SharedRoundTripSchema,
+} from '@go-train-group-pass/shared/schemas';
 
 /**
  * Trip schedule details schema matching the shared package
  * This will be imported from @go-train-group-pass/shared once the package is linked
  */
-export const TripScheduleDetailsSchema = z.object({
-  orgStation: z.string(),
-  destStation: z.string(),
-  departureTime: z.date(),
-  arrivalTime: z.date(),
-  tripCreationMetaData: z.object({
-    tripId: z.string(),
-    arrivalStopTimeId: z.string(),
-    departureStopTimeId: z.string(),
-  }),
-});
+export const TripScheduleDetailsSchema = SharedTripScheduleDetailsSchema;
 
 export type TripScheduleDetails = z.infer<typeof TripScheduleDetailsSchema>;
 
 /**
  * Schema for round trip response from API
  */
-export const RoundTripSchema = z.object({
-  departureTrips: z.array(TripScheduleDetailsSchema),
-  returnTrips: z.array(TripScheduleDetailsSchema),
-});
+export const RoundTripSchema = SharedRoundTripSchema;
 
 export type RoundTripResponse = z.infer<typeof RoundTripSchema>;
 
@@ -38,7 +29,7 @@ export const RoundTripFormSchema = z
     destStation: z.string().optional(),
     selectedDeparture: TripScheduleDetailsSchema.nullable(),
     selectedReturn: TripScheduleDetailsSchema.nullable(),
-    wantsToSteward: z.boolean().default(false),
+    wantsToSteward: z.boolean().optional(),
   })
   .refine(data => data.date !== undefined, {
     message: 'Please select a travel date',

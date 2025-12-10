@@ -108,6 +108,7 @@ export class ItinerariesService {
         this.tripBookingService.getTripDetails(booking),
       ),
       groupsFormed: false,
+      tripBookingIds: tripBookings.map((booking) => booking.id),
     };
     const travelGroup = await this.travelGroupRepo.findOne(
       {
@@ -135,7 +136,7 @@ export class ItinerariesService {
       }));
     }
 
-    return itineraryTravelInfo;
+    return {...itineraryTravelInfo, groupsFormed: true};
   }
   // demo only
   async getExistingItineraries(): Promise<ExistingItinerariesDto> {
@@ -215,9 +216,18 @@ export class ItinerariesService {
             }
           });
         });
-
+        // definitely a better way to do this
+        const itineraryId = userItineraries.find(
+          (itinerary) => itinerary.tripHash === aggregatedItinerary.id,
+        )?.id;
+        if (!itineraryId) {
+          // this should be impossible
+          throw new Error('Could not find itinerary id');
+        }
         userQuickViewItineraries.push({
+          // this should be renamed later to aggregatedItineraryId
           id: aggregatedItinerary.id,
+          itineraryId: itineraryId,
           userCount: aggregatedItinerary.userCount,
           groupMembers: Array.from(groupMembersMap.values()),
           joined: joinedTripHashes.has(aggregatedItinerary.id),
@@ -249,6 +259,13 @@ export class ItinerariesService {
       throw new BadRequestException('User not found');
     }
     const tripIds = tripSequence.split(',');
+    const tripIdSequenceMap = tripIds.reduce(
+      (acc, tripId, index) => {
+        acc[tripId] = index;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
     const trips = await this.tripRepository.find(
       {
         id: { $in: tripIds },
@@ -269,6 +286,7 @@ export class ItinerariesService {
         trip.gtfsTrip.id,
         trip.originStopTime.id,
         trip.destinationStopTime.id,
+        tripIdSequenceMap[trip.gtfsTrip.id],
       );
       tripBookings.push(tripBooking);
     }

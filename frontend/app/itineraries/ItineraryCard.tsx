@@ -1,14 +1,6 @@
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-} from '@/components/ui/card';
-import { Separator } from '@/components/ui';
-import { getRelativeDateLabel } from '@/lib/utils';
+import { Card } from '@/components/ui/card';
 import { format } from 'date-fns';
-import { ArrowRight, Calendar, MapPin, Users } from 'lucide-react';
+import { ArrowRight, Calendar, Users } from 'lucide-react';
 
 interface TripDetail {
     tripId: string;
@@ -27,86 +19,92 @@ interface ItineraryCardProps {
 
 export default function ItineraryCard({ tripDetails, action, userCount }: ItineraryCardProps) {
     return (
-        <Card className='flex flex-col gap-4 w-full max-w-5xl mx-auto'>
-            <CardHeader>
-                <div className='flex items-start justify-between gap-2'>
-                    <div className='flex-1'>
-                        <CardDescription className='flex items-center gap-1 text-inherit dark:text-white'>
-                            <Calendar className='h-4 w-4' />
-                            {tripDetails && tripDetails.length > 0 && (
-                                <>
-                                    {format(
-                                        tripDetails[0].departureTime,
-                                        'yyyy-MM-dd'
-                                    )}{' '}
-                                    {getRelativeDateLabel(
-                                        tripDetails[0].departureTime
-                                    )}
-                                </>
-                            )}
-                        </CardDescription>
-                    </div>
-                </div>
-            </CardHeader>
-            <CardContent className='flex-1'>
-                <div className='flex gap-4 flex-wrap items-start'>
-                    {tripDetails && tripDetails.flatMap((trip, tripIndex) =>
-                        [
-                            <div
-                                key={`trip-${tripIndex}`}
-                                className='flex-1 min-w-[200px]'
-                            >
-                                <div className='space-y-2'>
+        <Card className='w-full max-w-5xl mx-auto overflow-hidden'>
+            <div className='flex flex-col md:flex-row'>
+                <div className='flex-1 p-3 md:p-6'> {/* Reduced padding on mobile */}
+                    {tripDetails && tripDetails.map((trip, tripIndex) => {
+                        const durationMinutes = Math.round((trip.arrivalTime.getTime() - trip.departureTime.getTime()) / (1000 * 60));
+                        const hours = Math.floor(durationMinutes / 60);
+                        const minutes = durationMinutes % 60;
+                        const durationString = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+
+                        return (
+                            <div key={tripIndex} className={`${tripIndex > 0 ? 'mt-4 pt-4 border-t' : ''}`}>
+                                {/* Header: Carrier & Date */}
+                                <div className='flex items-center justify-between mb-2 md:mb-4 text-xs md:text-sm text-muted-foreground'>
                                     <div className='flex items-center gap-2'>
-                                        <span className='text-xs font-semibold text-muted-foreground bg-muted px-2 py-1 rounded'>
-                                            Trip {tripIndex + 1}
-                                        </span>
+                                        <div className='font-bold text-primary text-base md:text-lg'>GO Transit</div>
                                     </div>
-                                    <div className='flex items-center gap-2 text-sm'>
-                                        <MapPin className='h-4 w-4 text-primary' />
-                                        <span className='font-medium'>
-                                            {trip.orgStation}
-                                        </span>
-                                        <ArrowRight className='h-4 w-4 text-muted-foreground' />
-                                        <span className='font-medium'>
-                                            {trip.destStation}
-                                        </span>
-                                    </div>
-                                    <div className='flex items-center gap-1.5 pl-6 text-xs text-muted-foreground'>
+                                    <div className='flex items-center gap-2'>
+                                        <Calendar className='h-3 w-3 md:h-4 md:w-4' />
                                         <span>
-                                            Departs{' '}
-                                            <span className='font-semibold'>
-                                                {format(trip.departureTime, 'h:mm a')}
-                                            </span>{' '}
-                                            • Arrives{' '}
-                                            <span className='font-semibold'>
-                                                {format(trip.arrivalTime, 'h:mm a')}
-                                            </span>
+                                            {format(trip.departureTime, 'MMM d')}
+                                            <span className='md:hidden'> • {format(trip.departureTime, 'EEE')}</span>
+                                            <span className='hidden md:inline'> • {format(trip.departureTime, 'EEEE')}</span>
                                         </span>
                                     </div>
                                 </div>
-                            </div>,
-                            tripDetails && tripIndex < tripDetails.length - 1 && (
-                                <Separator
-                                    key={`separator-${tripIndex}`}
-                                    orientation='vertical'
-                                    className='h-auto'
-                                />
-                            ),
-                        ].filter(Boolean)
+
+                                {/* Main Trip Layout */}
+                                <div className='flex flex-col md:flex-row items-center gap-2 md:gap-0 font-sans'>
+                                    {/* Mobile Wrapper for Horizontal Times */}
+                                    <div className='flex flex-row items-center justify-between w-full md:w-auto md:contents'>
+
+                                        {/* Departure */}
+                                        <div className='flex-1 min-w-[100px] md:min-w-[140px]'>
+                                            <div className='text-xl md:text-3xl font-bold leading-none mb-1 text-left'>
+                                                {format(trip.departureTime, 'h:mm a')}
+                                            </div>
+                                            <div className='text-xs md:text-sm text-muted-foreground font-medium text-left truncate max-w-[120px] md:max-w-none'>
+                                                {trip.orgStation}
+                                            </div>
+                                        </div>
+
+                                        {/* Mobile Arrow/Duration */}
+                                        <div className='md:hidden flex flex-col items-center justify-center px-2'>
+                                            <ArrowRight className='h-4 w-4 text-muted-foreground/60' />
+                                            <span className='text-[10px] font-medium text-muted-foreground/80 whitespace-nowrap'>{durationString}</span>
+                                        </div>
+
+                                        {/* Arrival */}
+                                        <div className='flex-1 min-w-[100px] md:min-w-[140px] text-right'>
+                                            <div className='text-xl md:text-3xl font-bold leading-none mb-1'>
+                                                {format(trip.arrivalTime, 'h:mm a')}
+                                            </div>
+                                            <div className='text-xs md:text-sm text-muted-foreground font-medium text-right truncate max-w-[120px] md:max-w-none ml-auto'>
+                                                {trip.destStation}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Desktop Middle Section: Arrow & Duration */}
+                                    <div className='hidden md:flex flex-col items-center justify-center px-6 min-w-[120px]'>
+                                        <ArrowRight className='h-5 w-5 text-muted-foreground/60 mb-1' />
+                                        <span className='text-xs font-medium text-muted-foreground/80'>{durationString}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+
+                    {/* User Count */}
+                    {userCount !== undefined && (
+                        <div className='flex items-center gap-2 mt-2 md:mt-4 text-xs md:text-sm text-muted-foreground'>
+                            <Users className='h-3 w-3 md:h-4 md:w-4' />
+                            <span>{userCount} going</span>
+                        </div>
                     )}
                 </div>
-            </CardContent>
-            <CardFooter className='gap-3'>
-                <div className='flex items-center gap-2 flex-1'>
-                    <Users className='h-4 w-4 text-muted-foreground' />
-                    <span className='text-sm text-muted-foreground'>
-                        <span className='font-medium'>{userCount}</span>{' '}
-                        going
-                    </span>
-                </div>
-                {action && <div>{action}</div>}
-            </CardFooter>
+
+                {/* Action Area */}
+                {action && (
+                    <div className='md:border-l bg-muted/10 md:bg-transparent p-3 md:p-6 flex items-center justify-center md:min-w-[160px]'>
+                        <div className='w-full md:w-auto'>
+                            {action}
+                        </div>
+                    </div>
+                )}
+            </div>
         </Card>
     );
 }

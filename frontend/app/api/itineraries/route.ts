@@ -11,6 +11,49 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id');
+
+  const accessToken = request.cookies.get('access_token')?.value;
+
+  if (!accessToken) {
+    return NextResponse.json(
+      { message: 'Authorization required. Please sign in.' },
+      { status: 401 }
+    );
+  }
+
+  try {
+    const apiResponse = await fetch(`${BACKEND_URL}/itineraries?id=${id}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const responseData = await apiResponse.json();
+
+    if (!apiResponse.ok) {
+      return NextResponse.json(
+        { message: responseData.message || 'Failed to fetch itinerary' },
+        { status: apiResponse.status }
+      );
+    }
+
+    const data = responseData.data || responseData;
+
+    return NextResponse.json(data);
+  } catch (error) {
+    return NextResponse.json(
+      {
+        message:
+          error instanceof Error ? error.message : 'Internal server error',
+      },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

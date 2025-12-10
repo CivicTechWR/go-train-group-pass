@@ -32,14 +32,17 @@ export const ItineraryTravelInfoSchema = z.object({
   steward: StewardSchema.optional(),
   tripDetails: z.array(TripDetailsSchema),
   groupsFormed: z.boolean(),
+  tripBookingIds: z.array(z.string()),
+
 });
 export const ExistingItinerarySchema = z.object({
   userCount: z.number(),
   tripDetails: z.array(TripDetailsSchema),
   tripSequence: z.string(),
+
 });
 
-export const ExistingItinerariesSchema =  z.array(ExistingItinerarySchema);
+export const ExistingItinerariesSchema = z.array(ExistingItinerarySchema);
 
 export const QuickViewItinerarySchema = z.object({
   id: z.string(),
@@ -48,6 +51,7 @@ export const QuickViewItinerarySchema = z.object({
   joined: z.boolean(),
   groupFormed: z.boolean(),
   tripDetails: z.array(TripDetailsSchema),
+  itineraryId: z.string(),
 });
 export const QuickViewItinerariesSchema = z.object({
   joinedItineraries: z.array(QuickViewItinerarySchema),
