@@ -1,5 +1,29 @@
-import { Entity, Property } from '@mikro-orm/core';
-import { TripDetailsDto } from '@go-train-group-pass/shared';
+
+import { Entity, Property, Embeddable, Embedded } from '@mikro-orm/core';
+
+@Embeddable()
+export class TripDetail {
+  @Property()
+  orgStation: string;
+
+  @Property()
+  destStation: string;
+
+  @Property()
+  departureTime: Date;
+
+  @Property()
+  arrivalTime: Date;
+
+  @Property()
+  routeShortName: string;
+
+  @Property()
+  tripId: string;
+
+  @Property()
+  sequence: number;
+}
 
 @Entity({
   expression: `
@@ -43,6 +67,6 @@ export class AggregatedItinerary {
   @Property()
   userCount: number;
 
-  @Property({ type: 'json' })
-  tripDetails: TripDetailsDto[];
+  @Embedded(() => TripDetail, { array: true, persist: false})
+  tripDetails: TripDetail[] = [];
 }

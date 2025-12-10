@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   Request,
   UnauthorizedException,
   UseGuards,
@@ -18,6 +19,8 @@ import {
   ExistingItinerariesSchema,
   ItineraryCreationResponseDto,
   ItineraryCreationResponseSchema,
+  ItineraryQueryParamsDto,
+  ItineraryTravelInfoSchema,
 } from '@go-train-group-pass/shared';
 
 @Controller('itineraries')
@@ -42,6 +45,22 @@ export class ItinerariesController {
     return this.itinerariesService.create(req.user.id, createItineraryDto);
   }
 
+  @Get()
+  @ApiOperation({ summary: 'Get itinerary travel info' })
+  @ApiOkResponse({ description: 'Itinerary travel info' })
+  @Serialize(ItineraryTravelInfoSchema)
+  async getItineraryTravelInfo(
+    @Request() req: RequestWithUser,
+    @Query() queryParams: ItineraryQueryParamsDto,
+  ) {
+    if (!req.user) {
+      throw new UnauthorizedException('User not found');
+    }
+    return this.itinerariesService.getItineraryInfo(
+      req.user.id,
+      queryParams.id,
+    );
+  }
   @Get('existing')
   @ApiOperation({ summary: 'Summary of all itineraries with same trips' })
   @ApiOkResponse({ description: 'Existing itineraries' })
