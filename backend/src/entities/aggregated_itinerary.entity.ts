@@ -67,6 +67,6 @@ export class AggregatedItinerary {
   @Property()
   userCount: number;
 
-  @Embedded(() => TripDetail, { array: true })
+  @Embedded(() => TripDetail, { array: true, persist: false})
   tripDetails: TripDetail[] = [];
 }
