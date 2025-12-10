@@ -21,6 +21,8 @@ import {
   ItineraryCreationResponseSchema,
   ItineraryQueryParamsDto,
   ItineraryTravelInfoSchema,
+  QuickViewItinerariesDto,
+  QuickViewItinerariesSchema,
 } from '@go-train-group-pass/shared';
 
 @Controller('itineraries')
@@ -60,6 +62,19 @@ export class ItinerariesController {
       req.user.id,
       queryParams.id,
     );
+  }
+
+  @Get('quick-view')
+  @ApiOperation({ summary: 'Get quick view of all active itineraries' })
+  @ApiOkResponse({ description: 'Quick view of active itineraries' })
+  @Serialize(QuickViewItinerariesSchema)
+  async getQuickViewItineraries(
+    @Request() req: RequestWithUser,
+  ): Promise<QuickViewItinerariesDto> {
+    if (!req.user) {
+      throw new UnauthorizedException('User not found');
+    }
+    return this.itinerariesService.getQuickViewItineraries(req.user.id);
   }
   @Get('existing')
   @ApiOperation({ summary: 'Summary of all itineraries with same trips' })
