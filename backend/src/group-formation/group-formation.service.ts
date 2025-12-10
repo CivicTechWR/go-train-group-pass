@@ -161,6 +161,7 @@ export class GroupFormationService {
       }
       selectedStewards[idx] = stewardItinerary.user;
       groupedItineraries.push(stewardItinerary);
+      groupItineraryLookup[itinerary.id] = idx;
       memberGroups[idx] = []; // Initialize array for members
     });
 
@@ -182,7 +183,7 @@ export class GroupFormationService {
       }
     });
 
-    for (const itinerary of checkedInUngroupedItineraries) {
+    for (const itinerary of groupedItineraries) {
       const groupNumber = groupItineraryLookup[itinerary.id];
       itinerary.tripBookings.getItems().forEach((booking) => {
         this.travelGroupRepository.create({
@@ -191,7 +192,6 @@ export class GroupFormationService {
           trip: booking.trip,
           steward: selectedStewards[groupNumber],
           tripBookings: booking,
-          members: memberGroups[groupNumber],
         });
       });
     }
