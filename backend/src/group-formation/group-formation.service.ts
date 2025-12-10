@@ -161,7 +161,7 @@ export class GroupFormationService {
       }
       selectedStewards[idx] = stewardItinerary.user;
       groupedItineraries.push(stewardItinerary);
-      groupItineraryLookup[itinerary.id] = idx;
+      groupItineraryLookup[stewardItinerary.id] = idx;
       memberGroups[idx] = []; // Initialize array for members
     });
 

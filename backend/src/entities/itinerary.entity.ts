@@ -13,7 +13,7 @@ import { BaseEntity } from './base';
 import { randomUUID } from 'crypto';
 import { ItineraryStatus } from './itineraryStatusEnum';
 
-@Entity()
+@Entity({ schema: 'go-train-group-pass' })
 export class Itinerary extends BaseEntity {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id: string = randomUUID();

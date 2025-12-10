@@ -14,6 +14,7 @@ import { TripBookingModule } from './trip-booking/trip-booking.module';
 import { TripScheduleModule } from './trip-schedule/trip-schedule.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ItinerarySubscriber } from './subscribers/itinerary.subscriber';
+import { GroupFormationModule } from './group-formation';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ItinerarySubscriber } from './subscribers/itinerary.subscriber';
     TripModule,
     TripBookingModule,
     TripScheduleModule,
+    GroupFormationModule,
   ],
   controllers: [AppController],
   exports: [
@@ -33,6 +35,7 @@ import { ItinerarySubscriber } from './subscribers/itinerary.subscriber';
     TripModule,
     TripBookingModule,
     TripScheduleModule,
+    GroupFormationModule,
   ],
   providers: [
     AppService,

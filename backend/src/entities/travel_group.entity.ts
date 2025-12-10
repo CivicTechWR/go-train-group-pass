@@ -18,7 +18,7 @@ import {
 import { TravelGroupStatus } from './travelGroupEnum';
 import { BaseEntity } from './base';
 
-@Entity()
+@Entity({ schema: 'go-train-group-pass' })
 export class TravelGroup extends BaseEntity {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id: string = randomUUID();
@@ -54,8 +54,8 @@ export class TravelGroup extends BaseEntity {
   @OneToMany(() => TravelGroupStatusLog, (log) => log.travelGroup)
   statusLogs = new Collection<TravelGroupStatusLog>(this);
 
-  @Property({ persist: false })
-  get members(): User[] {
+  @Property({ name: 'members', persist: false })
+  members(): User[] {
     return this.tripBookings.getItems().map((booking) => booking.user);
   }
 }

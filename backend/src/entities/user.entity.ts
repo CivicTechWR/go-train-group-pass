@@ -14,7 +14,11 @@ import { Payment } from '.';
 import { BaseEntity } from './base';
 import { UserRepository } from '../users/users.repository';
 
-@Entity({ tableName: 'users', repository: () => UserRepository })
+@Entity({
+  tableName: 'users',
+  schema: 'go-train-group-pass',
+  repository: () => UserRepository,
+})
 export class User extends BaseEntity {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id: string = randomUUID();

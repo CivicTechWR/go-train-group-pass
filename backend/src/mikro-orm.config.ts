@@ -1,7 +1,9 @@
 import { Logger } from '@nestjs/common';
 import { defineConfig } from '@mikro-orm/postgresql';
 import { Migrator } from '@mikro-orm/migrations';
+import { SeedManager } from '@mikro-orm/seeder';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
+import { ItinerarySubscriber } from './subscribers/itinerary.subscriber';
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
 
@@ -20,9 +22,10 @@ export default defineConfig({
   user: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
   dbName: process.env.DB_NAME || 'postgres',
-  extensions: [Migrator],
+  extensions: [Migrator, SeedManager],
+  subscribers: [ItinerarySubscriber],
   highlighter: new SqlHighlighter(),
-  debug: true,
+  debug: false,
   logger: logFn,
   migrations: {
     path: './src/database/migrations',
@@ -34,7 +37,7 @@ export default defineConfig({
   },
   entities: Object.values(entities),
   metadataCache: {
-    enabled: true,
+    enabled: false,
   },
   schemaGenerator: {
     ignoreSchema: [
