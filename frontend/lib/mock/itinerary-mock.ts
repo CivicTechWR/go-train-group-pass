@@ -13,6 +13,8 @@ export const itineraryMock: Itinerary[] = [
         destStation: 'Union Station',
         tripId: 'mock-trip-1',
         routeShortName: 'GO',
+        isCheckedIn: true,
+
       },
       {
         departureTime: new Date('2025-12-10T17:30:00-05:00'),
@@ -21,6 +23,8 @@ export const itineraryMock: Itinerary[] = [
         destStation: 'Kitchener Station',
         tripId: 'mock-trip-2',
         routeShortName: 'GO',
+        isCheckedIn: false,
+
       },
     ],
     userCount: 3,
@@ -35,6 +39,7 @@ export const itineraryMock: Itinerary[] = [
         destStation: 'Union Station',
         tripId: 'mock-trip-3',
         routeShortName: 'GO',
+        isCheckedIn: true,
       },
       {
         departureTime: new Date('2025-12-11T10:15:00-05:00'),
@@ -43,6 +48,7 @@ export const itineraryMock: Itinerary[] = [
         destStation: 'Kitchener Station',
         tripId: 'mock-trip-4',
         routeShortName: 'GO',
+        isCheckedIn: false,
       },
       {
         departureTime: new Date('2025-12-11T18:00:00-05:00'),
@@ -51,6 +57,7 @@ export const itineraryMock: Itinerary[] = [
         destStation: 'Guelph Central Station',
         tripId: 'mock-trip-5',
         routeShortName: 'GO',
+        isCheckedIn: false,
       },
     ],
     userCount: 1,
@@ -65,6 +72,7 @@ export const itineraryMock: Itinerary[] = [
         destStation: 'Union Station',
         tripId: 'mock-trip-6',
         routeShortName: 'GO',
+        isCheckedIn: true,
       },
     ],
     userCount: 4,

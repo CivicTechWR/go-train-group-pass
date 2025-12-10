@@ -85,5 +85,6 @@ export class TripBookingService {
       bookingId: tripBooking.id,
       isCheckedIn: tripBooking.status === TripBookingStatus.CHECKED_IN,
     };
+
   }
 }

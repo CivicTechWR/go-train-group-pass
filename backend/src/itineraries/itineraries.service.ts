@@ -100,19 +100,13 @@ export class ItinerariesService {
         id,
         user: { id: userId },
       },
-      { populate: ['tripBookings', 'tripBookings.trip'] },
+      { populate: ['tripBookings', 'tripBookings.trip', 'tripBookings.user'] },
     );
     const tripBookings = itinerary.tripBookings.getItems();
     const tripIds = tripBookings.map((tripBooking) => tripBooking.trip.id);
     const itineraryTravelInfo: ItineraryTravelInfoDto = {
-      tripDetails: tripBookings.map((booking) => {
-        return {
-          ...this.tripBookingService.getTripDetails(booking),
-          bookingId: booking.id,
-          isCheckedIn: booking.status == TripBookingStatus.CHECKED_IN,
-        }
-      }
-
+      tripDetails: tripBookings.map((booking) =>
+        this.tripBookingService.getTripDetails(booking)
       ),
       groupsFormed: false,
     };
@@ -149,7 +143,7 @@ export class ItinerariesService {
     return aggregatedItineraries.map((aggregatedItinerary) => ({
       tripSequence: aggregatedItinerary.tripSequence,
       userCount: aggregatedItinerary.userCount,
-      tripDetails: aggregatedItinerary.tripDetails,
+      tripDetails: aggregatedItinerary.tripDetails.map(td => ({...td, isCheckedIn: false})),
     }));
   }
 
@@ -170,7 +164,7 @@ export class ItinerariesService {
         joinedItineraries: [],
         itinerariesToJoin: aggregatedItineraries.map((aggregatedItinerary) => ({
           userCount: aggregatedItinerary.userCount,
-          tripDetails: aggregatedItinerary.tripDetails,
+          tripDetails: aggregatedItinerary.tripDetails.map(td => ({...td, isCheckedIn: false})),
           tripSequence: aggregatedItinerary.tripSequence,
         })),
       };
@@ -248,12 +242,14 @@ export class ItinerariesService {
           groupMembers: Array.from(groupMembersMap.values()),
           joined: joinedTripHashes.has(aggregatedItinerary.id),
           groupFormed: groupsForItinerary.length > 0,
-          tripDetails: aggregatedItinerary.tripDetails,
+          // isCheckedIn should not be here but doesn't matter for now. We need to fix the dtos
+          tripDetails: aggregatedItinerary.tripDetails.map(td => ({...td, isCheckedIn: false})),
         });
       } else {
         otherItineraries.push({
           userCount: aggregatedItinerary.userCount,
-          tripDetails: aggregatedItinerary.tripDetails,
+          // isCheckedIn should not be here but doesn't matter for now. We need to fix the dtos
+          tripDetails: aggregatedItinerary.tripDetails.map(td => ({...td, isCheckedIn: false})),
           tripSequence: aggregatedItinerary.tripSequence,
         });
       }

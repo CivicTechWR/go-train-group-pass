@@ -26,6 +26,7 @@ export default function ItineraryDetailsPage() {
             // Refresh data
             const result = await apiGet<ItineraryTravelInfo>(`/itineraries?id=${params.id}`);
             const parsed = ItineraryTravelInfoSchema.parse(result);
+
             setData(parsed);
         } catch (err) {
             console.error('Failed to simulate group formation:', err);
@@ -164,18 +165,19 @@ export default function ItineraryDetailsPage() {
                                         <div className="flex gap-2 self-end sm:self-auto">
                                             {member.email && (
                                                 <Button size="sm" variant="outline" asChild>
-                                                    <a href={`mailto:${member.email}`}>
+                                                    <>
                                                         <Mail className="h-4 w-4 mr-2" />
-                                                        Email
-                                                    </a>
+                                                        {member.email}
+                                                    </>
                                                 </Button>
                                             )}
                                             {member.phoneNumber && (
                                                 <Button size="sm" variant="outline" asChild>
-                                                    <a href={`tel:${member.phoneNumber}`}>
+                                                    <>
+
                                                         <Phone className="h-4 w-4 mr-2" />
-                                                        Call
-                                                    </a>
+                                                        {member.phoneNumber}
+                                                    </>
                                                 </Button>
                                             )}
                                         </div>

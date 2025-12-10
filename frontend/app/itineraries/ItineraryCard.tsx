@@ -13,11 +13,11 @@ interface TripDetail {
     departureTime: Date;
     arrivalTime: Date;
     bookingId?: string;
-    isCheckedIn: boolean;
+    isCheckedIn?: boolean;
 }
 
 
-function CheckInButton({ bookingId, isCheckedIn }: { bookingId: string, isCheckedIn: boolean }) {
+function CheckInButton({ bookingId, isCheckedIn }: { bookingId: string, isCheckedIn?: boolean }) {
     // 1. Initialize local state with the prop (Fire and Forget pattern)
     const [isLoading, setIsLoading] = useState(false);
     const [checkedInSuccess, setCheckedInSuccess] = useState(false);
