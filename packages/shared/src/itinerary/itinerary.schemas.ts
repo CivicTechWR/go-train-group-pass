@@ -1,12 +1,20 @@
-import z from "zod";
-import { TripDetailsSchema } from "../trip/trip.schemas";
+import z from 'zod';
+import {
+  StewardSchema,
+  TravelGroupMemberSchema,
+} from '../travel-group/travel-group.schemas';
+import { TripDetailsSchema } from '../trip/trip.schemas';
 
-export const ItineraryCreationResponseSchema = z.object({
+export const ItineraryResponseSchema = z.object({
   id: z.string(),
   trips: z.array(TripDetailsSchema),
   stewarding: z.boolean(),
 });
 
+export const ItineraryQueryParamsSchema = z.object({
+  id: z.uuid(),
+});
+export const ItineraryCreationResponseSchema = ItineraryResponseSchema;
 
 const ItinerarySegmentSchema = z.object({
   originStopTimeId: z.string(),
@@ -19,6 +27,12 @@ export const CreateItinerarySchema = z.object({
   wantsToSteward: z.boolean(),
 });
 
+export const ItineraryTravelInfoSchema = z.object({
+  members: z.array(TravelGroupMemberSchema).optional(),
+  steward: StewardSchema.optional(),
+  tripDetails: z.array(TripDetailsSchema),
+  groupsFormed: z.boolean(),
+});
 export const ExistingItinerarySchema = z.object({
   userCount: z.number(),
   tripDetails: z.array(TripDetailsSchema),

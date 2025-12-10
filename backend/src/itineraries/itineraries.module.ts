@@ -6,11 +6,22 @@ import { Itinerary } from '../entities/itinerary.entity';
 import { AuthModule } from '../modules/auth/auth.module';
 import { UsersModule } from 'src/users/users.module';
 import { TripBookingModule } from 'src/trip-booking/trip-booking.module';
-import { AggregatedItinerary } from 'src/entities';
+import {
+  AggregatedItinerary,
+  TravelGroup,
+  Trip,
+  TripBooking,
+} from 'src/entities';
 
 @Module({
   imports: [
-    MikroOrmModule.forFeature([Itinerary, AggregatedItinerary]),
+    MikroOrmModule.forFeature([
+      Itinerary,
+      AggregatedItinerary,
+      Trip,
+      TravelGroup,
+      TripBooking,
+    ]),
     UsersModule,
     AuthModule,
     TripBookingModule,
