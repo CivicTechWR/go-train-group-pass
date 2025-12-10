@@ -4,7 +4,6 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { GTFSStopTime, GTFSTrip, Trip } from '../entities';
 import { gtfsDateStringToDate } from '../utils/gtfsDateStringToDate';
 import { getDateTimeFromServiceIdGTFSTimeString } from 'src/utils/getDateTimeFromServiceIdGTFSTimeString';
-import { TripDetailsDto } from '@go-train-group-pass/shared';
 
 @Injectable()
 export class TripService {
