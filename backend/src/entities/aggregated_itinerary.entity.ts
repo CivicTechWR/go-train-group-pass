@@ -1,4 +1,3 @@
-
 import { Entity, Property, Embeddable, Embedded } from '@mikro-orm/core';
 
 @Embeddable()
@@ -67,6 +66,6 @@ export class AggregatedItinerary {
   @Property()
   userCount: number;
 
-  @Embedded(() => TripDetail, { array: true, persist: false})
+  @Embedded(() => TripDetail, { array: true, persist: false })
   tripDetails: TripDetail[] = [];
 }
