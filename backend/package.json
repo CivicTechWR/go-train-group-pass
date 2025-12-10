@@ -26,6 +26,7 @@
     "security": "npm audit --audit-level=high",
     "migrate:up": "mikro-orm migration:up",
     "db:cleanup-demo": "ts-node -r tsconfig-paths/register src/scripts/cleanup-demo.ts",
+    "db:seed:demo": "mikro-orm seeder:run --class=DemoSeeder",
     "repl": "nest start --entryFile repl",
     "prepare": "cd .. && husky"
   },

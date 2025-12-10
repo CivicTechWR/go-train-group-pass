@@ -18,12 +18,14 @@ export class DemoSeeder extends Seeder {
 
   async run(em: EntityManager): Promise<void> {
     const date = new Date('2025-12-11'); // Specific demo date
+    const serviceId = '20251211';
     this.generatedPhoneNumbers.clear(); // Reset for this run
 
     console.log('Finding Trips...');
 
     const outboundTrip = await this.findTrip(
       em,
+      serviceId,
       'Kitchener',
       'Kitchener GO',
       'Union Station GO',
@@ -32,6 +34,7 @@ export class DemoSeeder extends Seeder {
 
     const returnTrip = await this.findTrip(
       em,
+      serviceId,
       'Kitchener',
       'Union Station GO',
       'Kitchener GO',
@@ -128,6 +131,7 @@ export class DemoSeeder extends Seeder {
 
   private async findTrip(
     em: EntityManager,
+    serviceId: string,
     routeLongName: string,
     originStopName: string,
     destinationStopName: string,
@@ -165,6 +169,7 @@ export class DemoSeeder extends Seeder {
       .andWhere({ 'dest.stop': destStop.id })
       .andWhere('origin.stop_sequence < dest.stop_sequence')
       .andWhere({ 'origin.departureTime': { $gte: approximateTime } })
+      .andWhere({'t.serviceId': serviceId})
       .orderBy({ 'origin.departureTime': 'ASC' })
       .limit(1);
 
