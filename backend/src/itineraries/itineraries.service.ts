@@ -17,6 +17,7 @@ import { ItineraryCreationResponseDto } from '@go-train-group-pass/shared';
 import { TravelGroup, Trip, TripBooking } from 'src/entities';
 import { AggregatedItinerary } from 'src/entities';
 import { type TravelGroupMemberDto } from '@go-train-group-pass/shared';
+import { TripBookingStatus } from 'src/entities/tripBookingEnum';
 
 @Injectable()
 export class ItinerariesService {
@@ -107,7 +108,8 @@ export class ItinerariesService {
       tripDetails: tripBookings.map((booking) => {
         return {
           ...this.tripBookingService.getTripDetails(booking),
-          bookingId: booking.id
+          bookingId: booking.id,
+          isCheckedIn: booking.status == TripBookingStatus.CHECKED_IN,
         }
       }
 
@@ -139,7 +141,6 @@ export class ItinerariesService {
         phoneNumber: user.phoneNumber,
       }));
     }
-
     return { ...itineraryTravelInfo, groupsFormed: true };
   }
   // demo only

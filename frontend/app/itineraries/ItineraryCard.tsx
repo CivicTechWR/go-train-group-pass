@@ -1,6 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { format } from 'date-fns';
-import { ArrowRight, Users, Check } from 'lucide-react';
+import { ArrowRight, Users, Check, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { apiPost } from '@/lib/api';
@@ -13,28 +13,44 @@ interface TripDetail {
     departureTime: Date;
     arrivalTime: Date;
     bookingId?: string;
-    isCheckedIn?: boolean;
+    isCheckedIn: boolean;
 }
 
 
 function CheckInButton({ bookingId, isCheckedIn }: { bookingId: string, isCheckedIn: boolean }) {
+    // 1. Initialize local state with the prop (Fire and Forget pattern)
     const [isLoading, setIsLoading] = useState(false);
+    const [checkedInSuccess, setCheckedInSuccess] = useState(false);
+    
+    // Optional: If using Next.js App Router to revalidate data in background
+    // const router = useRouter();
 
     const handleCheckIn = async () => {
+        if (isCheckedIn) return; // Prevent double clicks
+
         try {
             setIsLoading(true);
+            
+            // 2. Perform the API call
             await apiPost('/trip-booking/check-in', { id: bookingId });
-            window.location.reload();
+            
+            // 3. Update local state immediately (Optimistic UI)
+            setCheckedInSuccess(true);
+            
+            // Optional: If you need to ensure the server data is fresh for other components:
+            // router.refresh(); 
         } catch (error) {
             console.error('Failed to check in:', error);
+            // Ideally show a toast error here
         } finally {
             setIsLoading(false);
         }
     };
 
-    if (isCheckedIn) {
+    // 4. Render based on the LOCAL state, not just the prop
+    if (isCheckedIn || checkedInSuccess) {
         return (
-            <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50" disabled>
+            <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50 hover:bg-green-100 cursor-default">
                 <Check className="w-4 h-4 mr-2" />
                 Checked In
             </Button>
@@ -47,7 +63,14 @@ function CheckInButton({ bookingId, isCheckedIn }: { bookingId: string, isChecke
             disabled={isLoading}
             size="sm"
         >
-            {isLoading ? 'Checking in...' : 'Check In'}
+            {isLoading ? (
+                <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Checking in...
+                </>
+            ) : (
+                'Check In'
+            )}
         </Button>
     );
 }
@@ -80,8 +103,8 @@ export default function ItineraryCard({ tripDetails, action, userCount }: Itiner
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-4 md:hidden">
-                                        {(trip.bookingId && trip.isCheckedIn !== undefined) && (
-                                            <CheckInButton bookingId={trip.bookingId} isCheckedIn={trip.isCheckedIn} />
+                                        {trip.bookingId  && (
+                                            <CheckInButton bookingId={trip.bookingId} isCheckedIn={trip.isCheckedIn===true} />
                                         )}
                                     </div>
                                 </div>
@@ -119,7 +142,7 @@ export default function ItineraryCard({ tripDetails, action, userCount }: Itiner
                                 {/* Desktop CheckIn Button - Moved here to be inline */}
                                 <div className="hidden md:flex items-center gap-4 ml-4">
                                     {trip.bookingId && (
-                                        <CheckInButton bookingId={trip.bookingId} isCheckedIn={trip.isCheckedIn ?? false} />
+                                        <CheckInButton bookingId={trip.bookingId} isCheckedIn={trip.isCheckedIn} />
                                     )}
                                 </div>
                             </div>
