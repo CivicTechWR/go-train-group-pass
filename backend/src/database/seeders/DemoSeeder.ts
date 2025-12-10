@@ -12,7 +12,8 @@ import {
 import { ItineraryStatus } from '../../entities/itineraryStatusEnum';
 import { TripBookingStatus } from '../../entities/tripBookingEnum';
 import { faker } from '@faker-js/faker';
-import { createDateInTransitTimezone, createDateTimeInTransitTimezone } from '../../utils/date.utils';
+import { createDateInTransitTimezone } from '../../utils/date.utils';
+import { getDateTimeFromServiceIdGTFSTimeString } from '../../utils/getDateTimeFromServiceIdGTFSTimeString';
 
 export class DemoSeeder extends Seeder {
   private generatedPhoneNumbers = new Set<string>();
@@ -106,7 +107,7 @@ export class DemoSeeder extends Seeder {
         if (trip) popularTripPairs.push(trip);
       }
 
-      const numItineraries = faker.number.int({ min: 9, max: 20 });
+      const numItineraries = faker.number.int({ min: 9, max: 40 });
       console.log(
         `Generating ${numItineraries} itineraries for ${dateStr} (ServiceId: ${serviceId})...`,
       );
@@ -183,9 +184,12 @@ export class DemoSeeder extends Seeder {
       });
 
       if (!trip) {
-        // USE UTILS TO SET CORRECT TIMESTAMP
-        const departureTime = createDateTimeInTransitTimezone(date, originStopTime.departureTime);
-        const arrivalTime = createDateTimeInTransitTimezone(date, destinationStopTime.arrivalTime);
+        // Convert GTFS date to service ID format (YYYYMMDD)
+        const serviceId = date.toISOString().split('T')[0].replace(/-/g, '');
+        
+        // USE PROPER GTFS TIME CONVERTER that handles "next day" times like 25:00:00
+        const departureTime = getDateTimeFromServiceIdGTFSTimeString(serviceId, originStopTime.departureTime);
+        const arrivalTime = getDateTimeFromServiceIdGTFSTimeString(serviceId, destinationStopTime.arrivalTime);
 
         trip = em.create(Trip, {
           gtfsTrip,
