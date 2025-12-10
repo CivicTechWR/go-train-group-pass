@@ -25,6 +25,7 @@
     "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
     "security": "npm audit --audit-level=high",
     "migrate:up": "mikro-orm migration:up",
+    "db:cleanup-demo": "ts-node -r tsconfig-paths/register src/scripts/cleanup-demo.ts",
     "repl": "nest start --entryFile repl",
     "prepare": "cd .. && husky"
   },
