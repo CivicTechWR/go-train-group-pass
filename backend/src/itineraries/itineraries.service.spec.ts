@@ -4,12 +4,15 @@ import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { EntityManager } from '@mikro-orm/core';
 import { Itinerary } from '../entities/itinerary.entity';
 import { TripBooking } from '../entities/trip_booking.entity';
+import { Trip } from '../entities/trip.entity';
 import { User } from '../entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { TripBookingService } from '../trip-booking/trip-booking.service';
 import { CreateItineraryDto } from '@go-train-group-pass/shared';
 import { ItineraryStatus } from '../entities/itineraryStatusEnum';
 import { vi, describe, it, expect, beforeEach, afterEach, Mock } from 'vitest';
+import { TravelGroup } from '../entities/travel_group.entity';
+import { AggregatedItinerary } from '../entities/aggregated_itinerary.entity';
 
 // Mock the @Transactional decorator to be a passthrough
 vi.mock('@mikro-orm/core', async () => {
@@ -18,12 +21,12 @@ vi.mock('@mikro-orm/core', async () => {
     ...actual,
     Transactional:
       () =>
-      <T>(
-        target: object,
-        propertyKey: string | symbol,
-        descriptor: TypedPropertyDescriptor<T>,
-      ) =>
-        descriptor,
+        <T>(
+          target: object,
+          propertyKey: string | symbol,
+          descriptor: TypedPropertyDescriptor<T>,
+        ) =>
+          descriptor,
   };
 });
 
@@ -39,7 +42,11 @@ describe('ItinerariesService', () => {
   };
   let em: { persist: Mock; flush: Mock };
   let usersService: { findByAuthUserIdOrFail: Mock; findById: Mock };
-  let tripBookingService: { create: Mock; getTripDetails: Mock };
+  let tripBookingService: {
+    create: Mock;
+    getTripDetails: Mock;
+    findOrCreate: Mock;
+  };
 
   beforeEach(async () => {
     // Reset mocks for each test
@@ -68,12 +75,19 @@ describe('ItinerariesService', () => {
     const mockTripBookingService = {
       create: vi.fn(),
       getTripDetails: vi.fn(),
+      findOrCreate: vi.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ItinerariesService,
         { provide: getRepositoryToken(Itinerary), useValue: mockRepository },
+        { provide: getRepositoryToken(TravelGroup), useValue: mockRepository }, // Reusing mockRepository for simplicity as it's just a dependency check for now or basic query
+        {
+          provide: getRepositoryToken(AggregatedItinerary),
+          useValue: mockRepository,
+        },
+        { provide: getRepositoryToken(Trip), useValue: mockRepository },
         { provide: UsersService, useValue: mockUsersService },
         { provide: TripBookingService, useValue: mockTripBookingService },
         { provide: EntityManager, useValue: mockEm },
@@ -140,7 +154,7 @@ describe('ItinerariesService', () => {
 
     it('should create an itinerary with trip bookings', async () => {
       usersService.findById.mockResolvedValue(mockUser);
-      tripBookingService.create
+      tripBookingService.findOrCreate
         .mockResolvedValueOnce(mockTripBooking1)
         .mockResolvedValueOnce(mockTripBooking2);
 
@@ -158,15 +172,15 @@ describe('ItinerariesService', () => {
       const result = await service.create(userId, createItineraryDto);
 
       expect(usersService.findById).toHaveBeenCalledWith(userId);
-      expect(tripBookingService.create).toHaveBeenCalledTimes(2);
-      expect(tripBookingService.create).toHaveBeenCalledWith(
+      expect(tripBookingService.findOrCreate).toHaveBeenCalledTimes(2);
+      expect(tripBookingService.findOrCreate).toHaveBeenCalledWith(
         userId,
         createItineraryDto.segments[0].gtfsTripId,
         createItineraryDto.segments[0].originStopTimeId,
         createItineraryDto.segments[0].destStopTimeId,
         1, // sequence
       );
-      expect(tripBookingService.create).toHaveBeenCalledWith(
+      expect(tripBookingService.findOrCreate).toHaveBeenCalledWith(
         userId,
         createItineraryDto.segments[1].gtfsTripId,
         createItineraryDto.segments[1].originStopTimeId,

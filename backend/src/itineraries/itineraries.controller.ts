@@ -21,13 +21,16 @@ import {
   ItineraryCreationResponseSchema,
   ItineraryQueryParamsDto,
   ItineraryTravelInfoSchema,
+  QuickViewItinerariesDto,
+  QuickViewItinerariesSchema,
 } from '@go-train-group-pass/shared';
+import { Public } from '../common/decorators/public.decorator';
 
 @Controller('itineraries')
 @UseGuards(AuthGuard)
 @ApiTags('Itineraries')
 export class ItinerariesController {
-  constructor(private readonly itinerariesService: ItinerariesService) {}
+  constructor(private readonly itinerariesService: ItinerariesService) { }
 
   @Post()
   @ApiOperation({ summary: 'Create an itinerary' })
@@ -61,11 +64,45 @@ export class ItinerariesController {
       queryParams.id,
     );
   }
+
+  @Get('quick-view')
+  @Public()
+  @ApiOperation({ summary: 'Get quick view of all active itineraries' })
+  @ApiOkResponse({ description: 'Quick view of active itineraries' })
+  @Serialize(QuickViewItinerariesSchema)
+  async getQuickViewItineraries(
+    @Request() req: RequestWithUser,
+  ): Promise<QuickViewItinerariesDto> {
+    return this.itinerariesService.getQuickViewItineraries(req.user?.id);
+  }
+
   @Get('existing')
   @ApiOperation({ summary: 'Summary of all itineraries with same trips' })
   @ApiOkResponse({ description: 'Existing itineraries' })
   @Serialize(ExistingItinerariesSchema)
   async getExistingItineraries(): Promise<ExistingItinerariesDto> {
     return this.itinerariesService.getExistingItineraries();
+  }
+
+  @Post('join')
+  @ApiOperation({
+    summary:
+      'Creates a new itinerary for a user based on an existing trip sequence',
+  })
+  @ApiOkResponse({ description: 'Existing itineraries' })
+  @Serialize(ItineraryCreationResponseSchema)
+  async createItineraryWithExistingTripSequence(
+    @Request() req: RequestWithUser,
+    @Body('tripSequence') tripSequence: string,
+    @Body('wantsToSteward') wantsToSteward: boolean,
+  ): Promise<ItineraryCreationResponseDto> {
+    if (!req.user) {
+      throw new UnauthorizedException('User not found');
+    }
+    return this.itinerariesService.createItineraryWithExistingTripSequence(
+      req.user.id,
+      tripSequence,
+      wantsToSteward,
+    );
   }
 }

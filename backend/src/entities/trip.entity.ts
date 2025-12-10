@@ -13,7 +13,7 @@ import { GTFSStopTime } from './gtfs_stop_times.entity';
 import { TripBooking } from './trip_booking.entity';
 import { BaseEntity } from './base';
 
-@Entity()
+@Entity({ schema: 'go-train-group-pass' })
 @Unique({
   properties: ['gtfsTrip', 'originStopTime', 'destinationStopTime', 'date'],
 })

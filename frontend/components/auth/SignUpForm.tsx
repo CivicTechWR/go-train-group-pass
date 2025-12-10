@@ -1,0 +1,245 @@
+'use client';
+
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+  Input,
+} from '@/components/ui';
+import { useAuth } from '@/contexts/AuthContext';
+import { SignUpInput, SignUpSchema } from '@/lib/types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Controller, useForm } from 'react-hook-form';
+import { parsePhoneNumber, isValidPhoneNumber } from 'libphonenumber-js';
+
+export function SignUpForm() {
+  const { signUp } = useAuth();
+  const router = useRouter();
+
+  const {
+    control,
+    handleSubmit,
+    setError,
+    formState: { isSubmitting, isSubmitted, errors },
+  } = useForm<SignUpInput>({
+    resolver: zodResolver(SignUpSchema),
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      email: '',
+      password: '',
+      fullName: '',
+      phoneNumber: undefined,
+    },
+  });
+
+  const onSubmit = async (data: SignUpInput) => {
+    try {
+      // Transform phone number to E.164 format before submission
+      const submitData: SignUpInput = {
+        email: data.email,
+        password: data.password,
+        fullName: data.fullName,
+      };
+
+      // Convert phone number to E.164 format if provided
+      if (data.phoneNumber && data.phoneNumber.trim() !== '') {
+        try {
+          // Try to parse with North American default (US/Canada)
+          const phoneNumber = parsePhoneNumber(data.phoneNumber, 'US');
+          submitData.phoneNumber = phoneNumber.format('E.164');
+        } catch (error) {
+          // If parsing with default country fails, try without (assumes international format)
+          try {
+            const phoneNumber = parsePhoneNumber(data.phoneNumber);
+            submitData.phoneNumber = phoneNumber.format('E.164');
+          } catch {
+            // If both fail, set error and don't submit
+            setError('phoneNumber', {
+              type: 'manual',
+              message: 'Invalid phone number format. Please enter a valid phone number.',
+            });
+            return;
+          }
+        }
+      }
+
+      await signUp(submitData);
+      router.push('/profile');
+    } catch (error) {
+      setError('root', {
+        type: 'manual',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Sign up failed. Please try again.',
+      });
+    }
+  };
+
+  return (
+    <Card className='w-full py-4 sm:py-6'>
+      <CardHeader className='text-center'>
+        <CardTitle className='text-2xl sm:text-3xl font-bold'>
+          Sign Up
+        </CardTitle>
+        <CardDescription>
+          Enter your information to create a new account
+        </CardDescription>
+      </CardHeader>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <CardContent>
+          <FieldSet>
+            <FieldGroup>
+              <Controller
+                name='email'
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      type='email'
+                      aria-invalid={fieldState.invalid}
+                      placeholder='janedoe@example.com'
+                    />
+                    <FieldError
+                      errors={
+                        fieldState.error &&
+                        (fieldState.isTouched || isSubmitted)
+                          ? [fieldState.error]
+                          : undefined
+                      }
+                    />
+                  </Field>
+                )}
+              />
+              <Controller
+                name='password'
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      type='password'
+                      aria-invalid={fieldState.invalid}
+                      placeholder='********'
+                    />
+                    <FieldError
+                      errors={
+                        fieldState.error &&
+                        (fieldState.isTouched || isSubmitted)
+                          ? [fieldState.error]
+                          : undefined
+                      }
+                    />
+                    <p className='mt-1 text-xs text-gray-600 dark:text-gray-400'>
+                      Must be at least 8 characters
+                    </p>
+                  </Field>
+                )}
+              />
+              <Controller
+                name='fullName'
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Full Name</FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      type='text'
+                      value={field.value || ''}
+                      onChange={e => {
+                        const value = e.target.value.trim();
+                        field.onChange(value === '' ? undefined : value);
+                      }}
+                      aria-invalid={fieldState.invalid}
+                      placeholder='John Doe'
+                    />
+                    <FieldError
+                      errors={
+                        fieldState.error &&
+                        (fieldState.isTouched || isSubmitted)
+                          ? [fieldState.error]
+                          : undefined
+                      }
+                    />
+                  </Field>
+                )}
+              />
+              <Controller
+                name='phoneNumber'
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>
+                      Phone Number (optional)
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      type='tel'
+                      value={field.value || ''}
+                      onChange={e => {
+                        const value = e.target.value.trim();
+                        field.onChange(value === '' ? undefined : value);
+                      }}
+                      aria-invalid={fieldState.invalid}
+                      placeholder='+1 234 567 8900 or 234-567-8900'
+                    />
+                    <FieldError
+                      errors={
+                        fieldState.error &&
+                        (fieldState.isTouched || isSubmitted)
+                          ? [fieldState.error]
+                          : undefined
+                      }
+                    />
+                    <p className='mt-1 text-xs text-gray-600 dark:text-gray-400'>
+                      Enter with country code (e.g., +1 for US/Canada) or local format
+                    </p>
+                  </Field>
+                )}
+              />
+              {errors.root && <FieldError errors={[errors.root]} />}
+            </FieldGroup>
+          </FieldSet>
+        </CardContent>
+        <CardFooter className='flex-col gap-3 sm:gap-4 pt-0 mt-4 sm:mt-7'>
+          <Button type='submit' disabled={isSubmitting} className='w-full'>
+            {isSubmitting ? (
+              <>
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                Signing up...
+              </>
+            ) : (
+              'Sign Up'
+            )}
+          </Button>
+          <p className='text-center text-sm'>
+            Already have an account?{' '}
+            <Link href='/signin' className='text-emerald-600 hover:underline'>
+              Sign in
+            </Link>
+          </p>
+        </CardFooter>
+      </form>
+    </Card>
+  );
+}

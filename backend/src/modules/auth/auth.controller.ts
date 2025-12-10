@@ -1,33 +1,33 @@
 import {
-  Controller,
-  Post,
-  Get,
+  AuthResponseDto,
+  AuthResponseSchema,
+  PasswordResetInputDto,
+  PasswordResetResponseDto,
+  PasswordUpdateInputDto,
+  RefreshTokenDto,
+  SignInInputDto,
+  SignUpInputDto,
+  UserDto,
+  UserSchema,
+} from '@go-train-group-pass/shared';
+import {
   Body,
+  Controller,
+  Get,
   Headers,
   HttpCode,
   HttpStatus,
+  Post,
   UnauthorizedException,
 } from '@nestjs/common';
 import {
-  ApiTags,
+  ApiBearerAuth,
   ApiOperation,
   ApiResponse,
-  ApiBearerAuth,
+  ApiTags,
 } from '@nestjs/swagger';
-import { AuthService } from './auth.service';
-import {
-  SignUpInputDto,
-  SignInInputDto,
-  RefreshTokenDto,
-  PasswordResetInputDto,
-  PasswordUpdateInputDto,
-  PasswordResetResponseDto,
-  AuthResponseDto,
-  UserDto,
-  AuthResponseSchema,
-  UserSchema,
-} from '@go-train-group-pass/shared';
 import { Serialize } from '../../common/decorators/serialize.decorator';
+import { AuthService } from './auth.service';
 
 @ApiTags('Auth')
 @Controller('auth')

@@ -13,7 +13,14 @@ export class TripBookingService {
     private readonly tripBookingRepo: EntityRepository<TripBooking>,
     private readonly userService: UsersService,
     private readonly tripService: TripService,
-  ) {}
+  ) { }
+
+  async checkIn(id: string) {
+    const tripBooking = await this.tripBookingRepo.findOneOrFail({ id });
+    tripBooking.status = TripBookingStatus.CHECKED_IN;
+    await this.tripBookingRepo.getEntityManager().flush();
+  }
+
   async findOrCreate(
     userId: string,
     gtfsTripId: string,
@@ -74,6 +81,10 @@ export class TripBookingService {
       arrivalTime: tripBooking.trip.arrivalTime,
       routeShortName: tripBooking.trip.routeShortName,
       tripId: tripBooking.trip.id,
+      sequence: tripBooking.sequence ?? undefined,
+      bookingId: tripBooking.id,
+      isCheckedIn: tripBooking.status === TripBookingStatus.CHECKED_IN,
     };
+
   }
 }

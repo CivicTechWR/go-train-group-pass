@@ -118,5 +118,52 @@ describe('TripService', () => {
         },
       );
     });
+
+    it('should handle overnight trips correctly (arrival next day)', async () => {
+      mockRepository.findOne.mockResolvedValue(null);
+      const gtfsTrip = {
+        id: 'gtfs-trip-overnight',
+        serviceId: '20231211', // Dec 11
+        route: { routeShortName: 'LW', routeLongName: 'Lakeshore West' },
+      };
+      const originStopTime = {
+        id: 'origin-id',
+        departureTime: '22:34:00',
+        stop: { stopName: 'Origin' },
+        trip: { id: 'gtfs-trip-overnight' },
+      };
+      const destStopTime = {
+        id: 'dest-id',
+        arrivalTime: '00:26:00', // Next day technically
+        stop: { stopName: 'Dest' },
+        trip: { id: 'gtfs-trip-overnight' },
+      };
+
+      mockRepository.findOneOrFail.mockImplementation(
+        (idOrQuery: string | { id: string }) => {
+          if (idOrQuery === 'gtfs-trip-overnight') return Promise.resolve(gtfsTrip);
+          if (typeof idOrQuery !== 'string' && idOrQuery.id === 'origin-id')
+            return Promise.resolve(originStopTime);
+          if (typeof idOrQuery !== 'string' && idOrQuery.id === 'dest-id')
+            return Promise.resolve(destStopTime);
+          return Promise.reject(new Error('Not found'));
+        },
+      );
+
+      const upsertedTrip = { id: 'new-trip-id' };
+      mockRepository.upsert.mockResolvedValue(upsertedTrip);
+
+      await service.findOrCreate(
+        'gtfs-trip-overnight',
+        'origin-id',
+        'dest-id',
+      );
+
+      const upsertCall = mockRepository.upsert.mock.calls[0][0];
+      const departureTime = upsertCall.departureTime;
+      const arrivalTime = upsertCall.arrivalTime;
+
+      expect(arrivalTime.getTime()).toBeGreaterThan(departureTime.getTime());
+    });
   });
 });
