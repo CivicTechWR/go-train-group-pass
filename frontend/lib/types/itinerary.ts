@@ -49,9 +49,16 @@ export type ItineraryCreationResponse = z.infer<
  * Schema for existing itinerary from API
  * Matches ExistingItinerarySchema from shared package
  */
+const TravelGroupMemberSchema = z.object({
+  name: z.string(),
+  email: z.string(),
+  phoneNumber: z.string(),
+});
+
 export const ExistingItinerarySchema = z.object({
   userCount: z.number(),
   tripDetails: z.array(TripDetailsSchema),
+  tripSequence: z.string(),
 });
 
 export type ExistingItinerary = z.infer<typeof ExistingItinerarySchema>;
@@ -63,3 +70,21 @@ export type ExistingItinerary = z.infer<typeof ExistingItinerarySchema>;
 export const ExistingItinerariesSchema = z.array(ExistingItinerarySchema);
 
 export type ExistingItineraries = z.infer<typeof ExistingItinerariesSchema>;
+
+export const QuickViewItinerarySchema = z.object({
+  id: z.string(),
+  userCount: z.number(),
+  groupMembers: z.array(TravelGroupMemberSchema),
+  joined: z.boolean(),
+  groupFormed: z.boolean(),
+  tripDetails: z.array(TripDetailsSchema),
+});
+
+export type QuickViewItinerary = z.infer<typeof QuickViewItinerarySchema>;
+
+export const QuickViewItinerariesSchema = z.object({
+  joinedItineraries: z.array(QuickViewItinerarySchema),
+  itinerariesToJoin: z.array(ExistingItinerarySchema),
+});
+
+export type QuickViewItineraries = z.infer<typeof QuickViewItinerariesSchema>;

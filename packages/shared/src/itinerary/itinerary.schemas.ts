@@ -36,9 +36,10 @@ export const ItineraryTravelInfoSchema = z.object({
 export const ExistingItinerarySchema = z.object({
   userCount: z.number(),
   tripDetails: z.array(TripDetailsSchema),
+  tripSequence: z.string(),
 });
 
-export const ExistingItinerariesSchema = z.array(ExistingItinerarySchema);
+export const ExistingItinerariesSchema =  z.array(ExistingItinerarySchema);
 
 export const QuickViewItinerarySchema = z.object({
   id: z.string(),
@@ -46,5 +47,9 @@ export const QuickViewItinerarySchema = z.object({
   groupMembers: z.array(TravelGroupMemberSchema),
   joined: z.boolean(),
   groupFormed: z.boolean(),
+  tripDetails: z.array(TripDetailsSchema),
 });
-export const QuickViewItinerariesSchema = z.array(QuickViewItinerarySchema);
+export const QuickViewItinerariesSchema = z.object({
+  joinedItineraries: z.array(QuickViewItinerarySchema),
+  itinerariesToJoin: z.array(ExistingItinerarySchema),
+});

@@ -1,22 +1,13 @@
 'use client';
 
-import { Separator } from '@/components/ui';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-} from '@/components/ui/card';
 import { apiGet } from '@/lib/api';
-import { ExistingItinerary } from '@/lib/types';
-import { getRelativeDateLabel } from '@/lib/utils';
-import { format } from 'date-fns';
-import { ArrowRight, Calendar, MapPin, Users } from 'lucide-react';
+import { QuickViewItineraries } from '@/lib/types';
 import { useEffect, useState } from 'react';
+import ItineraryCard from './ItineraryCard';
+import JoinButton from './JoinButton';
 
 export default function ItinerariesPage() {
-  const [itineraries, setItineraries] = useState<ExistingItinerary[]>([]);
+  const [data, setData] = useState<QuickViewItineraries | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,8 +16,8 @@ export default function ItinerariesPage() {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await apiGet<ExistingItinerary[]>('/itineraries/existing');
-        setItineraries(data);
+        const result = await apiGet<QuickViewItineraries>('/itineraries/quick-view');
+        setData(result);
       } catch (err) {
         const errorMessage =
           err instanceof Error
@@ -61,100 +52,58 @@ export default function ItinerariesPage() {
             Please try refreshing the page
           </p>
         </div>
-      ) : itineraries.length === 0 ? (
+      ) : !data ? (
         <div className='text-center py-12'>
-          <p className='text-muted-foreground mb-4'>No itineraries yet</p>
-          <p className='text-sm text-muted-foreground'>
-            Check back later to see available itineraries
-          </p>
+          <p className='text-muted-foreground mb-4'>No itineraries found</p>
         </div>
       ) : (
-        <div className='space-y-6 mb-20'>
-          {itineraries.map((itinerary, index) => (
-            <Card
-              key={index}
-              className='flex flex-col gap-4 w-full max-w-5xl mx-auto'
-            >
-              <CardHeader>
-                <div className='flex items-start justify-between gap-2'>
-                  <div className='flex-1'>
-                    <CardDescription className='flex items-center gap-1 text-inherit dark:text-white'>
-                      <Calendar className='h-4 w-4' />
-                      {itinerary.tripDetails.length > 0 && (
-                        <>
-                          {format(
-                            itinerary.tripDetails[0].departureTime,
-                            'yyyy-MM-dd'
-                          )}{' '}
-                          {getRelativeDateLabel(
-                            itinerary.tripDetails[0].departureTime
-                          )}
-                        </>
-                      )}
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className='flex-1'>
-                <div className='flex gap-4 flex-wrap items-start'>
-                  {itinerary.tripDetails.flatMap((trip, tripIndex) =>
-                    [
-                      <div
-                        key={`trip-${tripIndex}`}
-                        className='flex-1 min-w-[200px]'
-                      >
-                        <div className='space-y-2'>
-                          <div className='flex items-center gap-2'>
-                            <span className='text-xs font-semibold text-muted-foreground bg-muted px-2 py-1 rounded'>
-                              Trip {tripIndex + 1}
-                            </span>
-                          </div>
-                          <div className='flex items-center gap-2 text-sm'>
-                            <MapPin className='h-4 w-4 text-primary' />
-                            <span className='font-medium'>
-                              {trip.orgStation}
-                            </span>
-                            <ArrowRight className='h-4 w-4 text-muted-foreground' />
-                            <span className='font-medium'>
-                              {trip.destStation}
-                            </span>
-                          </div>
-                          <div className='flex items-center gap-1.5 pl-6 text-xs text-muted-foreground'>
-                            <span>
-                              Departs{' '}
-                              <span className='font-semibold'>
-                                {format(trip.departureTime, 'h:mm a')}
-                              </span>{' '}
-                              • Arrives{' '}
-                              <span className='font-semibold'>
-                                {format(trip.arrivalTime, 'h:mm a')}
-                              </span>
-                            </span>
-                          </div>
-                        </div>
-                      </div>,
-                      tripIndex < itinerary.tripDetails.length - 1 && (
-                        <Separator
-                          key={`separator-${tripIndex}`}
-                          orientation='vertical'
-                          className='h-auto'
-                        />
-                      ),
-                    ].filter(Boolean)
-                  )}
-                </div>
-              </CardContent>
-              <CardFooter className='gap-3'>
-                <div className='flex items-center gap-2 flex-1'>
-                  <Users className='h-4 w-4 text-muted-foreground' />
-                  <span className='text-sm text-muted-foreground'>
-                    <span className='font-medium'>{itinerary.userCount}</span>{' '}
-                    going
-                  </span>
-                </div>
-              </CardFooter>
-            </Card>
-          ))}
+        <div className='space-y-12 mb-20'>
+          {data.joinedItineraries.length > 0 && (
+            <section>
+              <h2 className='text-2xl font-bold mb-6 text-center md:text-left'>My Itineraries</h2>
+              <div className='space-y-6'>
+                {data.joinedItineraries.map((itinerary) => (
+                  <ItineraryCard
+                    key={itinerary.id}
+                    tripDetails={itinerary.tripDetails}
+                    userCount={itinerary.userCount}
+
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {data.itinerariesToJoin.length > 0 && (
+            <section>
+              <h2 className='text-2xl font-bold mb-6 text-center md:text-left'>Other Itineraries</h2>
+              <div className='space-y-6'>
+                {data.itinerariesToJoin.map((itinerary, index) => (
+                  <ItineraryCard
+                    // itinerariesToJoin don't have IDs in the current schema implementation, so we use index and tripSequence if unique
+                    key={itinerary.tripSequence + index}
+                    tripDetails={itinerary.tripDetails}
+                    userCount={itinerary.userCount}
+                    action={
+                      <div className="flex gap-2">
+                        <JoinButton tripSequence={itinerary.tripSequence} />
+                        <JoinButton tripSequence={itinerary.tripSequence} stewardType={true} />
+                      </div>
+                    }
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {data.joinedItineraries.length === 0 && data.itinerariesToJoin.length === 0 && (
+            <div className='text-center py-12'>
+              <p className='text-muted-foreground mb-4'>No itineraries yet</p>
+              <p className='text-sm text-muted-foreground'>
+                Check back later to see available itineraries
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>
