@@ -106,7 +106,7 @@ export class ItinerariesService {
       {
         trip: { id: { $in: tripIds } },
       },
-      { populate: ['members', 'steward'] },
+      { populate: ['tripBookings.user', 'steward'] },
     );
 
     if (!travelGroup) {
