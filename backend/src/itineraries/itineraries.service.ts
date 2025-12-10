@@ -31,7 +31,7 @@ export class ItinerariesService {
     private readonly tripRepository: EntityRepository<Trip>,
     private readonly userService: UsersService,
     private readonly tripBookingService: TripBookingService,
-  ) {}
+  ) { }
 
   @Transactional()
   async create(
@@ -104,11 +104,15 @@ export class ItinerariesService {
     const tripBookings = itinerary.tripBookings.getItems();
     const tripIds = tripBookings.map((tripBooking) => tripBooking.trip.id);
     const itineraryTravelInfo: ItineraryTravelInfoDto = {
-      tripDetails: tripBookings.map((booking) =>
-        this.tripBookingService.getTripDetails(booking),
+      tripDetails: tripBookings.map((booking) => {
+        return {
+          ...this.tripBookingService.getTripDetails(booking),
+          bookingId: booking.id
+        }
+      }
+
       ),
       groupsFormed: false,
-      tripBookingIds: tripBookings.map((booking) => booking.id),
     };
     const travelGroup = await this.travelGroupRepo.findOne(
       {
@@ -136,7 +140,7 @@ export class ItinerariesService {
       }));
     }
 
-    return {...itineraryTravelInfo, groupsFormed: true};
+    return { ...itineraryTravelInfo, groupsFormed: true };
   }
   // demo only
   async getExistingItineraries(): Promise<ExistingItinerariesDto> {

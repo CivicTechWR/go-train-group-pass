@@ -171,7 +171,7 @@ export function RoundTripForm({ onSubmit }: RoundTripFormProps) {
           Select your departure and return times for your journey
         </CardDescription>
       </CardHeader>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit) as any}>
         <CardContent>
           <FieldSet>
             <FieldGroup>
@@ -382,9 +382,8 @@ export function RoundTripForm({ onSubmit }: RoundTripFormProps) {
                             type='button'
                             variant={isSelected ? 'default' : 'outline'}
                             disabled={!isValid || isLoadingSchedules}
-                            className={`h-auto py-3 px-4 flex flex-col items-start ${
-                              !isValid ? 'opacity-50 cursor-not-allowed' : ''
-                            }`}
+                            className={`h-auto py-3 px-4 flex flex-col items-start ${!isValid ? 'opacity-50 cursor-not-allowed' : ''
+                              }`}
                             onClick={() => {
                               if (isValid && !isLoadingSchedules) {
                                 handleReturnSelect(schedule);

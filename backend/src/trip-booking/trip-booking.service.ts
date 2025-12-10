@@ -13,7 +13,7 @@ export class TripBookingService {
     private readonly tripBookingRepo: EntityRepository<TripBooking>,
     private readonly userService: UsersService,
     private readonly tripService: TripService,
-  ) {}
+  ) { }
 
   async checkIn(id: string) {
     const tripBooking = await this.tripBookingRepo.findOneOrFail({ id });
@@ -82,6 +82,7 @@ export class TripBookingService {
       routeShortName: tripBooking.trip.routeShortName,
       tripId: tripBooking.trip.id,
       sequence: tripBooking.sequence,
+      bookingId: tripBooking.id,
     };
   }
 }

@@ -3,8 +3,8 @@ import z from 'zod';
 export const TripScheduleDetailsSchema = z.object({
   orgStation: z.string(),
   destStation: z.string(),
-  departureTime: z.date(),
-  arrivalTime: z.date(),
+  departureTime: z.coerce.date(),
+  arrivalTime: z.coerce.date(),
   tripCreationMetaData: z.object({
     tripId: z.string(),
     arrivalStopTimeId: z.string(),

@@ -32,7 +32,6 @@ export const ItineraryTravelInfoSchema = z.object({
   steward: StewardSchema.optional(),
   tripDetails: z.array(TripDetailsSchema),
   groupsFormed: z.boolean(),
-  tripBookingIds: z.array(z.string()),
 
 });
 export const ExistingItinerarySchema = z.object({

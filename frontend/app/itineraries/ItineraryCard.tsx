@@ -1,6 +1,9 @@
 import { Card } from '@/components/ui/card';
 import { format } from 'date-fns';
-import { ArrowRight, Calendar, Users } from 'lucide-react';
+import { ArrowRight, Calendar, Users, Check } from 'lucide-react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { apiPost } from '@/lib/api';
 
 interface TripDetail {
     tripId: string;
@@ -9,6 +12,43 @@ interface TripDetail {
     destStation: string;
     departureTime: Date;
     arrivalTime: Date;
+    bookingId?: string;
+}
+
+function CheckInButton({ bookingId }: { bookingId: string }) {
+    const [isCheckedIn, setIsCheckedIn] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleCheckIn = async () => {
+        try {
+            setIsLoading(true);
+            await apiPost('/trip-booking/check-in', { id: bookingId });
+            setIsCheckedIn(true);
+        } catch (error) {
+            console.error('Failed to check in:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    if (isCheckedIn) {
+        return (
+            <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50" disabled>
+                <Check className="w-4 h-4 mr-2" />
+                Checked In
+            </Button>
+        );
+    }
+
+    return (
+        <Button
+            onClick={handleCheckIn}
+            disabled={isLoading}
+            size="sm"
+        >
+            {isLoading ? 'Checking in...' : 'Check In'}
+        </Button>
+    );
 }
 
 interface ItineraryCardProps {
@@ -35,13 +75,18 @@ export default function ItineraryCard({ tripDetails, action, userCount }: Itiner
                                     <div className='flex items-center gap-2'>
                                         <div className='font-bold text-primary text-base md:text-lg'>GO Transit</div>
                                     </div>
-                                    <div className='flex items-center gap-2'>
-                                        <Calendar className='h-3 w-3 md:h-4 md:w-4' />
-                                        <span>
-                                            {format(trip.departureTime, 'MMM d')}
-                                            <span className='md:hidden'> • {format(trip.departureTime, 'EEE')}</span>
-                                            <span className='hidden md:inline'> • {format(trip.departureTime, 'EEEE')}</span>
-                                        </span>
+                                    <div className="flex items-center gap-4">
+                                        <div className='flex items-center gap-2'>
+                                            <Calendar className='h-3 w-3 md:h-4 md:w-4' />
+                                            <span>
+                                                {format(trip.departureTime, 'MMM d')}
+                                                <span className='md:hidden'> • {format(trip.departureTime, 'EEE')}</span>
+                                                <span className='hidden md:inline'> • {format(trip.departureTime, 'EEEE')}</span>
+                                            </span>
+                                        </div>
+                                        {trip.bookingId && (
+                                            <CheckInButton bookingId={trip.bookingId} />
+                                        )}
                                     </div>
                                 </div>
 

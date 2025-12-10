@@ -8,7 +8,10 @@ import {
  * Trip schedule details schema matching the shared package
  * This will be imported from @go-train-group-pass/shared once the package is linked
  */
-export const TripScheduleDetailsSchema = SharedTripScheduleDetailsSchema;
+export const TripScheduleDetailsSchema = SharedTripScheduleDetailsSchema.extend({
+  departureTime: z.date(),
+  arrivalTime: z.date(),
+});
 
 export type TripScheduleDetails = z.infer<typeof TripScheduleDetailsSchema>;
 
