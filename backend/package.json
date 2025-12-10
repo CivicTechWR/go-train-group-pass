@@ -22,7 +22,7 @@
     "test:e2e": "vitest run --config vitest.e2e.config.ts",
     "test:a11y": "echo 'Accessibility tests not yet implemented for backend API'",
     "type-check": "tsc --noEmit",
-    "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format:check": "prettier --check --fix \"src/**/*.ts\" \"test/**/*.ts\"",
     "security": "npm audit --audit-level=high",
     "migrate:up": "mikro-orm migration:up",
     "repl": "nest start --entryFile repl",

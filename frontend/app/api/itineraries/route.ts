@@ -1,6 +1,8 @@
 import {
   CreateItinerarySchema,
   ItineraryCreationResponseSchema,
+  ItineraryQueryParamsSchema,
+  ItineraryTravelInfoSchema,
 } from '@/lib/types';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
@@ -49,7 +51,14 @@ export async function POST(request: NextRequest) {
 
     const data = responseData.data || responseData;
 
-    const parseTripDetails = (trip: any) => ({
+    const parseTripDetails = (trip: {
+      tripId: string;
+      routeShortName: string;
+      orgStation: string;
+      destStation: string;
+      departureTime: string | Date;
+      arrivalTime: string | Date;
+    }) => ({
       ...trip,
       departureTime: new Date(trip.departureTime),
       arrivalTime: new Date(trip.arrivalTime),
@@ -98,6 +107,122 @@ export async function POST(request: NextRequest) {
       {
         message:
           error instanceof Error ? error.message : 'Internal server error',
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    // Extract query parameters
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json(
+        { message: 'Itinerary ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate query parameters
+    const validatedParams = ItineraryQueryParamsSchema.parse({ id });
+
+    // Extract access token from cookies for authentication
+    const accessToken = request.cookies.get('access_token')?.value;
+
+    if (!accessToken) {
+      return NextResponse.json(
+        { message: 'Authorization required. Please sign in.' },
+        { status: 401 }
+      );
+    }
+
+    const response = await fetch(
+      `${BACKEND_URL}/itineraries?id=${encodeURIComponent(validatedParams.id)}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      return NextResponse.json(
+        {
+          message:
+            responseData.message || 'Failed to fetch itinerary travel info',
+          ...(responseData.errors && { errors: responseData.errors }),
+        },
+        { status: response.status }
+      );
+    }
+
+    const data = responseData.data || responseData;
+
+    // Parse date strings to Date objects for tripDetails
+    const parseTripDetails = (trip: {
+      tripId: string;
+      routeShortName: string;
+      orgStation: string;
+      destStation: string;
+      departureTime: string | Date;
+      arrivalTime: string | Date;
+    }) => ({
+      ...trip,
+      departureTime: new Date(trip.departureTime),
+      arrivalTime: new Date(trip.arrivalTime),
+    });
+
+    const parsedData = {
+      ...data,
+      tripDetails: (data.tripDetails || []).map(parseTripDetails),
+    };
+
+    // Validate response schema
+    const parseResult = ItineraryTravelInfoSchema.safeParse(parsedData);
+    if (!parseResult.success) {
+      const zodError = parseResult.error;
+      console.error('Backend response shape mismatch:', zodError.issues);
+      return NextResponse.json(
+        {
+          message: 'Invalid response format from backend',
+          errors: zodError.issues,
+        },
+        { status: 500 }
+      );
+    }
+
+    // Prevent caching
+    const nextResponse = NextResponse.json(parseResult.data);
+    nextResponse.headers.set(
+      'Cache-Control',
+      'no-store, no-cache, must-revalidate, proxy-revalidate'
+    );
+    nextResponse.headers.set('Pragma', 'no-cache');
+    nextResponse.headers.set('Expires', '0');
+
+    return nextResponse;
+  } catch (error) {
+    // Handle validation errors
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        { message: 'Validation error', errors: error.issues },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Failed to fetch itinerary travel info. Please try again.',
       },
       { status: 500 }
     );

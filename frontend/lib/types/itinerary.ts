@@ -63,3 +63,47 @@ export type ExistingItinerary = z.infer<typeof ExistingItinerarySchema>;
 export const ExistingItinerariesSchema = z.array(ExistingItinerarySchema);
 
 export type ExistingItineraries = z.infer<typeof ExistingItinerariesSchema>;
+
+/**
+ * Schema for travel group member
+ * Matches TravelGroupMemberSchema from shared package
+ */
+export const TravelGroupMemberSchema = z.object({
+  name: z.string(),
+  email: z.string(),
+  phoneNumber: z.string(),
+});
+
+export type TravelGroupMember = z.infer<typeof TravelGroupMemberSchema>;
+
+/**
+ * Schema for steward
+ * Matches StewardSchema from shared package
+ */
+export const StewardSchema = TravelGroupMemberSchema;
+
+export type Steward = z.infer<typeof StewardSchema>;
+
+/**
+ * Schema for itinerary travel info response
+ * Matches ItineraryTravelInfoSchema from shared package
+ * Uses coerce to handle date strings from backend
+ */
+export const ItineraryTravelInfoSchema = z.object({
+  members: z.array(TravelGroupMemberSchema).optional(),
+  steward: StewardSchema.optional(),
+  tripDetails: z.array(TripDetailsSchema),
+  groupsFormed: z.boolean(),
+});
+
+export type ItineraryTravelInfo = z.infer<typeof ItineraryTravelInfoSchema>;
+
+/**
+ * Schema for itinerary query parameters
+ * Matches ItineraryQueryParamsSchema from shared package
+ */
+export const ItineraryQueryParamsSchema = z.object({
+  id: z.string().uuid(),
+});
+
+export type ItineraryQueryParams = z.infer<typeof ItineraryQueryParamsSchema>;

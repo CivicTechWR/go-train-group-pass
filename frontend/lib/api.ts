@@ -3,6 +3,8 @@
  * Cookies are automatically included in requests by the browser
  */
 
+import type { ItineraryTravelInfo } from './types';
+
 const API_BASE = '/api';
 
 // Track refresh state to prevent multiple simultaneous refresh attempts
@@ -139,4 +141,21 @@ export async function apiPut<T>(endpoint: string, data?: unknown): Promise<T> {
  */
 export async function apiDelete<T>(endpoint: string): Promise<T> {
   return apiRequest<T>(endpoint, { method: 'DELETE' });
+}
+
+/**
+ * Itinerary API functions
+ */
+
+/**
+ * Get itinerary travel info by ID
+ * @param id - The itinerary UUID
+ * @returns Itinerary travel info including members, steward, trip details, and groups formed status
+ */
+export async function getItineraryTravelInfo(
+  id: string
+): Promise<ItineraryTravelInfo> {
+  return apiGet<ItineraryTravelInfo>(
+    `/itineraries?id=${encodeURIComponent(id)}`
+  );
 }

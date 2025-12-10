@@ -1,5 +1,6 @@
 'use client';
 
+import { ItineraryDetailsModal } from '@/components/itinerary/ItineraryDetailsModal';
 import { RoundTripForm } from '@/components/trip/RoundTripForm';
 import { apiPost } from '@/lib/api';
 import {
@@ -13,6 +14,10 @@ import { useState } from 'react';
 export default function BookPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [createdItineraryId, setCreatedItineraryId] = useState<string | null>(
+    null
+  );
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const transformFormData = (
     data: RoundTripFormInput
@@ -52,8 +57,9 @@ export default function BookPage() {
         transformedData
       );
 
-      // Success - redirect to itineraries page
-      router.push('/itineraries');
+      // Store the created itinerary ID and show details modal
+      setCreatedItineraryId(response.id);
+      setShowDetailsModal(true);
     } catch (error) {
       const errorMessage =
         error instanceof Error
@@ -73,6 +79,21 @@ export default function BookPage() {
         )}
         <RoundTripForm onSubmit={handleSubmit} />
       </div>
+
+      <ItineraryDetailsModal
+        itineraryId={createdItineraryId}
+        open={showDetailsModal}
+        onOpenChange={open => {
+          setShowDetailsModal(open);
+          // After closing, optionally redirect to itineraries page
+          if (!open && createdItineraryId) {
+            // Small delay to allow modal close animation
+            setTimeout(() => {
+              router.push('/itineraries');
+            }, 200);
+          }
+        }}
+      />
     </div>
   );
 }
