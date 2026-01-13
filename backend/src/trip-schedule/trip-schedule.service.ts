@@ -14,16 +14,18 @@ export class TripScheduleService {
     @InjectRepository(TripSchedule)
     private readonly tripScheduleRepo: EntityRepository<TripSchedule>,
   ) {}
-  public async getKIToUnionRoundTripSchedule(day: Date): Promise<RoundTripDto> {
+  public async getKIToUnionRoundTripSchedule(
+    dateString: string,
+  ): Promise<RoundTripDto> {
     const departureTrips = await this.getTripSchedule(
       'Kitchener GO',
       'Union Station GO',
-      day,
+      dateString,
     );
     const returnTrips = await this.getTripSchedule(
       'Union Station GO',
       'Kitchener GO',
-      day,
+      dateString,
     );
     return {
       departureTrips,
@@ -33,7 +35,7 @@ export class TripScheduleService {
   public async getTripSchedule(
     orgStation: string,
     destStation: string,
-    day: Date,
+    dateString: string,
   ): Promise<TripScheduleDetailsDto[]> {
     const supportedTrips = ['Kitchener GO', 'Union Station GO'];
     if (!supportedTrips.includes(orgStation)) {
@@ -42,11 +44,9 @@ export class TripScheduleService {
     if (!supportedTrips.includes(destStation)) {
       throw new BadRequestException('Destination station not supported');
     }
-    // convert date to service id
-    const year = day.getFullYear();
-    const month = String(day.getMonth() + 1).padStart(2, '0');
-    const dayStr = String(day.getDate()).padStart(2, '0');
-    const serviceId = `${year}${month}${dayStr}`;
+    // Extract serviceId directly from ISO date string (YYYY-MM-DD)
+    // This avoids timezone-related issues with Date object methods
+    const serviceId = dateString.replace(/-/g, '');
     const trips = await this.tripScheduleRepo.find({
       startStopName: orgStation,
       endStopName: destStation,

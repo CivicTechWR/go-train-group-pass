@@ -34,7 +34,7 @@ export class TripScheduleController {
     @Query() queryParams: KitchenerUnionRoundTripScheduleInputDto,
   ) {
     return this.tripScheduleService.getKIToUnionRoundTripSchedule(
-      new Date(queryParams.date),
+      queryParams.date,
     );
   }
 
@@ -47,7 +47,7 @@ export class TripScheduleController {
     return this.tripScheduleService.getTripSchedule(
       queryParams.orgStation,
       queryParams.destStation,
-      new Date(queryParams.date),
+      queryParams.date,
     );
   }
 }

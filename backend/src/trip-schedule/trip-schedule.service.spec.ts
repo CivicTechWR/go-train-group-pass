@@ -34,17 +34,21 @@ describe('TripScheduleService', () => {
   });
 
   describe('getTripSchedule', () => {
-    const day = new Date('2023-10-27T10:00:00Z'); // Friday
+    const dateString = '2023-10-27'; // Friday in ISO format
 
     it('should throw BadRequestException if origin station is not supported', async () => {
       await expect(
-        service.getTripSchedule('Invalid Station', 'Union Station GO', day),
+        service.getTripSchedule(
+          'Invalid Station',
+          'Union Station GO',
+          dateString,
+        ),
       ).rejects.toThrow(BadRequestException);
     });
 
     it('should throw BadRequestException if destination station is not supported', async () => {
       await expect(
-        service.getTripSchedule('Kitchener GO', 'Invalid Station', day),
+        service.getTripSchedule('Kitchener GO', 'Invalid Station', dateString),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -65,7 +69,7 @@ describe('TripScheduleService', () => {
       const result = await service.getTripSchedule(
         'Kitchener GO',
         'Union Station GO',
-        day,
+        dateString,
       );
 
       expect(mockTripScheduleRepo.find).toHaveBeenCalledWith({
@@ -82,7 +86,7 @@ describe('TripScheduleService', () => {
 
   describe('getKIToUnionRoundTripSchedule', () => {
     it('should return round trip schedules', async () => {
-      const day = new Date('2023-10-27T10:00:00Z');
+      const dateString = '2023-10-27';
 
       const departureTripsMock = [
         {
@@ -126,19 +130,19 @@ describe('TripScheduleService', () => {
         .mockResolvedValueOnce(departureTripsMock)
         .mockResolvedValueOnce(returnTripsMock);
 
-      const result = await service.getKIToUnionRoundTripSchedule(day);
+      const result = await service.getKIToUnionRoundTripSchedule(dateString);
 
       expect(getTripScheduleSpy).toHaveBeenNthCalledWith(
         1,
         'Kitchener GO',
         'Union Station GO',
-        day,
+        dateString,
       );
       expect(getTripScheduleSpy).toHaveBeenNthCalledWith(
         2,
         'Union Station GO',
         'Kitchener GO',
-        day,
+        dateString,
       );
 
       expect(result.departureTrips).toEqual(departureTripsMock);
