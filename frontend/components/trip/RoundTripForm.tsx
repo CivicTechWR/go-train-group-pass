@@ -168,7 +168,8 @@ export function RoundTripForm({ onSubmit }: RoundTripFormProps) {
           Book Round Trip
         </CardTitle>
         <CardDescription>
-          Select your departure and return times for your journey
+          Select your departure and return times for your journey (currently
+          supporting Kitchener ↔ Union only)
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit(onSubmit) as any}>

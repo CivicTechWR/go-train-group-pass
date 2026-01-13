@@ -100,8 +100,6 @@ export default function ItinerariesPage() {
           <p className='text-muted-foreground max-w-2xl mx-auto'>
             Find others to share a group pass with. We handle grouping and assigning stewards.
             <br />
-            Currently supporting Kitchener (KI) ↔ Union round trips.
-            <br />
             Coming soon: Payment tracking, ticket uploads, and more!
           </p>
         </div>

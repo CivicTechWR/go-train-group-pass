@@ -37,13 +37,6 @@ export class TripScheduleService {
     destStation: string,
     dateString: string,
   ): Promise<TripScheduleDetailsDto[]> {
-    const supportedTrips = ['Kitchener GO', 'Union Station GO'];
-    if (!supportedTrips.includes(orgStation)) {
-      throw new BadRequestException('Origin station not supported');
-    }
-    if (!supportedTrips.includes(destStation)) {
-      throw new BadRequestException('Destination station not supported');
-    }
     // Extract serviceId directly from ISO date string (YYYY-MM-DD)
     // This avoids timezone-related issues with Date object methods
     const serviceId = dateString.replace(/-/g, '');

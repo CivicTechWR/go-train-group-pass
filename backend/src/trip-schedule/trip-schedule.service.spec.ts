@@ -36,23 +36,7 @@ describe('TripScheduleService', () => {
   describe('getTripSchedule', () => {
     const dateString = '2023-10-27'; // Friday in ISO format
 
-    it('should throw BadRequestException if origin station is not supported', async () => {
-      await expect(
-        service.getTripSchedule(
-          'Invalid Station',
-          'Union Station GO',
-          dateString,
-        ),
-      ).rejects.toThrow(BadRequestException);
-    });
-
-    it('should throw BadRequestException if destination station is not supported', async () => {
-      await expect(
-        service.getTripSchedule('Kitchener GO', 'Invalid Station', dateString),
-      ).rejects.toThrow(BadRequestException);
-    });
-
-    it('should return trip details when stations are valid', async () => {
+    it('should return trip details for any valid station pair', async () => {
       const mockTrips = [
         {
           tripId: '1',
