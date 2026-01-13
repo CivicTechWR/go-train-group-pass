@@ -80,19 +80,24 @@ describe('GroupFormationService', () => {
   describe('formGroupsForItinerary', () => {
     const mockTripHash = 'abc-123';
     const mockItineraryId = 'itinerary-1';
+    const mockUserId = 'user-1';
 
     it('should return NOT_ENOUGH_BOOKINGS if fewer than 2 users', async () => {
       // Mock finding the requested itinerary
       itineraryRepositoryMock.findOneOrFail.mockResolvedValue({
         id: mockItineraryId,
         tripHash: mockTripHash,
+        user: { id: mockUserId },
       });
       // Mock finding only 1 matching itinerary
       itineraryRepositoryMock.find.mockResolvedValue([
         { id: '1', user: { id: 'u1' } },
       ]);
 
-      const result = await service.formGroupsForItinerary(mockItineraryId);
+      const result = await service.formGroupsForItinerary(
+        mockItineraryId,
+        mockUserId,
+      );
 
       expect(result.failureReason).toBe(
         GroupFormationResultFailureReason.NOT_ENOUGH_BOOKINGS,
@@ -105,6 +110,7 @@ describe('GroupFormationService', () => {
       itineraryRepositoryMock.findOneOrFail.mockResolvedValue({
         id: mockItineraryId,
         tripHash: mockTripHash,
+        user: { id: mockUserId },
       });
       // 3 users, none want to steward
       itineraryRepositoryMock.find.mockResolvedValue([
@@ -113,7 +119,10 @@ describe('GroupFormationService', () => {
         { id: '3', wantsToSteward: false, user: { id: 'u3' } },
       ]);
 
-      const result = await service.formGroupsForItinerary(mockItineraryId);
+      const result = await service.formGroupsForItinerary(
+        mockItineraryId,
+        mockUserId,
+      );
 
       expect(result.failureReason).toBe(
         GroupFormationResultFailureReason.NO_STEWARD_CANDIDATE,
@@ -126,6 +135,7 @@ describe('GroupFormationService', () => {
       itineraryRepositoryMock.findOneOrFail.mockResolvedValue({
         id: mockItineraryId,
         tripHash: mockTripHash,
+        user: { id: mockUserId },
       });
       // 3 users, 1 wants to steward
       const mockBookings = {
@@ -153,7 +163,10 @@ describe('GroupFormationService', () => {
       ];
       itineraryRepositoryMock.find.mockResolvedValue(users);
 
-      const result = await service.formGroupsForItinerary(mockItineraryId);
+      const result = await service.formGroupsForItinerary(
+        mockItineraryId,
+        mockUserId,
+      );
 
       expect(result.groupsFormed).toBe(1); // One group of 3
       expect(result.usersGrouped).toBe(3);
@@ -167,6 +180,7 @@ describe('GroupFormationService', () => {
       itineraryRepositoryMock.findOneOrFail.mockResolvedValue({
         id: mockItineraryId,
         tripHash: mockTripHash,
+        user: { id: mockUserId },
       });
 
       // We need 2 stewards for 2 groups
@@ -194,7 +208,10 @@ describe('GroupFormationService', () => {
       }
       itineraryRepositoryMock.find.mockResolvedValue(users);
 
-      const result = await service.formGroupsForItinerary(mockItineraryId);
+      const result = await service.formGroupsForItinerary(
+        mockItineraryId,
+        mockUserId,
+      );
 
       // Best split for 6 is 3, 3 -> 2 groups
       expect(result.groupsFormed).toBe(2);
@@ -206,6 +223,7 @@ describe('GroupFormationService', () => {
       itineraryRepositoryMock.findOneOrFail.mockResolvedValue({
         id: mockItineraryId,
         tripHash: mockTripHash,
+        user: { id: mockUserId },
       });
 
       // 6 users need 2 groups (3+3), but only 1 steward provided
@@ -227,7 +245,7 @@ describe('GroupFormationService', () => {
       itineraryRepositoryMock.find.mockResolvedValue(users);
 
       await expect(
-        service.formGroupsForItinerary(mockItineraryId),
+        service.formGroupsForItinerary(mockItineraryId, mockUserId),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -235,6 +253,7 @@ describe('GroupFormationService', () => {
       itineraryRepositoryMock.findOneOrFail.mockResolvedValue({
         id: mockItineraryId,
         tripHash: mockTripHash,
+        user: { id: mockUserId },
       });
 
       itineraryRepositoryMock.find.mockResolvedValue(null); // Simulated null return if type allows or adjust logic
@@ -243,7 +262,10 @@ describe('GroupFormationService', () => {
       // If find returns empty array
       itineraryRepositoryMock.find.mockResolvedValue([]);
 
-      const result = await service.formGroupsForItinerary(mockItineraryId);
+      const result = await service.formGroupsForItinerary(
+        mockItineraryId,
+        mockUserId,
+      );
       // Less than MIN_GROUP_SIZE (2)
       expect(result.failureReason).toBe(
         GroupFormationResultFailureReason.NOT_ENOUGH_BOOKINGS,

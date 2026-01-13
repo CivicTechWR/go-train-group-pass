@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { Trip, TripBooking, TravelGroup, User, Itinerary } from '../entities';
@@ -56,6 +61,7 @@ export class GroupFormationService {
    */
   async formGroupsForItinerary(
     itineraryId: string,
+    userId: string,
   ): Promise<GroupFormationResultDto> {
     this.logger.log(`Forming groups for itinerary ${itineraryId}`);
 
@@ -66,6 +72,13 @@ export class GroupFormationService {
         populate: ['tripBookings', 'tripBookings.trip', 'user'],
       },
     );
+
+    // Verify the user making the request owns this itinerary
+    if (itinerary.user.id !== userId) {
+      throw new ForbiddenException(
+        'You do not have permission to trigger group formation for this itinerary',
+      );
+    }
 
     // Find ALL itineraries with the same tripHash (users traveling the same route)
     // Theoretically, should always be one itinerary/trip combo per user enforced on db level so shouldn't need to de-duplicate.

@@ -5,6 +5,8 @@ import {
   UseGuards,
   Logger,
   BadRequestException,
+  ForbiddenException,
+  Request,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -15,6 +17,7 @@ import {
 } from '@nestjs/swagger';
 import { GroupFormationService } from './group-formation.service';
 import { AuthGuard } from '../modules/auth/auth.guard';
+import type { RequestWithUser } from '../modules/auth/auth.guard';
 import { Serialize } from '../common/decorators/serialize.decorator';
 import {
   GroupFormationResultSchema,
@@ -35,6 +38,7 @@ export class GroupFormationController {
 
   /**
    * Trigger group formation for a specific itinerary.
+   * Only the itinerary owner can trigger group formation.
    * Should be called when it's time to lock in groups (e.g., 15 mins before departure).
    */
   @Post('itinerary/:itineraryId')
@@ -44,6 +48,7 @@ export class GroupFormationController {
     summary: 'Trigger group formation for a specific itinerary',
     description:
       'Forms groups for all trips in the specified itinerary. ' +
+      'Only the itinerary owner can trigger this. ' +
       'Should be called at the appropriate time before departure.',
   })
   @ApiParam({
@@ -59,15 +64,26 @@ export class GroupFormationController {
     description: 'Not enough eligible bookings or stewards to form groups',
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - you do not own this itinerary',
+  })
   @ApiResponse({ status: 404, description: 'Itinerary not found' })
   @Serialize(GroupFormationResultSchema)
   async formGroupsForItinerary(
     @Param('itineraryId') itineraryId: string,
+    @Request() req: RequestWithUser,
   ): Promise<GroupFormationResultDto> {
+    if (!req.user) {
+      throw new ForbiddenException('User not found in request');
+    }
+
     this.logger.log(`Group formation triggered for itinerary ${itineraryId}`);
 
-    const results =
-      await this.groupFormationService.formGroupsForItinerary(itineraryId);
+    const results = await this.groupFormationService.formGroupsForItinerary(
+      itineraryId,
+      req.user.id,
+    );
 
     if (results.failureReason) {
       throw new BadRequestException(
