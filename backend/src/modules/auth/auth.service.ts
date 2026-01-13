@@ -110,7 +110,7 @@ export class AuthService implements IAuthService {
     const { error } = await this.supabaseService.auth.resetPasswordForEmail(
       email,
       {
-        redirectTo: `${frontendUrl}/auth/reset-password`,
+        redirectTo: `${frontendUrl}/auth/reset`,
       },
     );
 

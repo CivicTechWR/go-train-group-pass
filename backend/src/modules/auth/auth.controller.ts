@@ -93,7 +93,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async requestPasswordReset(@Body() body: PasswordResetInputDto) {
     await this.authService.requestPasswordReset(body);
-    return { message: 'Password reset email sent', invalid: 'invalid' };
+    return { message: 'Password reset email sent' };
   }
 
   @Post('password/update')

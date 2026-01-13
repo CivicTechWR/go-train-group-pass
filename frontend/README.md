@@ -36,13 +36,7 @@ npm install
 
 ### 3. Set Up Environment Variables
 
-Create a `.env` file in the frontend directory:
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your configuration.:
+Create a `.env.local` file in the frontend directory with your configuration:
 
 ```env
 # Backend API URL

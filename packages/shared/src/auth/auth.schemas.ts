@@ -12,7 +12,15 @@ export const SignUpInputSchema = z.object({
     .min(8, 'Password must be at least 8 characters')
     .max(72, 'Password must not exceed 72 characters'),
   fullName: z.string().min(1, 'Full name must not be empty'),
-  phoneNumber: z.e164().optional(),
+  phoneNumber: z
+    .string()
+    .min(1, 'Phone number is required')
+    .refine(
+      (val) =>
+        /^\+?[1-9]\d{1,14}$/.test(val) ||
+        /^[0-9\s\-\+\(\)]+$/.test(val),
+      'Invalid phone number format',
+    ),
 });
 
 export const SignInInputSchema = z.object({
