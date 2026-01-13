@@ -8,10 +8,21 @@ import {
 } from '@nestjs/platform-fastify';
 
 async function bootstrap() {
+  // Configure CORS based on environment
+  const corsOptions =
+    process.env.NODE_ENV === 'production'
+      ? {
+          origin: process.env.FRONTEND_URL || 'https://localhost:3001',
+          credentials: true,
+          methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+          allowedHeaders: ['Content-Type', 'Authorization'],
+        }
+      : true; // Allow all origins in development
+
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),
-    { cors: true },
+    { cors: corsOptions },
   );
 
   if (process.env.NODE_ENV !== 'production') {
