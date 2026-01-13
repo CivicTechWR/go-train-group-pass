@@ -17,7 +17,6 @@ import { ItineraryCreationResponseDto } from '@go-train-group-pass/shared';
 import { TravelGroup, Trip, TripBooking } from 'src/entities';
 import { AggregatedItinerary } from 'src/entities';
 import { type TravelGroupMemberDto } from '@go-train-group-pass/shared';
-import { TripBookingStatus } from 'src/entities/tripBookingEnum';
 
 @Injectable()
 export class ItinerariesService {
@@ -32,7 +31,7 @@ export class ItinerariesService {
     private readonly tripRepository: EntityRepository<Trip>,
     private readonly userService: UsersService,
     private readonly tripBookingService: TripBookingService,
-  ) { }
+  ) {}
 
   @Transactional()
   async create(
@@ -106,7 +105,7 @@ export class ItinerariesService {
     const tripIds = tripBookings.map((tripBooking) => tripBooking.trip.id);
     const itineraryTravelInfo: ItineraryTravelInfoDto = {
       tripDetails: tripBookings.map((booking) =>
-        this.tripBookingService.getTripDetails(booking)
+        this.tripBookingService.getTripDetails(booking),
       ),
       groupsFormed: false,
     };
@@ -143,7 +142,10 @@ export class ItinerariesService {
     return aggregatedItineraries.map((aggregatedItinerary) => ({
       tripSequence: aggregatedItinerary.tripSequence,
       userCount: aggregatedItinerary.userCount,
-      tripDetails: aggregatedItinerary.tripDetails.map(td => ({...td, isCheckedIn: false})),
+      tripDetails: aggregatedItinerary.tripDetails.map((td) => ({
+        ...td,
+        isCheckedIn: false,
+      })),
     }));
   }
 
@@ -164,7 +166,10 @@ export class ItinerariesService {
         joinedItineraries: [],
         itinerariesToJoin: aggregatedItineraries.map((aggregatedItinerary) => ({
           userCount: aggregatedItinerary.userCount,
-          tripDetails: aggregatedItinerary.tripDetails.map(td => ({...td, isCheckedIn: false})),
+          tripDetails: aggregatedItinerary.tripDetails.map((td) => ({
+            ...td,
+            isCheckedIn: false,
+          })),
           tripSequence: aggregatedItinerary.tripSequence,
         })),
       };
@@ -243,13 +248,19 @@ export class ItinerariesService {
           joined: joinedTripHashes.has(aggregatedItinerary.id),
           groupFormed: groupsForItinerary.length > 0,
           // isCheckedIn should not be here but doesn't matter for now. We need to fix the dtos
-          tripDetails: aggregatedItinerary.tripDetails.map(td => ({...td, isCheckedIn: false})),
+          tripDetails: aggregatedItinerary.tripDetails.map((td) => ({
+            ...td,
+            isCheckedIn: false,
+          })),
         });
       } else {
         otherItineraries.push({
           userCount: aggregatedItinerary.userCount,
           // isCheckedIn should not be here but doesn't matter for now. We need to fix the dtos
-          tripDetails: aggregatedItinerary.tripDetails.map(td => ({...td, isCheckedIn: false})),
+          tripDetails: aggregatedItinerary.tripDetails.map((td) => ({
+            ...td,
+            isCheckedIn: false,
+          })),
           tripSequence: aggregatedItinerary.tripSequence,
         });
       }

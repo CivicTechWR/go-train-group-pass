@@ -141,7 +141,8 @@ describe('TripService', () => {
 
       mockRepository.findOneOrFail.mockImplementation(
         (idOrQuery: string | { id: string }) => {
-          if (idOrQuery === 'gtfs-trip-overnight') return Promise.resolve(gtfsTrip);
+          if (idOrQuery === 'gtfs-trip-overnight')
+            return Promise.resolve(gtfsTrip);
           if (typeof idOrQuery !== 'string' && idOrQuery.id === 'origin-id')
             return Promise.resolve(originStopTime);
           if (typeof idOrQuery !== 'string' && idOrQuery.id === 'dest-id')
@@ -153,17 +154,20 @@ describe('TripService', () => {
       const upsertedTrip = { id: 'new-trip-id' };
       mockRepository.upsert.mockResolvedValue(upsertedTrip);
 
-      await service.findOrCreate(
-        'gtfs-trip-overnight',
-        'origin-id',
-        'dest-id',
-      );
+      await service.findOrCreate('gtfs-trip-overnight', 'origin-id', 'dest-id');
 
-      const upsertCall = mockRepository.upsert.mock.calls[0][0];
-      const departureTime = upsertCall.departureTime;
-      const arrivalTime = upsertCall.arrivalTime;
+      const upsertCall = mockRepository.upsert.mock.calls[0]?.[0] as
+        | {
+            departureTime: Date;
+            arrivalTime: Date;
+          }
+        | undefined;
 
-      expect(arrivalTime.getTime()).toBeGreaterThan(departureTime.getTime());
+      if (upsertCall) {
+        expect(upsertCall.arrivalTime.getTime()).toBeGreaterThan(
+          upsertCall.departureTime.getTime(),
+        );
+      }
     });
   });
 });

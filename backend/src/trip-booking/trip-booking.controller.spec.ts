@@ -9,7 +9,6 @@ describe('TripBookingController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [TripBookingController],
-      controllers: [TripBookingController],
       providers: [
         {
           provide: TripBookingService,

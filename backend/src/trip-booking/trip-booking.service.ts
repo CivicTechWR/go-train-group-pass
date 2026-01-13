@@ -1,6 +1,10 @@
 import { EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { TripBooking } from '../entities';
 import { TripService } from '../trip/trip.service';
 import { TripBookingStatus } from '../entities/tripBookingEnum';
@@ -13,11 +17,23 @@ export class TripBookingService {
     private readonly tripBookingRepo: EntityRepository<TripBooking>,
     private readonly userService: UsersService,
     private readonly tripService: TripService,
-  ) { }
+  ) {}
 
-  async checkIn(id: string) {
-    const tripBooking = await this.tripBookingRepo.findOneOrFail({ id });
+  async checkIn(id: string, userId: string) {
+    const tripBooking = await this.tripBookingRepo.findOneOrFail(
+      { id },
+      { populate: ['user'] },
+    );
+
+    // Verify the user making the request owns this booking
+    if (tripBooking.user.id !== userId) {
+      throw new ForbiddenException(
+        'You do not have permission to check in this trip booking',
+      );
+    }
+
     tripBooking.status = TripBookingStatus.CHECKED_IN;
+    tripBooking.checkedInAt = new Date();
     await this.tripBookingRepo.getEntityManager().flush();
   }
 
@@ -85,6 +101,5 @@ export class TripBookingService {
       bookingId: tripBooking.id,
       isCheckedIn: tripBooking.status === TripBookingStatus.CHECKED_IN,
     };
-
   }
 }
