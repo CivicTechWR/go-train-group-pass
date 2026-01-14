@@ -10,7 +10,7 @@
 
 ## 🚨 We Need Frontend Help
 
-Our backend is built and working, but we have **no user interface yet**. We’re looking for frontend developers (or people willing to learn React/Next.js) to help build the web app. See [Contributing](#contributing) for details.
+Our backend is built and working, but our front end workflows need more work. We’re looking for frontend developers (or people willing to learn React/Next.js) to help build the web app. See [Contributing](#contributing) for details.
 
 -----
 
@@ -308,9 +308,14 @@ A: One person in the group (the “steward”) purchases the pass from GO Transi
 
 ### Privacy & Safety
 
-**Q: What information do other group members see about me?**
+**Q: What information can other people see about me?**
 
-A: By default, only your first name and a profile photo (if you add one). Your phone number and email stay private. Only the ticket steward shares their contact info so the group can coordinate.
+**A:** It depends on your role in a trip.
+
+- **If you’re a group member:** you only see the ticket steward’s contact information. Other group members do not see your contact details.
+- **If you’re the ticket steward:** you can see the names and contact information of the group members for that trip, so you can coordinate.
+
+Everyone keeps a history of past trips. For trips where you were the steward, you’ll retain the contact info for those participants. For trips where you weren’t the steward, you’ll only retain the steward’s contact info.
 
 **Q: What if I get matched with someone I don’t want to travel with?**
 
