@@ -115,17 +115,9 @@ Interested in helping out? Start with [`CONTRIBUTING.md`](CONTRIBUTING.md) for m
 - PostgreSQL (or use our Supabase setup)
 - Basic familiarity with REST APIs and ORMs (we use MikroORM)
 
-**Get the backend running:**
+For backend setup instructions, see the [Backend README](backend/README.md#getting-started).
 
-```bash
-git clone https://github.com/CivicTechWR/go-train-group-pass.git
-cd go-train-group-pass
-npm install
-cd backend
-npm run dev
-```
-
-See detailed setup guides:
+Additional setup guides:
 
 |Surface           |Status |Setup Guide                                                                                                                                                 |
 |------------------|-------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
