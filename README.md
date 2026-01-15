@@ -142,7 +142,7 @@ See detailed setup guides:
 
 ## Project Structure
 
-- **`backend/`** — Backend API service. See [`backend/README.md`](backend/README.md) for details.
+- **`backend/`** — Backend API service. See [`backend/README.md#project-structure`](backend/README.md#project-structure) for details.
 - **`packages/shared/`** — Shared TypeScript types and DTOs
 - **`supabase/`** — Local Supabase configuration (CLI, database, auth) that mirrors hosted infrastructure.
 - **`spec/`** — Technical specifications and process documentation
