@@ -53,77 +53,7 @@ A web app where commuters can:
 
 ## Current Status & Roadmap
 
-### Rider Journey Stages
-
-The stages below map to open issues and our development epics:
-
-#### 1. Pre-planning (Epic 1: Trip Discovery & Planning - 70% done)
-
-Search schedules, create itineraries, plan your trips
-
-- ✅ GTFS data import and refresh
-- ✅ One-way trip schedule search
-- ✅ Round-trip Kitchener-Union query
-- 🔄 Generic round-trip endpoint
-- 🔄 Itinerary creation flow
-- Issues: [#64–66](https://github.com/CivicTechWR/go-train-group-pass/issues?q=is%3Aissue+is%3Aopen+64..66), [#74–86](https://github.com/CivicTechWR/go-train-group-pass/issues?q=is%3Aissue+is%3Aopen+74..86)
-
-#### 2. Pre-board - MVP Priority
-
-**Epic 2: Group Formation & Matching (40% done)**  
-**Epic 3: Group Coordination (0% done)**
-
-Group formation, check-in, QR/scan, and steward confirmations
-
-- ✅ Database schema (travel_group, trip_booking)
-- ✅ Group formation background job
-- 🔄 Manual group formation trigger
-- ❌ Group chat/messaging
-- ❌ Meetup location selection
-- ❌ Member check-in status
-- ❌ **Frontend interface** (blocking everything)
-- Issues: [#67–71](https://github.com/CivicTechWR/go-train-group-pass/issues?q=is%3Aissue+is%3Aopen+67..71), [#93–100](https://github.com/CivicTechWR/go-train-group-pass/issues?q=is%3Aissue+is%3Aopen+93..100), [#104–110](https://github.com/CivicTechWR/go-train-group-pass/issues?q=is%3Aissue+is%3Aopen+104..110)
-
-#### 3. On board - MVP Priority
-
-**Epic 3: Group Coordination (continued)**
-
-Steward tools for verification and regrouping
-
-- ❌ Active pass display
-- ❌ Real-time group status
-- ❌ Steward broadcast tools
-- Issues: Same as Pre-board
-
-#### 4. Post board
-
-**Epic 4: Pass Purchase & Activation (20% done)**  
-**Epic 5: Payment Settlement (0% done)**
-
-Ticket purchase, cost splits, and payments/reconciliation
-
-- ✅ Database schema (ticket_purchase, payment tables)
-- ❌ Pass purchase workflow
-- ❌ Cost calculation & display
-- ❌ Payment tracking
-- Issues: [#72–73](https://github.com/CivicTechWR/go-train-group-pass/issues?q=is%3Aissue+is%3Aopen+72..73), [#107–115](https://github.com/CivicTechWR/go-train-group-pass/issues?q=is%3Aissue+is%3Aopen+107..115)
-
-### Additional Epics (Not Started)
-
-**Epic 6: Notifications & Alerts (0% done)**
-
-- Trip reminders, group updates, service disruptions
-- Critical for user adoption post-MVP
-
-**Epic 7: User Experience / Frontend (0% done) ⚠️ BLOCKING**
-
-- Web interface - without this, nothing else matters
-- Issues: [#26](https://github.com/CivicTechWR/go-train-group-pass/issues/26), [#52](https://github.com/CivicTechWR/go-train-group-pass/issues/52)
-
-**Epic 8: Safety & Trust (0% done)**
-
-- User verification, reporting, blocking, moderation
-- Can defer to post-MVP but important for scale
+For the latest project status, roadmap, and development progress, see the [Pass Sharing Project](https://github.com/orgs/CivicTechWR/projects/pass-sharing-project).
 
 ### System Architecture
 
