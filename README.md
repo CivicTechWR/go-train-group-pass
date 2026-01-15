@@ -142,7 +142,7 @@ See detailed setup guides:
 
 ## Project Structure
 
-- **`backend/`** — NestJS application modules, MikroORM entities, and Vitest suites. See [`backend/README.md#project-structure`](backend/README.md#project-structure) for file-level detail.
+- **`backend/`** — Backend API service. See [`backend/README.md#project-structure`](backend/README.md#project-structure) for details.
 - **`packages/shared/`** — Shared TypeScript types and DTOs
 - **`supabase/`** — Local Supabase configuration (CLI, database, auth) that mirrors hosted infrastructure.
 - **`spec/`** — Technical specifications and process documentation
