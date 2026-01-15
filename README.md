@@ -53,7 +53,7 @@ A web app where commuters can:
 
 ## Current Status & Roadmap
 
-For the latest project status, roadmap, and development progress, see the [Pass Sharing Project](https://github.com/orgs/CivicTechWR/projects/pass-sharing-project).
+For the latest project status, roadmap, and development progress, see the [Pass Sharing Project](https://github.com/orgs/CivicTechWR/projects) on GitHub.
 
 ### System Architecture
 
