@@ -113,7 +113,7 @@ Interested in helping out? Start with [`CONTRIBUTING.md`](CONTRIBUTING.md) for m
 
 - Node.js 18+ and npm
 - PostgreSQL (or use our Supabase setup)
-- Basic familiarity with REST APIs
+- Basic familiarity with REST APIs and ORMs (we use MikroORM)
 
 **Get the backend running:**
 
