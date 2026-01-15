@@ -154,11 +154,17 @@ We welcome contributors of all skill levels:
 - **Writers:** Documentation, help content, privacy policies
 - **Anyone interested:** Come learn with us!
 
-### Time Commitment
+### What Commitment Looks Like
 
-- **90-120 minutes/week** at Wednesday hack nights
-- More if you want to contribute outside of meetups
-- Even occasional contributions (once a month) are valuable
+Commitment here is about communication and collaboration, not rigid time requirements. We welcome both regular contributors and one-time contributions:
+
+- **Identify a ticket** you'd like to work on and what you may need to learn
+- **Ask for help** finding resources or getting clarification on unclear requirements
+- **Provide time estimates** when you start work (we include estimates on tickets, but yours may differ based on your familiarity with the codebase and tech)
+- **Communicate updates** to the team, especially if your work is a dependency for something else
+- **Join hack nights** (90-120 minutes/week on Wednesdays) or contribute asynchronously—both work!
+
+Even occasional contributions are valuable. Work at your own pace and communicate openly.
 
 ### Why Join This Project
 
