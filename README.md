@@ -194,6 +194,15 @@ Read our [Code of Conduct](CODE_OF_CONDUCT.md) and check out [open issues](https
 
 ## Development Workflow
 
+### Issue and PR Management
+
+- **All PRs must be linked to an issue:** We don't merge anything not tied to a ticket. If you start work before creating an issue, add one to the [project board](https://github.com/orgs/CivicTechWR/projects) before opening a PR. This ensures clear tracking of all work without relying solely on commit messages.
+- **One issue per PR:** PRs addressing multiple issues slow down task completion and confuse new contributors who need to work off branches other than main. Keep your PRs focused on a single issue.
+- **PR size and state:** PRs should be in a working state and reasonably sized. While large PRs won't be rejected, smaller PRs are reviewed and merged much faster.
+- **Review requirements:** All PRs must be reviewed before merging.
+
+### Workflow Guidelines
+
 - Work from feature branches aligned with the contribution templates in [`.github/ISSUE_TEMPLATE/`](.github/ISSUE_TEMPLATE/) and [`pull_request_template.md`](.github/pull_request_template.md).
 - Automated checks run on every push/PR; monitor the GitHub Action badges or run equivalents locally (`npm run lint`, `npm run type-check`, `npm run test`).
 - Consult the [Notion workflow analysis section](https://www.notion.so/Technical-Design-Document-WIP-2a1e01ee4c0080a391bfcd52b067f9a9#2a1e01ee4c0080c0beaa576dc85df8ba) for sprint cadence and release planning.
