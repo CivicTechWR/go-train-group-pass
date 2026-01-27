@@ -15,7 +15,7 @@ import { faker } from '@faker-js/faker';
 import { createDateInTransitTimezone } from '../../utils/date.utils';
 import { getDateTimeFromServiceIdGTFSTimeString } from '../../utils/getDateTimeFromServiceIdGTFSTimeString';
 
-export class DemoSeeder extends Seeder {
+export class DevelopmentSeeder extends Seeder {
   private generatedPhoneNumbers = new Set<string>();
 
   async run(em: EntityManager): Promise<void> {
