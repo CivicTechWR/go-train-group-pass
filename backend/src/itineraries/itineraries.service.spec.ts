@@ -21,12 +21,12 @@ vi.mock('@mikro-orm/core', async () => {
     ...actual,
     Transactional:
       () =>
-        <T>(
-          target: object,
-          propertyKey: string | symbol,
-          descriptor: TypedPropertyDescriptor<T>,
-        ) =>
-          descriptor,
+      <T>(
+        target: object,
+        propertyKey: string | symbol,
+        descriptor: TypedPropertyDescriptor<T>,
+      ) =>
+        descriptor,
   };
 });
 

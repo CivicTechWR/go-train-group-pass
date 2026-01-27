@@ -1,6 +1,6 @@
 import { gtfsDateStringToDate } from './gtfsDateStringToDate';
 import { GTFSTimeString } from './isGTFSTimeString';
-import { createDateTimeInTransitTimezone } from './date.utils';
+import { createUTCDateTimeInTransitTimezone } from './date.utils';
 
 export function getDateTimeFromServiceIdGTFSTimeString(
   serviceID: string,
@@ -24,5 +24,5 @@ export function getDateTimeFromServiceIdGTFSTimeString(
   const secondsStr = String(seconds).padStart(2, '0');
   const normalizedTimeString = `${hoursStr}:${minutesStr}:${secondsStr}`;
 
-  return createDateTimeInTransitTimezone(targetDate, normalizedTimeString);
+  return createUTCDateTimeInTransitTimezone(targetDate, normalizedTimeString);
 }

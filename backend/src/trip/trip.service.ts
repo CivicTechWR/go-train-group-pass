@@ -14,7 +14,7 @@ export class TripService {
     private readonly tripRepo: EntityRepository<Trip>,
     @InjectRepository(GTFSStopTime)
     private readonly gtfstopTimeRepo: EntityRepository<GTFSStopTime>,
-  ) { }
+  ) {}
   async findOrCreate(
     gtfsTripId: string,
     originStopTimeId: string,
@@ -65,7 +65,7 @@ export class TripService {
     );
 
     // If arrival time is before departure time, it means the trip spans midnight and arrival is the next day.
-    // This handles cases where GTFS time might be normalized (e.g., 00:26:00 instead of 24:26:00) 
+    // This handles cases where GTFS time might be normalized (e.g., 00:26:00 instead of 24:26:00)
     // or if the trip simply crosses midnight into the next calendar day.
     if (arrivalTime < departureTime) {
       arrivalTime.setDate(arrivalTime.getDate() + 1);

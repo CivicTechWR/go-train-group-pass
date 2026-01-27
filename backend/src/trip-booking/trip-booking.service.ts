@@ -13,7 +13,7 @@ export class TripBookingService {
     private readonly tripBookingRepo: EntityRepository<TripBooking>,
     private readonly userService: UsersService,
     private readonly tripService: TripService,
-  ) { }
+  ) {}
 
   async checkIn(id: string) {
     const tripBooking = await this.tripBookingRepo.findOneOrFail({ id });
@@ -85,6 +85,5 @@ export class TripBookingService {
       bookingId: tripBooking.id,
       isCheckedIn: tripBooking.status === TripBookingStatus.CHECKED_IN,
     };
-
   }
 }

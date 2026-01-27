@@ -30,7 +30,7 @@ import { Public } from '../common/decorators/public.decorator';
 @UseGuards(AuthGuard)
 @ApiTags('Itineraries')
 export class ItinerariesController {
-  constructor(private readonly itinerariesService: ItinerariesService) { }
+  constructor(private readonly itinerariesService: ItinerariesService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create an itinerary' })

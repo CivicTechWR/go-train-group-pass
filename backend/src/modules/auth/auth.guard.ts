@@ -20,7 +20,7 @@ export class AuthGuard implements CanActivate {
     private readonly supabaseService: SupabaseService,
     private readonly usersService: UsersService,
     private readonly reflector: Reflector,
-  ) { }
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [

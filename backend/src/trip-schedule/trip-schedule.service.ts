@@ -35,11 +35,11 @@ export class TripScheduleService {
     destStation: string,
     day: Date,
   ): Promise<TripScheduleDetailsDto[]> {
-    const supportedTrips = ['Kitchener GO', 'Union Station GO'];
-    if (!supportedTrips.includes(orgStation)) {
+    const supportedStations = ['Kitchener GO', 'Union Station GO'];
+    if (!supportedStations.includes(orgStation)) {
       throw new BadRequestException('Origin station not supported');
     }
-    if (!supportedTrips.includes(destStation)) {
+    if (!supportedStations.includes(destStation)) {
       throw new BadRequestException('Destination station not supported');
     }
     // convert date to service id
