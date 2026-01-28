@@ -55,53 +55,13 @@ A web app where commuters can:
 
 For the latest project status, roadmap, and development progress, see the [Pass Sharing Project](https://github.com/orgs/CivicTechWR/projects/pass-sharing-project).
 
-### System Architecture
-
-```mermaid
-flowchart LR
-    subgraph Riders
-        EndUsers[Group riders]
-    end
-    subgraph CivicTechWR Platform
-        Clients[Web & future mobile apps]
-        API[NestJS + Fastify API]
-        AuthGuard[Supabase Auth integration]
-        Data[GTFS + Pass entities]
-    end
-    subgraph Infrastructure
-        SupabaseAuth[Supabase Auth]
-        SupabaseDB[Supabase PostgreSQL]
-    end
-
-    EndUsers --> Clients --> API
-    API --> AuthGuard
-    AuthGuard --> SupabaseAuth
-    API --> Data --> SupabaseDB
-    SupabaseAuth --> SupabaseDB
-```
-
 ## Technology Stack
 
-**Backend (completed):**
+We use modern TypeScript-based tools for both backend and frontend development.
 
-- NestJS 11 (Fastify adapter), TypeScript
-- PostgreSQL + MikroORM
-- Supabase Auth (JWT session tokens)
-- GTFS transit data processing
-
-**Frontend (planned - need help!):**
-
-- Next.js 14+ (App Router)
-- React + TypeScript
-- Tailwind CSS (or your preference)
-- Real-time updates (WebSockets or polling)
-
-**Tooling:**
-
-- ESLint, Prettier, Vitest, SWC, ts-node
-- GitHub Actions for linting, accessibility audits, and security scans
-
-Reference: `backend/package.json` and [`backend/README.md`](backend/README.md#tech-stack).
+**For complete technology details, system architecture, and tooling information, see:**
+- [`backend/README.md`](backend/README.md) - Backend tech stack, architecture, and project structure
+- `backend/package.json` - Complete list of dependencies and scripts
 
 ## Getting Started
 
@@ -134,12 +94,12 @@ Additional setup guides:
 
 ## Project Structure
 
-- **`backend/`** — Backend API service. See [`backend/README.md#project-structure`](backend/README.md#project-structure) for details.
+- **`backend/`** — Backend API service. See [`backend/README.md`](backend/README.md) for architecture, tech stack, and detailed project structure.
 - **`packages/shared/`** — Shared TypeScript types and DTOs
-- **`supabase/`** — Local Supabase configuration (CLI, database, auth) that mirrors hosted infrastructure.
+- **`supabase/`** — Local Supabase configuration. See [`backend/SUPABASE_SETUP.md`](backend/SUPABASE_SETUP.md) for setup guide.
 - **`spec/`** — Technical specifications and process documentation
-- **`.github/workflows/`** — Automation pipelines for linting, accessibility, and security checks that gate pull requests.
-- **UX & product specs** — Living documents in [Notion](https://www.notion.so/Technical-Design-Document-WIP-2a1e01ee4c0080a391bfcd52b067f9a9) and [Figma](https://www.figma.com/board/5AhW638DdlgCooNjtEZnEG/Metrolinx-Group-Pass?node-id=0-1&t=e1jtwAZg5bLGRAGI-1) capture workflows and visual design decisions.
+- **`.github/workflows/`** — CI/CD automation pipelines
+- **UX & product specs** — [Notion](https://www.notion.so/Technical-Design-Document-WIP-2a1e01ee4c0080a391bfcd52b067f9a9) and [Figma](https://www.figma.com/board/5AhW638DdlgCooNjtEZnEG/Metrolinx-Group-Pass?node-id=0-1&t=e1jtwAZg5bLGRAGI-1)
 
 Frontend will go in a new folder (we need someone to set it up!)
 
