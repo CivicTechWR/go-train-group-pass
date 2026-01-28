@@ -280,7 +280,7 @@ A: No, GO Transit’s weekday group passes are only available as e-tickets, not 
 
 **Q: I’m not a developer, can I still help?**
 
-A: Absolutely! We need designers, testers, writers, and people to help with user research. Come to a hacknight and tell us what you’re interested in.
+A: Absolutely! We need designers, testers, writers, and people to help with user research. Look for issues with the `non-technical` label to find tasks that don't require coding. Come to a hacknight and tell us what you’re interested in.
 
 **Q: I’m a beginner, is this project too advanced?**
 
