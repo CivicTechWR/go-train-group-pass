@@ -1,4 +1,5 @@
 import { Seeder } from '@mikro-orm/seeder';
+import { createClient } from '@supabase/supabase-js';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
   User,
@@ -14,6 +15,7 @@ import { TripBookingStatus } from '../../entities/tripBookingEnum';
 import { faker } from '@faker-js/faker';
 import { createDateInTransitTimezone } from '../../utils/date.utils';
 import { getDateTimeFromServiceIdGTFSTimeString } from '../../utils/getDateTimeFromServiceIdGTFSTimeString';
+import { addDays, format } from 'date-fns';
 
 export class DevelopmentSeeder extends Seeder {
   private generatedPhoneNumbers = new Set<string>();
@@ -21,7 +23,80 @@ export class DevelopmentSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
     this.generatedPhoneNumbers.clear(); // Reset for this run
 
-    // --- 1. Fixed Demo User (Jessica Liu) for Dec 11 ---
+    // --- 0. Set up Supabase Admin Client ---
+    console.log('--- Setting up Supabase Admin Client ---');
+    const supabaseUrl = process.env.SUPABASE_URL || 'http://127.0.0.1:54321';
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseServiceKey) {
+      console.warn(
+        'SUPABASE_SERVICE_ROLE_KEY not found in environment. Skipping Supabase user creation.',
+      );
+    }
+
+    const supabase = supabaseServiceKey
+      ? createClient(supabaseUrl, supabaseServiceKey, {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      })
+      : null;
+
+    // --- 0.1 Create Loggable Test User ---
+    console.log('--- Ensuring Loggable Test User exists ---');
+    const testEmail = 'test@example.com';
+    const testPassword = 'password123';
+    const testName = 'Test User';
+    const testPhone = '+15550001234';
+    let testAuthUserId: string | undefined;
+
+    if (supabase) {
+      // Check if user exists in Supabase
+      const { data: userData, error: listError } =
+        await supabase.auth.admin.listUsers();
+      const existingSupabaseUser = (userData?.users as any[] | undefined)?.find(
+        (u) => u.email === testEmail,
+      );
+
+      if (existingSupabaseUser) {
+        console.log(`User ${testEmail} already exists in Supabase.`);
+        testAuthUserId = existingSupabaseUser.id;
+      } else {
+        console.log(`Creating user ${testEmail} in Supabase...`);
+        const { data: newUser, error: createError } =
+          await supabase.auth.admin.createUser({
+            email: testEmail,
+            password: testPassword,
+            email_confirm: true,
+            user_metadata: {
+              full_name: testName,
+            },
+          });
+
+        if (createError) {
+          console.error('Error creating user in Supabase:', createError);
+        } else {
+          testAuthUserId = newUser.user?.id;
+        }
+      }
+    }
+
+    let testUser = await em.findOne(User, { email: testEmail });
+    if (!testUser) {
+      console.log(`Creating user ${testEmail} in local database...`);
+      testUser = em.create(User, {
+        name: testName,
+        email: testEmail,
+        phoneNumber: testPhone,
+        authUserId: testAuthUserId || crypto.randomUUID(),
+      });
+      em.persist(testUser);
+    } else if (testAuthUserId && testUser.authUserId !== testAuthUserId) {
+      console.log(`Updating authUserId for ${testEmail} in local database...`);
+      testUser.authUserId = testAuthUserId;
+    }
+
     console.log('--- Setting up Fixed Demo User (Dec 11) ---');
     const dateString = '2025-12-11';
     const demoDate = createDateInTransitTimezone(dateString);
@@ -57,7 +132,10 @@ export class DevelopmentSeeder extends Seeder {
     );
 
     console.log('Creating Main Demo User...');
-    const demoUserName = process.env.DEMO_USER_NAME || 'Jessica Liu';
+    const demoUserName = process.env.DEMO_USER_NAME;
+    if (!demoUserName) {
+      throw new Error('DEMO_USER_NAME environment variable is not set');
+    }
     let demoUser = await em.findOne(User, {
       name: demoUserName,
     });
@@ -74,12 +152,16 @@ export class DevelopmentSeeder extends Seeder {
 
     await this.createItineraryForUser(em, demoUser, demoTripEntities, false);
 
+    // Also give some trips to our loggable test user if they don't have them
+    await this.createItineraryForUser(em, testUser, demoTripEntities, true);
+
     // --- 2. Random Itineraries for Dec 11 - Dec 18 ---
     console.log('--- Generating Random Itineraries (Dec 11 - Dec 18) ---');
 
     // We can use simple loop over days offset
-    const startDateStr = '2025-12-11';
-    const endDateStr = '2025-12-18';
+    const startDateStr = format(new Date(), 'yyyy-MM-dd');
+    const endDateStr = format(addDays(new Date(), 7), 'yyyy-MM-DD' );
+
     const start = createDateInTransitTimezone(startDateStr);
     const end = createDateInTransitTimezone(endDateStr);
 
@@ -186,7 +268,7 @@ export class DevelopmentSeeder extends Seeder {
       if (!trip) {
         // Convert GTFS date to service ID format (YYYYMMDD)
         const serviceId = date.toISOString().split('T')[0].replace(/-/g, '');
-        
+
         // USE PROPER GTFS TIME CONVERTER that handles "next day" times like 25:00:00
         const departureTime = getDateTimeFromServiceIdGTFSTimeString(serviceId, originStopTime.departureTime);
         const arrivalTime = getDateTimeFromServiceIdGTFSTimeString(serviceId, destinationStopTime.arrivalTime);
