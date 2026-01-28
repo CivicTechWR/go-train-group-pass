@@ -1,0 +1,273 @@
+# GO Train Group Pass Coordinator
+
+[![Lint and Type Check](https://github.com/CivicTechWR/go-train-group-pass/actions/workflows/lint.yml/badge.svg)](https://github.com/CivicTechWR/go-train-group-pass/actions/workflows/lint.yml)
+[![Accessibility Audit](https://github.com/CivicTechWR/go-train-group-pass/actions/workflows/accessibility.yml/badge.svg)](https://github.com/CivicTechWR/go-train-group-pass/actions/workflows/accessibility.yml)
+[![Security Audit](https://github.com/CivicTechWR/go-train-group-pass/actions/workflows/security.yml/badge.svg)](https://github.com/CivicTechWR/go-train-group-pass/actions/workflows/security.yml)
+
+**Helping Kitchener-Waterloo commuters save money and stay safe by coordinating GO Transit group passes**
+
+-----
+
+## 🚨 We Need Frontend Help
+
+Our backend is built and working, but our front end workflows need more work. We’re looking for frontend developers (or people willing to learn React/Next.js) to help build the web app. See [Contributing](#contributing) for details.
+
+-----
+
+## The Problem
+
+GO Transit offers [Weekday Group Passes](https://www.gotransit.com/en/partners-and-promotions/weekday-group-passes) that let 2-5 people travel together all day for a flat rate (starting at $30). They’re a great deal—but coordinating with strangers via WhatsApp groups is messy and risky:
+
+- Hard to find people traveling your route at your time
+- Chaotic group chats with last-minute dropouts
+- Awkward money collection and pass sharing
+- **Your phone number gets exposed to strangers** - creating risk of stalking or unwanted contact
+- No way to verify who’s actually showing up
+
+This app fixes that by making group coordination simple, reliable, transparent, and **private**. Only the ticket steward (pass purchaser) shares their contact info—everyone else can stay anonymous.
+
+## Product Overview
+
+Go Train Group Pass is a civic-tech collaboration that streamlines the purchase and coordination of GO Transit group passes. The platform provides authenticated APIs, GTFS-powered schedule data, and coordination tools that help riders plan trips, form groups, and share passes safely.
+
+- [Technical Design Document (Notion, WIP)](https://www.notion.so/Technical-Design-Document-WIP-2a1e01ee4c0080a391bfcd52b067f9a9)
+- [Product and UX boards (Figma)](https://www.figma.com/board/5AhW638DdlgCooNjtEZnEG/Metrolinx-Group-Pass?node-id=0-1&t=e1jtwAZg5bLGRAGI-1)
+
+### Product Principles
+
+- **Support stewards, not replace them:** The app augments the existing steward-led process and does not referee peer-to-peer payments.
+- **Privacy by design:** Only the ticket steward shares contact information. Other group members stay anonymous until they choose otherwise.
+- **Time-sensitive coordination:** Clear status cues keep the group aligned in the minutes leading up to boarding and while on the train.
+- **Clarity over chat scrollback:** Interfaces focus on surfacing the current itinerary state rather than relying on ad-hoc messaging threads.
+
+## What We’re Building
+
+A web app where commuters can:
+
+1. **Find travel partners** - Search for people going your route at your time
+1. **Form groups automatically** - Get matched with compatible travelers (2-5 people)
+1. **Coordinate meetups** - Agree on meeting spot, confirm arrival
+1. **Protect your privacy** - Only the ticket steward (pass purchaser) shares contact info
+1. **Handle the pass** - One person buys, everyone gets proof of group membership
+1. **Split costs fairly** - Track who owes what (payment happens outside the app for now)
+
+## Current Status & Roadmap
+
+For the latest project status, roadmap, and development progress, see the [Pass Sharing Project](https://github.com/orgs/CivicTechWR/projects/pass-sharing-project).
+
+## Technology Stack
+
+We use modern TypeScript-based tools for both backend and frontend development.
+
+**For complete technology details, system architecture, and tooling information, see:**
+- [`backend/README.md`](backend/README.md) - Backend tech stack, architecture, and project structure
+- `backend/package.json` - Complete list of dependencies and scripts
+
+## Getting Started
+
+Interested in helping out? Start with [`CONTRIBUTING.md`](CONTRIBUTING.md) for meetup details, setup steps, and collaboration norms.
+
+### Quick Start for Developers
+
+**Prerequisites:**
+
+- Node.js 18+ and npm
+- PostgreSQL (or use our Supabase setup)
+- Basic familiarity with REST APIs and ORMs (we use MikroORM)
+
+For backend setup instructions, see the [Backend README](backend/README.md#getting-started).
+
+Additional setup guides:
+
+|Surface           |Status |Setup Guide                                                                                                                                                 |
+|------------------|-------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|Backend API       |Active |[`backend/README.md#getting-started`](backend/README.md#getting-started)                                                                                    |
+|Supabase stack    |Active |[`backend/SUPABASE_SETUP.md`](backend/SUPABASE_SETUP.md)                                                                                                    |
+|Frontend (Next.js)|In Progress (on `demoday` branch)|Track via issues [#26](https://github.com/CivicTechWR/go-train-group-pass/issues/26) and [#52](https://github.com/CivicTechWR/go-train-group-pass/issues/52)|
+
+**Want to contribute to the frontend?** Talk to us first! We’ll help you:
+
+- Understand the API endpoints
+- Set up your development environment
+- Get access to our Figma designs
+- Connect with the team
+
+## Project Structure
+
+- **`backend/`** — Backend API service. See [`backend/README.md`](backend/README.md) for architecture, tech stack, and detailed project structure.
+- **`packages/shared/`** — Shared TypeScript types and DTOs
+- **`supabase/`** — Local Supabase configuration. See [`backend/SUPABASE_SETUP.md`](backend/SUPABASE_SETUP.md) for setup guide.
+- **`spec/`** — Technical specifications and process documentation
+- **`.github/workflows/`** — CI/CD automation pipelines
+- **UX & product specs** — [Notion](https://www.notion.so/Technical-Design-Document-WIP-2a1e01ee4c0080a391bfcd52b067f9a9) and [Figma](https://www.figma.com/board/5AhW638DdlgCooNjtEZnEG/Metrolinx-Group-Pass?node-id=0-1&t=e1jtwAZg5bLGRAGI-1)
+
+Frontend code exists in the `demoday` branch and will be merged soon.
+
+## Contributing
+
+We welcome contributors of all skill levels:
+
+- **Frontend Developers (URGENT NEED):** React/Next.js experience to build the user interface
+- **Backend Developers:** Help finish APIs, improve testing, optimize queries
+- **Designers:** UX/UI, user research, accessibility design
+- **Testers:** QA, user testing, feedback on flows
+- **Writers:** Documentation, help content, privacy policies
+- **Anyone interested:** Come learn with us!
+
+### What Commitment Looks Like
+
+Commitment here is about communication and collaboration, not rigid time requirements. We welcome both regular contributors and one-time contributions:
+
+- **Identify a ticket** you'd like to work on and what you may need to learn
+- **Ask for help** finding resources or getting clarification on unclear requirements
+- **Provide time estimates** when you start work (we include estimates on tickets, but yours may differ based on your familiarity with the codebase and tech)
+- **Communicate updates** to the team, especially if your work is a dependency for something else
+- **Join hack nights** (90-120 minutes/week on Wednesdays) or contribute asynchronously—both work!
+
+Even occasional contributions are valuable. Work at your own pace and communicate openly.
+
+### Why Join This Project
+
+- Real impact for local commuters
+- Portfolio piece with actual users
+- Supportive civic tech community
+- Flexible volunteer hours
+- Learn from experienced developers
+
+### How to Get Involved
+
+1. **Join our community:**
+- Slack: [CivicTechWR workspace](https://join.slack.com/t/civictechwr/shared_invite/zt-2hk4c93hv-DEIbxR_z1xKj8cZmayVHTw)
+- Weekly hacknights: [Schedule](https://docs.google.com/spreadsheets/d/1hAxstCyiVBdYeSQlIrlkhnSntJLJ3kNnoCuechFJN7E/edit?gid=0#gid=0)
+1. **Pick an issue or propose a feature:**
+- Look for `good first issue` or `help wanted` labels
+- Comment on the issue to claim it
+- Ask questions if anything is unclear
+1. **Submit your work:**
+- Fork the repo
+- Create a feature branch
+- Follow our code style (Prettier + ESLint configured)
+- Write tests for new features
+- Submit a pull request
+
+Read our [Code of Conduct](CODE_OF_CONDUCT.md) and check out [open issues](https://github.com/CivicTechWR/go-train-group-pass/issues).
+
+## Development Workflow
+
+### Issue and PR Management
+
+- **All PRs must be linked to an issue:** We don't merge anything not tied to a ticket. If you start work before creating an issue, add one to the [project board](https://github.com/orgs/CivicTechWR/projects) before opening a PR. This ensures clear tracking of all work without relying solely on commit messages.
+- **One issue per PR:** PRs addressing multiple issues slow down task completion and confuse new contributors who need to work off branches other than main. Keep your PRs focused on a single issue.
+- **PR size and state:** PRs should be in a working state and reasonably sized. While large PRs won't be rejected, smaller PRs are reviewed and merged much faster.
+- **Review requirements:** All PRs must be reviewed before merging.
+
+### Workflow Guidelines
+
+- Work from feature branches aligned with the contribution templates in [`.github/ISSUE_TEMPLATE/`](.github/ISSUE_TEMPLATE/) and [`pull_request_template.md`](.github/pull_request_template.md).
+- Automated checks run on every push/PR; monitor the GitHub Action badges or run equivalents locally (`npm run lint`, `npm run type-check`, `npm run test`).
+- Consult the [Notion workflow analysis section](https://www.notion.so/Technical-Design-Document-WIP-2a1e01ee4c0080a391bfcd52b067f9a9#2a1e01ee4c0080c0beaa576dc85df8ba) for sprint cadence and release planning.
+
+## Coding Standards
+
+- Style and linting rules are defined in `backend/.eslintrc.json` and enforced through `npm run lint` (see [`backend/README.md#code-quality`](backend/README.md#code-quality)).
+- Formatting relies on Prettier; use `npm run format` / `npm run format:check`.
+- All pull requests must pass the GitHub workflows (lint, accessibility, security) before merging.
+- Domain-driven patterns and DTO validation details live in the corresponding backend documentation sections to reduce duplication.
+
+## Testing
+
+- A full overview of unit, integration, e2e, coverage, and accessibility testing lives in [`backend/README.md#testing`](backend/README.md#testing) and the associated scripts (`package.json`).
+- CI executes the same commands, including accessibility audits via Playwright + axe (`npm run test:a11y`) and scheduled security scans.
+
+## Frequently Asked Questions
+
+### General Questions
+
+**Q: Why not just keep using WhatsApp groups?**
+
+A: WhatsApp groups expose everyone’s phone number to strangers, making people vulnerable to stalking or unwanted contact. Our app keeps you anonymous—only the ticket steward (who buys the pass) shares their contact info with the group.
+
+**Q: How much does it cost to use?**
+
+A: The app is completely free. You only pay for the GO Transit group pass itself (starting at $30 for 2 people).
+
+**Q: Do I need to download an app?**
+
+A: No! It’s a web app that works in your phone’s browser.
+
+**Q: What if someone doesn’t show up?**
+
+A: The app tracks check-ins and confirmations. If someone doesn’t confirm by a set time before departure, the group can be reformed or you can find a replacement. (This feature is still being built.)
+
+**Q: Who buys the actual GO Transit pass?**
+
+A: One person in the group (the “steward”) purchases the pass from GO Transit. The app helps track who owes money and confirms payment, but the actual money exchange happens outside the app (e-transfer, cash, etc.).
+
+### Privacy & Safety
+
+**Q: What information can other people see about me?**
+
+**A:** It depends on your role in a trip.
+
+- **If you’re a group member:** you only see the ticket steward’s contact information. Other group members do not see your contact details.
+- **If you’re the ticket steward:** you can see the names and contact information of the group members for that trip, so you can coordinate.
+
+Everyone keeps a history of past trips. For trips where you were the steward, you’ll retain the contact info for those participants. For trips where you weren’t the steward, you’ll only retain the steward’s contact info.
+
+**Q: What if I get matched with someone I don’t want to travel with?**
+
+A: You can leave a group at any time before the pass is purchased. We’re also building blocking and reporting features.
+
+**Q: How do you prevent fake accounts or bad actors?**
+
+A: We’re implementing user verification (email and/or SMS) and exploring additional trust features like reputation scores and verified user badges. This is part of our Safety & Trust epic (coming after launch).
+
+### Technical Questions
+
+**Q: What happens to my data?**
+
+A: Your data is stored securely in our database. We only collect what’s necessary for the app to work (name, email, travel preferences). We don’t sell your data or share it with third parties. See our privacy policy (coming soon) for details.
+
+**Q: Can I use this for weekend travel?**
+
+A: Currently we’re focused on weekday group passes. Weekend passes work differently (individual $10 day passes), but we might support them in the future.
+
+**Q: Does this work with PRESTO cards?**
+
+A: No, GO Transit’s weekday group passes are only available as e-tickets, not through PRESTO. You buy them online and activate them on your phone.
+
+### For Contributors
+
+**Q: I’m not a developer, can I still help?**
+
+A: Absolutely! We need designers, testers, writers, and people to help with user research. Look for issues with the `non-technical` label to find tasks that don't require coding. Come to a hacknight and tell us what you’re interested in.
+
+**Q: I’m a beginner, is this project too advanced?**
+
+A: Not at all. We welcome all skill levels. Every piece of work can be broken down into manageable tasks - we're here to help with that. Whether you're interested in backend, frontend, or other areas, we'll pair you with someone who can guide you.
+
+**Q: What if I can only volunteer occasionally?**
+
+A: That’s totally fine. Even showing up once a month and contributing a feature or bug fix is valuable. We work with people’s schedules.
+
+**Q: Do you have a deadline?**
+
+A: No hard deadline, but we’d love to launch something usable by spring 2025 when commuters are looking for ways to save money after winter.
+
+## About CivicTech Waterloo Region
+
+We’re a volunteer community using technology to solve local problems. We meet weekly for hacknights and monthly speaker sessions. Learn more at [civictechwr.org](https://civictechwr.org/).
+
+## Questions?
+
+- **Slack:** #go-train-group-pass channel in [CivicTechWR workspace](https://join.slack.com/t/civictechwr/shared_invite/zt-2hk4c93hv-DEIbxR_z1xKj8cZmayVHTw)
+- **Issues:** [GitHub Issues](https://github.com/CivicTechWR/go-train-group-pass/issues)
+- **In person:** Come to a hacknight! [See schedule](https://docs.google.com/spreadsheets/d/1hAxstCyiVBdYeSQlIrlkhnSntJLJ3kNnoCuechFJN7E/edit?gid=0#gid=0)
+
+-----
+
+**Ready to help build this?** Start by introducing yourself in our Slack channel or come to the next hacknight. We’d love to have you on the team.
+
+## License
+
+This repository does not yet declare a license. Coordinate with CivicTechWR maintainers before using the code outside the project.
