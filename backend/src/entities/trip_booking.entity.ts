@@ -17,7 +17,7 @@ import { Payment, TicketPurchase, TripBookingStatusLog } from '.';
 import { TripBookingStatus } from './tripBookingEnum';
 import { BaseEntity } from './base';
 
-@Entity()
+@Entity({ schema: 'go-train-group-pass' })
 @Unique({ properties: ['user', 'trip'] })
 export class TripBooking extends BaseEntity {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })

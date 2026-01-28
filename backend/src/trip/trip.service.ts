@@ -64,6 +64,13 @@ export class TripService {
       originStopTime.departureTime,
     );
 
+    // If arrival time is before departure time, it means the trip spans midnight and arrival is the next day.
+    // This handles cases where GTFS time might be normalized (e.g., 00:26:00 instead of 24:26:00)
+    // or if the trip simply crosses midnight into the next calendar day.
+    if (arrivalTime < departureTime) {
+      arrivalTime.setDate(arrivalTime.getDate() + 1);
+    }
+
     // Use upsert to handle race conditions where concurrent requests might try to create the same trip
     // If the trip was created by another request between the findOne checks, this will return the existing one
     // We can safely update/overwrite because the trip data is deterministic based on GTFS data

@@ -127,6 +127,7 @@ describe('TripBookingService', () => {
         arrivalTime: tripBooking.trip.arrivalTime,
         routeShortName: 'LW',
         tripId: 'trip-123',
+        isCheckedIn: false,
       });
     });
   });

@@ -1,0 +1,70 @@
+import { UserSchema } from '@/lib/types';
+import { NextRequest, NextResponse } from 'next/server';
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
+// Disable caching for this route
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export async function GET(request: NextRequest) {
+  try {
+    const accessToken = request.cookies.get('access_token')?.value;
+
+    if (!accessToken) {
+      return NextResponse.json(
+        { message: 'Authorization header is required' },
+        { status: 401 }
+      );
+    }
+
+    const response = await fetch(`${BACKEND_URL}/auth/me`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return NextResponse.json(data, { status: response.status });
+    }
+
+    const userData = data.data || data;
+
+    // Validate response schema
+    const parseResult = UserSchema.safeParse(userData);
+    if (!parseResult.success) {
+      const zodError = parseResult.error;
+      console.error('Backend response shape mismatch:', zodError.issues);
+      return NextResponse.json(
+        {
+          message: 'Invalid response format from backend',
+          errors: zodError.issues,
+        },
+        { status: 500 }
+      );
+    }
+    const user = parseResult.data;
+
+    // Prevent caching
+    const nextResponse = NextResponse.json(user);
+    nextResponse.headers.set(
+      'Cache-Control',
+      'no-store, no-cache, must-revalidate, proxy-revalidate'
+    );
+    nextResponse.headers.set('Pragma', 'no-cache');
+    nextResponse.headers.set('Expires', '0');
+    return nextResponse;
+  } catch (error) {
+    return NextResponse.json(
+      {
+        message:
+          error instanceof Error ? error.message : 'Internal server error',
+      },
+      { status: 500 }
+    );
+  }
+}

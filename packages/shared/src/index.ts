@@ -7,3 +7,5 @@ export * from './trip/trip.schemas';
 export * from './trip-schedule/trip-schedule.dto';
 export * from './trip-schedule/trip-schedule.schemas';
 export * from './travel-group/travel-group.dto';
+export * from './group-formation/group-formation.dto';
+export * from './group-formation/group-formation.schemas';

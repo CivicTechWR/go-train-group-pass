@@ -9,7 +9,7 @@ export const TravelGroupSchema = z.object({
 export const TravelGroupMemberSchema = z.object({
     name: z.string(),
     email: z.string(),
-    phoneNumber: z.string(),
+    phoneNumber: z.e164(),
 });
 
 export const StewardSchema = TravelGroupMemberSchema;

@@ -4,6 +4,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { GTFSTrip, TripBooking } from '../entities';
 import { TripModule } from '../trip/trip.module';
 import { UsersModule } from '../users/users.module';
+import { TripBookingController } from './trip-booking.controller';
 
 @Module({
   imports: [
@@ -13,5 +14,6 @@ import { UsersModule } from '../users/users.module';
   ],
   providers: [TripBookingService],
   exports: [TripBookingService],
+  controllers: [TripBookingController],
 })
 export class TripBookingModule {}

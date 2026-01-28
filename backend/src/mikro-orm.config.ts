@@ -1,7 +1,8 @@
-import { Logger } from '@nestjs/common';
-import { defineConfig } from '@mikro-orm/postgresql';
 import { Migrator } from '@mikro-orm/migrations';
+import { SeedManager } from '@mikro-orm/seeder';
+import { defineConfig } from '@mikro-orm/postgresql';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
+import { Logger } from '@nestjs/common';
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
 
@@ -11,6 +12,7 @@ const logFn = (message: string) => {
 };
 
 import * as entities from './entities';
+import { ItinerarySubscriber } from './subscribers/itinerary.subscriber';
 
 export default defineConfig({
   schema: 'go-train-group-pass',
@@ -20,9 +22,10 @@ export default defineConfig({
   user: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
   dbName: process.env.DB_NAME || 'postgres',
-  extensions: [Migrator],
+  extensions: [Migrator, SeedManager],
+  subscribers: [ItinerarySubscriber],
   highlighter: new SqlHighlighter(),
-  debug: true,
+  debug: false,
   logger: logFn,
   migrations: {
     path: './src/database/migrations',
@@ -34,7 +37,7 @@ export default defineConfig({
   },
   entities: Object.values(entities),
   metadataCache: {
-    enabled: true,
+    enabled: false,
   },
   schemaGenerator: {
     ignoreSchema: [
