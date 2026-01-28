@@ -284,7 +284,7 @@ A: Absolutely! We need designers, testers, writers, and people to help with user
 
 **Q: I’m a beginner, is this project too advanced?**
 
-A: Not at all. We welcome all skill levels. The backend is complex, but we can help you learn. If you’re interested in frontend, we’ll pair you with someone who can guide you.
+A: Not at all. We welcome all skill levels. Every piece of work can be broken down into manageable tasks - we're here to help with that. Whether you're interested in backend, frontend, or other areas, we'll pair you with someone who can guide you.
 
 **Q: What if I can only volunteer occasionally?**
 
