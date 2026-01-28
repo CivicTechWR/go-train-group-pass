@@ -10,6 +10,41 @@ Backend API for the Go Train Group Pass application, built with NestJS, MikroORM
 - **Testing**: Vitest
 - **Language**: TypeScript
 
+## System Architecture
+
+The application follows a layered architecture with clear separation between client, API, and infrastructure layers:
+
+```mermaid
+flowchart LR
+    subgraph Riders
+        EndUsers[Group riders]
+    end
+    subgraph CivicTechWR Platform
+        Clients[Web & future mobile apps]
+        API[NestJS + Fastify API]
+        AuthGuard[Supabase Auth integration]
+        Data[GTFS + Pass entities]
+    end
+    subgraph Infrastructure
+        SupabaseAuth[Supabase Auth]
+        SupabaseDB[Supabase PostgreSQL]
+    end
+
+    EndUsers --> Clients --> API
+    API --> AuthGuard
+    AuthGuard --> SupabaseAuth
+    API --> Data --> SupabaseDB
+    SupabaseAuth --> SupabaseDB
+```
+
+**Key Components:**
+- **API Layer**: NestJS with Fastify adapter handles HTTP requests and business logic
+- **Auth Layer**: Supabase Auth provides JWT-based authentication and user management
+- **Data Layer**: MikroORM entities map to PostgreSQL database for GTFS data and pass coordination
+- **Client Layer**: Future web and mobile applications will consume the REST API
+
+For detailed architectural patterns, see [RepositoryServiceControllerArchitecture.md](./RepositoryServiceControllerArchitecture.md).
+
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
