@@ -89,7 +89,7 @@ flowchart LR
 - Supabase Auth (JWT session tokens)
 - GTFS transit data processing
 
-**Frontend (planned - need help!):**
+**Frontend (in progress - on `demoday` branch):**
 
 - Next.js 14+ (App Router)
 - React + TypeScript
@@ -123,9 +123,9 @@ Additional setup guides:
 |------------------|-------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
 |Backend API       |Active |[`backend/README.md#getting-started`](backend/README.md#getting-started)                                                                                    |
 |Supabase stack    |Active |[`backend/SUPABASE_SETUP.md`](backend/SUPABASE_SETUP.md)                                                                                                    |
-|Frontend (Next.js)|Planned|Track via issues [#26](https://github.com/CivicTechWR/go-train-group-pass/issues/26) and [#52](https://github.com/CivicTechWR/go-train-group-pass/issues/52)|
+|Frontend (Next.js)|In Progress (on `demoday` branch)|Track via issues [#26](https://github.com/CivicTechWR/go-train-group-pass/issues/26) and [#52](https://github.com/CivicTechWR/go-train-group-pass/issues/52)|
 
-**Want to build the frontend?** Talk to us first! We’ll help you:
+**Want to contribute to the frontend?** Talk to us first! We’ll help you:
 
 - Understand the API endpoints
 - Set up your development environment
