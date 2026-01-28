@@ -141,7 +141,7 @@ Additional setup guides:
 - **`.github/workflows/`** — Automation pipelines for linting, accessibility, and security checks that gate pull requests.
 - **UX & product specs** — Living documents in [Notion](https://www.notion.so/Technical-Design-Document-WIP-2a1e01ee4c0080a391bfcd52b067f9a9) and [Figma](https://www.figma.com/board/5AhW638DdlgCooNjtEZnEG/Metrolinx-Group-Pass?node-id=0-1&t=e1jtwAZg5bLGRAGI-1) capture workflows and visual design decisions.
 
-Frontend will go in a new folder (we need someone to set it up!)
+Frontend code exists in the `demoday` branch and will be merged soon.
 
 ## Contributing
 
