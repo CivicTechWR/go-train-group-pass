@@ -3,8 +3,9 @@ import {
   RoundTripSchema,
   TripScheduleInputDto,
 } from '@go-train-group-pass/shared';
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiOperation,
   ApiOkResponse,
   ApiTags,
@@ -12,9 +13,12 @@ import {
 } from '@nestjs/swagger';
 import { TripScheduleService } from './trip-schedule.service';
 import { Serialize } from 'src/common/decorators/serialize.decorator';
+import { AuthGuard } from 'src/modules/auth/auth.guard';
 
 @Controller('trip-schedule')
 @ApiTags('Trip Schedule')
+@UseGuards(AuthGuard)
+@ApiBearerAuth()
 export class TripScheduleController {
   constructor(private readonly tripScheduleService: TripScheduleService) {}
 
@@ -29,7 +33,6 @@ export class TripScheduleController {
   })
   @ApiOkResponse({ description: 'Trip schedule for Kitchener-Union' })
   @Serialize(RoundTripSchema)
-  // route doesn't need to be protected because it's public information
   async demoRoundTripKitchenerUnion(
     @Query() queryParams: KitchenerUnionRoundTripScheduleInputDto,
   ) {
