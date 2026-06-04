@@ -7,6 +7,7 @@ import {
 } from '@nestjs/platform-fastify';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { TripScheduleDetailsDto } from '@go-train-group-pass/shared';
+import { UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from 'src/modules/auth/auth.guard';
 
 describe('TripScheduleController (Integration)', () => {
@@ -169,7 +170,11 @@ describe('TripScheduleController — auth enforcement', () => {
       ],
     })
       .overrideGuard(AuthGuard)
-      .useValue({ canActivate: () => false })
+      .useValue({
+        canActivate: () => {
+          throw new UnauthorizedException('Authorization header is required');
+        },
+      })
       .compile();
 
     app = module.createNestApplication<NestFastifyApplication>(
@@ -183,7 +188,7 @@ describe('TripScheduleController — auth enforcement', () => {
     await app.close();
   });
 
-  it('GET /trip-schedule/search returns 403 without a valid token', async () => {
+  it('GET /trip-schedule/search returns 401 without a valid token', async () => {
     const response = await app.inject({
       method: 'GET',
       url: '/trip-schedule/search',
@@ -193,15 +198,15 @@ describe('TripScheduleController — auth enforcement', () => {
         date: '2025-12-09',
       },
     });
-    expect(response.statusCode).toBe(403);
+    expect(response.statusCode).toBe(401);
   });
 
-  it('GET /trip-schedule/search/round-trip-kitchener-union returns 403 without a valid token', async () => {
+  it('GET /trip-schedule/search/round-trip-kitchener-union returns 401 without a valid token', async () => {
     const response = await app.inject({
       method: 'GET',
       url: '/trip-schedule/search/round-trip-kitchener-union',
       query: { date: '2025-12-09' },
     });
-    expect(response.statusCode).toBe(403);
+    expect(response.statusCode).toBe(401);
   });
 });
