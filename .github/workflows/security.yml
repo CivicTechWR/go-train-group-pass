@@ -10,6 +10,10 @@ on:
 
 jobs:
   gitleaks:
+    permissions:
+      contents: read
+      pull-requests: write
+      actions: write
     uses: ./.github/workflows/reusable-gitleaks.yml
     secrets: inherit
     with:
@@ -19,10 +23,12 @@ jobs:
 
   npm-audit:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       matrix:
         workspace: [backend]
-        # Add 'frontend' to the array when frontend directory is created
+        # Add frontend to the array when frontend directory is created
     env:
       NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
       NEXT_PUBLIC_SUPABASE_ANON_KEY: public-anon-key
@@ -45,7 +51,7 @@ jobs:
         run: npm ci
 
       - name: Run npm audit
-        working-directory: ${{ matrix.workspace }}
+        working-directory: backend
         run: |
           npm run security || {
             echo "npm audit failed; retrying in 30 seconds";
