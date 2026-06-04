@@ -38,6 +38,7 @@ flowchart LR
 ```
 
 **Key Components:**
+
 - **API Layer**: NestJS with Fastify adapter handles HTTP requests and business logic
 - **Auth Layer**: Supabase Auth provides JWT-based authentication and user management
 - **Data Layer**: MikroORM entities map to PostgreSQL database for GTFS data and pass coordination
@@ -200,7 +201,7 @@ npm run check
 
 ## Project Structure
 
-```
+```text
 backend/
 ├── src/
 │   ├── common/            # Shared utilities
@@ -255,7 +256,7 @@ export class ProtectedController {
 
 ### Base URL
 
-```
+```text
 http://localhost:3000
 ```
 
@@ -275,7 +276,8 @@ For complete API documentation, see [AUTH_SETUP.md](./AUTH_SETUP.md).
 
 ### Running Tests
 
-The project uses Vitest for testing. `Test.createTestingModule()` from `@nestjs/testing` works as expected — use it for all controller and service tests.
+The project uses Vitest for testing. `Test.createTestingModule()` from `@nestjs/testing`
+works as expected — use it for all controller and service tests.
 
 ```bash
 # Run all tests
@@ -409,6 +411,7 @@ npm run migrate:up
 - Check that migrations have run successfully
 
 ## Contributing
+
 1. Create a feature branch (`git checkout -b feature/my-feature`)
 2. Make your changes
 3. **Pre-commit checks run automatically**: `npm run check` (format, lint, type-check) via `.husky/pre-commit`. Fix any failures.
@@ -421,7 +424,7 @@ npm run migrate:up
 
 - [AUTH_SETUP.md](./AUTH_SETUP.md) - Detailed authentication documentation
 - [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) - Supabase setup guide
-- [../docs/metrolinx-open-data.md](../docs/metrolinx-open-data.md) - Metrolinx open data sources, full API endpoint catalogue, and ToS summary
+- [../docs/metrolinx-open-data.md](../docs/metrolinx-open-data.md) - Metrolinx data sources, API catalogue, and ToS summary
 - [NestJS Documentation](https://docs.nestjs.com)
 - [MikroORM Documentation](https://mikro-orm.io)
 - [Supabase Documentation](https://supabase.com/docs)
