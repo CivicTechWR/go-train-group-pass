@@ -91,6 +91,13 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:54322/postgres
 # Application Configuration
 PORT=3000
 FRONTEND_URL=http://localhost:3000
+
+# GTFS Feed (optional — defaults to GO Transit feed)
+GTFS_URL=https://assets.metrolinx.com/raw/upload/Documents/Metrolinx/Open%20Data/GO-GTFS.zip
+
+# Metrolinx Real-Time API (required for fleet consist, alerts, trip updates)
+# Register at: https://api.openmetrolinx.com/OpenDataAPI/Help/Registration/en
+METROLINX_API_KEY=
 ```
 
 > **Note**: The keys above are default local development keys from Supabase. For production, use keys from your Supabase project dashboard.
@@ -196,28 +203,26 @@ npm run check
 ```
 backend/
 ├── src/
-│   ├── auth/              # Authentication module
-│   │   ├── auth.controller.ts
-│   │   ├── auth.service.ts
-│   │   ├── auth.guard.ts
-│   │   ├── supabase.service.ts
-│   │   └── users.service.ts
-│   ├── entities/          # Database entities
-│   │   ├── user.entity.ts
-│   │   ├── route.entity.ts
-│   │   ├── stop.entity.ts
-│   │   └── ...
-│   ├── modules/           # Feature modules
-│   │   └── orm.module.ts
-│   ├── database/          # Database migrations
+│   ├── common/            # Shared utilities
+│   │   ├── decorators/    # Custom decorators (e.g. @Serialize)
+│   │   ├── filters/       # Exception filters
+│   │   ├── interceptors/
+│   │   └── schemas/
+│   ├── database/          # Migrations and DB types
 │   │   └── migrations/
+│   ├── entities/          # MikroORM entities (GTFS + pass coordination)
+│   ├── gtfs/              # GTFS feed download and import service
+│   ├── modules/
+│   │   └── auth/          # Authentication (Supabase JWT, AuthGuard)
+│   ├── trip-schedule/     # Trip schedule query service and controller
+│   ├── types/             # Shared TypeScript types
+│   ├── users/             # User service
+│   ├── utils/             # Date/time helpers, GTFS parsing utilities
 │   ├── app.module.ts      # Root module
-│   └── main.ts            # Application entry point
-├── test/                  # E2E tests
+│   ├── main.ts            # Application entry point
+│   └── mikro-orm.config.ts
 ├── .env                   # Environment variables (not in git)
 ├── .env.example           # Example environment config
-├── mikro-orm.config.ts    # ORM configuration
-├── vitest.config.ts       # Test configuration
 └── package.json
 ```
 
@@ -270,7 +275,7 @@ For complete API documentation, see [AUTH_SETUP.md](./AUTH_SETUP.md).
 
 ### Running Tests
 
-The project uses Vitest for testing. Note that there are currently some compatibility issues between Vitest and NestJS's testing utilities that are being addressed.
+The project uses Vitest for testing. `Test.createTestingModule()` from `@nestjs/testing` works as expected — use it for all controller and service tests.
 
 ```bash
 # Run all tests
@@ -282,14 +287,6 @@ npm run test:watch
 # Run with coverage
 npm run test:cov
 ```
-
-### Known Issues
-
-Tests are experiencing dependency injection issues with Vitest. If you encounter test failures related to undefined dependencies, consider:
-
-1. Using Jest instead of Vitest (more compatible with NestJS)
-2. Installing `@vitest/jest-compat` for better Jest compatibility
-3. Manually instantiating classes in tests instead of using `Test.createTestingModule()`
 
 ## Deployment
 
@@ -424,6 +421,7 @@ npm run migrate:up
 
 - [AUTH_SETUP.md](./AUTH_SETUP.md) - Detailed authentication documentation
 - [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) - Supabase setup guide
+- [../docs/metrolinx-open-data.md](../docs/metrolinx-open-data.md) - Metrolinx open data sources, full API endpoint catalogue, and ToS summary
 - [NestJS Documentation](https://docs.nestjs.com)
 - [MikroORM Documentation](https://mikro-orm.io)
 - [Supabase Documentation](https://supabase.com/docs)
