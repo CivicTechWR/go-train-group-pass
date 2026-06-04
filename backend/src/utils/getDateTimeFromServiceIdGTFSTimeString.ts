@@ -13,12 +13,14 @@ export function getDateTimeFromServiceIdGTFSTimeString(
   const extraDays = Math.floor(hours / 24);
   const normalizedHours = hours % 24;
 
+  // gtfsDateStringToDate returns midnight UTC — use UTC methods to avoid
+  // local-timezone getters returning the wrong calendar day on non-UTC servers.
   const resultDate = new Date(date);
-  resultDate.setDate(resultDate.getDate() + extraDays);
+  resultDate.setUTCDate(resultDate.getUTCDate() + extraDays);
 
-  const year = resultDate.getFullYear();
-  const month = String(resultDate.getMonth() + 1).padStart(2, '0');
-  const day = String(resultDate.getDate()).padStart(2, '0');
+  const year = resultDate.getUTCFullYear();
+  const month = String(resultDate.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(resultDate.getUTCDate()).padStart(2, '0');
   const hoursStr = String(normalizedHours).padStart(2, '0');
   const minutesStr = String(minutes).padStart(2, '0');
   const secondsStr = String(seconds).padStart(2, '0');
