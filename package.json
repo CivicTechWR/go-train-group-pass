@@ -19,6 +19,7 @@
         },
         "@angular-devkit/schematics": {
             "rxjs": "7.8.2"
-        }
+        },
+        "multer": "^2.2.0"
     }
 }
