@@ -22,7 +22,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       exception &&
       typeof exception === 'object' &&
       'getStatus' in exception &&
-      typeof (exception as { getStatus: unknown }).getStatus === 'function'
+      typeof exception.getStatus === 'function'
     ) {
       // It's an HttpException (or has the same interface)
       const httpException = exception as HttpException;
