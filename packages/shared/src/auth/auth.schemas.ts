@@ -1,10 +1,5 @@
 import { z } from 'zod';
 
-export const UserMetadataSchema = z.object({
-  full_name: z.string(),
-  phone_number: z.string(),
-});
-
 export const SignUpInputSchema = z.object({
   email: z.email('Invalid email address'),
   password: z
