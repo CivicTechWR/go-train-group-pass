@@ -1,0 +1,25 @@
+# CODEOWNERS
+# Assigns default reviewers for pull requests based on file paths.
+# The last matching rule takes precedence.
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global fallback — organizers review anything not matched below
+* @BreakableHoodie @adinschmidt @jliu1016
+
+# Backend
+/backend/ @BreakableHoodie @adinschmidt @jliu1016
+
+# Frontend
+/frontend/ @BreakableHoodie @Mosaab-Emam
+
+# Shared types/DTOs — both frontend and backend owners
+/packages/ @BreakableHoodie @adinschmidt @jliu1016 @Mosaab-Emam
+
+# Database migrations — require careful review
+/backend/src/database/migrations/ @BreakableHoodie @adinschmidt @jliu1016
+
+# CI/CD and workflows
+/.github/ @BreakableHoodie
+
+# Supabase config
+/supabase/ @BreakableHoodie @adinschmidt
