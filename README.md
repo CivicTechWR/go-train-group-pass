@@ -61,6 +61,7 @@ We use modern TypeScript-based tools for both backend and frontend development.
 
 **For complete technology details, system architecture, and tooling information, see:**
 - [`backend/README.md`](backend/README.md) - Backend tech stack, architecture, and project structure
+- [`docs/metrolinx-open-data.md`](docs/metrolinx-open-data.md) - Metrolinx data sources, full API catalogue, and terms of use summary
 - `backend/package.json` - Complete list of dependencies and scripts
 
 ## Getting Started
