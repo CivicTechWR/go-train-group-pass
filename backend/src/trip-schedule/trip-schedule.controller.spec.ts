@@ -1,12 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { TripScheduleController } from './trip-schedule.controller';
-import { TripScheduleService } from './trip-schedule.service';
+import { TripScheduleDetailsDto } from '@go-train-group-pass/shared';
 import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
+import { Test, TestingModule } from '@nestjs/testing';
 import { ZodValidationPipe } from 'nestjs-zod';
-import { TripScheduleDetailsDto } from '@go-train-group-pass/shared';
+import { TripScheduleController } from './trip-schedule.controller';
+import { TripScheduleService } from './trip-schedule.service';
 
 describe('TripScheduleController (Integration)', () => {
   let app: NestFastifyApplication;
