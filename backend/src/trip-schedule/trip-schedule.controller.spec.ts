@@ -7,6 +7,8 @@ import {
 } from '@nestjs/platform-fastify';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { TripScheduleDetailsDto } from '@go-train-group-pass/shared';
+import { UnauthorizedException } from '@nestjs/common';
+import { AuthGuard } from 'src/modules/auth/auth.guard';
 
 describe('TripScheduleController (Integration)', () => {
   let app: NestFastifyApplication;
@@ -25,7 +27,10 @@ describe('TripScheduleController (Integration)', () => {
           useValue: mockTripScheduleService,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(AuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     app = module.createNestApplication<NestFastifyApplication>(
       new FastifyAdapter(),
@@ -145,5 +150,63 @@ describe('TripScheduleController (Integration)', () => {
         mockTripScheduleService.getKIToUnionRoundTripSchedule,
       ).toHaveBeenCalledWith(new Date('2025-12-09'));
     });
+  });
+});
+
+describe('TripScheduleController — auth enforcement', () => {
+  let app: NestFastifyApplication;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [TripScheduleController],
+      providers: [
+        {
+          provide: TripScheduleService,
+          useValue: {
+            getTripSchedule: vi.fn(),
+            getKIToUnionRoundTripSchedule: vi.fn(),
+          },
+        },
+      ],
+    })
+      .overrideGuard(AuthGuard)
+      .useValue({
+        canActivate: () => {
+          throw new UnauthorizedException('Authorization header is required');
+        },
+      })
+      .compile();
+
+    app = module.createNestApplication<NestFastifyApplication>(
+      new FastifyAdapter(),
+    );
+    await app.init();
+    await app.getHttpAdapter().getInstance().ready();
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it('GET /trip-schedule/search returns 401 without a valid token', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/trip-schedule/search',
+      query: {
+        orgStation: 'Kitchener GO',
+        destStation: 'Union Station GO',
+        date: '2025-12-09',
+      },
+    });
+    expect(response.statusCode).toBe(401);
+  });
+
+  it('GET /trip-schedule/search/round-trip-kitchener-union returns 401 without a valid token', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/trip-schedule/search/round-trip-kitchener-union',
+      query: { date: '2025-12-09' },
+    });
+    expect(response.statusCode).toBe(401);
   });
 });
