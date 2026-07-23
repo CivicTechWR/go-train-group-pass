@@ -25,6 +25,7 @@
     "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
     "security": "npm audit --audit-level=high",
     "migrate:up": "mikro-orm migration:up",
+    "repl": "nest start --entryFile repl",
     "prepare": "cd .. && husky"
   },
   "dependencies": {

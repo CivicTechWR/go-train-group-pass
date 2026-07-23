@@ -24,6 +24,9 @@ export class Itinerary extends BaseEntity {
   @Property({ type: 'boolean', default: false })
   wantsToSteward: boolean;
 
+  @Property({ nullable: true })
+  tripHash?: string;
+
   @ManyToOne(() => User, {
     index: true,
   })
