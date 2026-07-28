@@ -28,7 +28,7 @@
     "prepare": "cd .. && husky"
   },
   "dependencies": {
-    "@fastify/static": "^9.1.3",
+    "@fastify/static": "^10.1.2",
     "@go-train-group-pass/shared": "^0.0.1",
     "@mikro-orm/core": "~6.6.15",
     "@mikro-orm/migrations": "~6.6.15",
